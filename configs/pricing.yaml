@@ -1,0 +1,10 @@
+# Price table used by the cost reporter.
+#
+# Values are USD per 1M tokens and must be copied from the provider's official
+# pricing page. `null` means "not confirmed yet": the reporter then prints token
+# counts without a dollar figure instead of inventing a price.
+#
+# Filled in during S2/S5; see docs/DECISIONS.md (D6).
+currency: USD
+per: 1M_tokens
+models: {}
