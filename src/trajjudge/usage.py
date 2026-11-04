@@ -9,6 +9,7 @@ requests that actually reached the provider.
 from __future__ import annotations
 
 import json
+import threading
 import math
 import os
 from dataclasses import dataclass, field
@@ -92,12 +93,14 @@ class UsageLog:
 
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
+        self._lock = threading.Lock()
 
     def append(self, record: UsageRecord) -> None:
-        """Append ``record`` as one JSON line, creating parent directories."""
+        """Append ``record`` as one JSON line, creating parent directories (thread-safe)."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(record.to_dict(), ensure_ascii=False) + "\n")
+        line = json.dumps(record.to_dict(), ensure_ascii=False) + "\n"
+        with self._lock, self.path.open("a", encoding="utf-8") as fh:
+            fh.write(line)
             fh.flush()
             os.fsync(fh.fileno())
 
@@ -106,7 +109,9 @@ class UsageLog:
         if not self.path.is_file():
             return []
         records: list[UsageRecord] = []
-        for line in self.path.read_text(encoding="utf-8").splitlines():
+        with self._lock:
+            text = self.path.read_text(encoding="utf-8")
+        for line in text.splitlines():
             line = line.strip()
             if not line:
                 continue

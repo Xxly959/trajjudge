@@ -321,3 +321,14 @@ def test_incomplete_usage_record_blocks_request(settings: Settings) -> None:
     with pytest.raises(ValueError, match="corrupt"):
         _client(settings, transport).complete([{"role": "user", "content": "hi"}])
     assert not transport.requests
+
+
+def test_concurrent_calls_keep_ledger_and_pending_marker_consistent(settings: Settings) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+    transport = Recorder([_response(str(i)) for i in range(24)])
+    client = _client(settings, transport)
+    with ThreadPoolExecutor(8) as pool:
+        results = list(pool.map(lambda i: client.complete([{"role": "user", "content": "hi"}], repeat_id=i), range(24)))
+    assert len(transport.requests) == 24 and not any(r.cached for r in results)
+    assert len(client.usage_log.read()) == 24
+    assert not client._pending_path.exists()

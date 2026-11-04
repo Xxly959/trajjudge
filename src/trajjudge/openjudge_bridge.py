@@ -21,9 +21,10 @@ from .llm import LLMClient, LLMError, LLMResult
 class SharedCompletionTransport:
     """Route SDK JSON bodies through the shared client without logging headers."""
 
-    def __init__(self, client: LLMClient, tag: str = "s3/weather") -> None:
+    def __init__(self, client: LLMClient, tag: str = "s3/weather", repeat_id: int | None = None) -> None:
         self.client = client
         self.tag = tag
+        self.repeat_id = repeat_id
         self.results: list[LLMResult] = []
         self.observations: list[dict[str, Any]] = []
         self.failure: str | None = None
@@ -54,8 +55,12 @@ class SharedCompletionTransport:
             "request_fields": sorted(payload),
         })
         parameters = {key: value for key, value in payload.items() if key not in {"thinking", "stream", "messages"}}
+        # Strategies (Average/Voting) send identical requests; a per-call suffix keeps
+        # each one a real sample instead of a cache replay. None keeps legacy keys.
+        repeat = None if self.repeat_id is None else f"{self.repeat_id}.{len(self.observations) - 1}"
         try:
-            result = self.client.complete(payload["messages"], thinking=thinking["type"] == "enabled", tag=self.tag, **parameters)
+            result = self.client.complete(payload["messages"], thinking=thinking["type"] == "enabled", tag=self.tag,
+                                          repeat_id=repeat, **parameters)
         except Exception as exc:
             self.failure = str(exc) if isinstance(exc, LLMError) else type(exc).__name__
             raise
@@ -93,9 +98,10 @@ class DeepSeekOpenJudgeModel(OpenAIChatModel):
 
 @asynccontextmanager
 async def openjudge_model(client: LLMClient, *, thinking: bool = False,
-                          max_tokens: int = 768, tag: str = "s3/weather") -> AsyncIterator[tuple[DeepSeekOpenJudgeModel, SharedCompletionTransport]]:
+                          max_tokens: int = 768, tag: str = "s3/weather",
+                          repeat_id: int | None = None, temperature: float | None = None) -> AsyncIterator[tuple[DeepSeekOpenJudgeModel, SharedCompletionTransport]]:
     """Provide the native upstream chat path with local JSON adaptation and transport."""
-    bridge = SharedCompletionTransport(client, tag=tag)
+    bridge = SharedCompletionTransport(client, tag=tag, repeat_id=repeat_id)
     http_client = DefaultAsyncHttpxClient(transport=bridge)
     model = DeepSeekOpenJudgeModel(
         model=client.settings.judge_model,
@@ -103,6 +109,7 @@ async def openjudge_model(client: LLMClient, *, thinking: bool = False,
         base_url=client.settings.base_url, stream=False, max_retries=0, timeout=60,
         client_args={"http_client": http_client}, max_tokens=max_tokens,
         extra_body={"thinking": {"type": "enabled" if thinking else "disabled"}},
+        **({"temperature": temperature} if temperature is not None else {}),
     )
     try:
         yield model, bridge

@@ -77,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     before = summarize(LLMClient(settings).usage_log.read(), pricing)
     if before.cost_usd is None:
         raise S5Stop("historical cost is unknown")
-    ceiling = min(settings.budget_usd, before.cost_usd + args.stage_cap_usd)
+    ceiling = before.cost_usd + args.stage_cap_usd  # the explicit, owner-approved stage cap replaces the phase-1 USD 3 ceiling
     print(json.dumps({"config": args.config, "tasks_total": len(tasks), "tasks_todo": len(todo),
                       "stage_cap_usd": args.stage_cap_usd, "ceiling_usd": ceiling,
                       "spent_before_usd": before.cost_usd}), flush=True)

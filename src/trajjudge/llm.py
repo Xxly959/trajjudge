@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import math
 import random
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -201,6 +202,10 @@ class LLMClient:
         self.jitter = jitter
         self._client = client
         self._transport: Transport | None = transport
+        self._lock = threading.Lock()
+        self._inflight = 0
+        self._pending_count = 0
+        self._reserved = 0.0
 
     # ---------------------------------------------------------------- client
 
@@ -272,7 +277,7 @@ class LLMClient:
         response_format: Mapping[str, Any] | None = None,
         tag: str = "",
         use_cache: bool = True,
-        repeat_id: int | None = None,
+        repeat_id: int | str | None = None,
     ) -> LLMResult:
         """Run one chat completion.
 
@@ -342,9 +347,17 @@ class LLMClient:
 
         if self.offline:
             raise LLMError("offline mode: completion cache miss")
-        self._check_budget(request)
+        with self._lock:
+            reserve = self._check_budget(request)
+            self._reserved += reserve
+            self._inflight += 1
         started = time.monotonic()
-        raw = self._call_with_retries(request, tag=tag, thinking=thinking_on)
+        try:
+            raw = self._call_with_retries(request, tag=tag, thinking=thinking_on)
+        finally:
+            with self._lock:
+                self._reserved -= reserve
+                self._inflight -= 1
         latency_ms = (time.monotonic() - started) * 1000
         result = self._parse(raw, model=model_id, thinking=thinking_on, latency_ms=latency_ms, tag=tag)
 
@@ -357,13 +370,14 @@ class LLMClient:
     def _pending_path(self) -> Path:
         return self.usage_log.path.with_suffix(".pending")
 
-    def _check_budget(self, request: dict[str, Any]) -> None:
+    def _check_budget(self, request: dict[str, Any]) -> float:
         """Reserve a conservative per-byte input estimate and all output retries.
 
-        Serial execution only. Provider-side billing remains authoritative.
+        Returns the reserved USD; in-flight reservations from other threads count
+        toward the budget. Provider-side billing remains authoritative.
         Uncertain billing or interrupted accounting blocks subsequent requests.
         """
-        if self._pending_path.exists():
+        if self._pending_path.exists() and self._inflight == 0:
             raise LLMError("unreconciled pending request; budget accounting is uncertain")
         prices = load_pricing(self.settings.pricing_file)
         price = prices.get(request["model"])
@@ -378,14 +392,27 @@ class LLMClient:
             + request["max_tokens"] * price.output_per_mtok
         ) / 1_000_000
         budget = self.settings.budget_usd
-        if not math.isfinite(budget) or budget <= 0 or summary.cost_usd + reserve > budget:
+        if not math.isfinite(budget) or budget <= 0 or summary.cost_usd + self._reserved + reserve > budget:
             raise LLMError("phase-1 budget would be exceeded; request blocked")
+        return reserve
+
+    def _mark_pending(self) -> None:
+        with self._lock:
+            self._pending_count += 1
+            self._pending_path.parent.mkdir(parents=True, exist_ok=True)
+            self._pending_path.write_text("Accounting pending; reconcile before resuming.\n")
+
+    def _clear_pending(self) -> None:
+        """Remove the marker only when no attempt of this client is still unaccounted."""
+        with self._lock:
+            self._pending_count -= 1
+            if self._pending_count == 0:
+                self._pending_path.unlink(missing_ok=True)
 
     def _call_with_retries(self, request: dict[str, Any], *, tag: str, thinking: bool) -> Any:
         transport = self._transport or self._default_transport
         for attempt in range(1, self.max_attempts + 1):
-            self._pending_path.parent.mkdir(parents=True, exist_ok=True)
-            self._pending_path.write_text("Accounting pending; reconcile before resuming.\n")
+            self._mark_pending()
             attempt_started = time.monotonic()
             try:
                 raw = transport(request)
@@ -397,7 +424,7 @@ class LLMClient:
                     prompt_tokens=0, completion_tokens=0, latency_ms=(time.monotonic() - attempt_started) * 1000, cached=False,
                     status="rejected" if known_rejection else "unknown", usage_known=known_rejection,
                 ))
-                self._pending_path.unlink()
+                self._clear_pending()
                 if attempt >= self.max_attempts or not _is_retryable(exc):
                     raise LLMError(f"LLM request failed after {attempt} attempt(s); HTTP status {status if isinstance(status, int) else 'unknown'}") from None
                 delay = min(self.backoff_cap, self.backoff_base * 2 ** (attempt - 1))
@@ -412,7 +439,7 @@ class LLMClient:
                 completion_tokens=raw_usage.get("completion_tokens", 0) if known else 0,
                 latency_ms=(time.monotonic() - attempt_started) * 1000, cached=False, usage_known=known, raw_usage=raw_usage,
             ))
-            self._pending_path.unlink()
+            self._clear_pending()
             return raw
         raise LLMError("request attempts exhausted")
 
