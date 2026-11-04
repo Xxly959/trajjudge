@@ -280,6 +280,28 @@ def test_endpoint_participates_in_cache_identity(settings: Settings) -> None:
     assert second.complete([{"role": "user", "content": "hi"}]).text == "second"
 
 
+def test_repeat_id_gives_independent_cache_entries(settings: Settings) -> None:
+    transport = Recorder([_response("a"), _response("b")])
+    client = _client(settings, transport)
+    msgs = [{"role": "user", "content": "hi"}]
+    first = client.complete(msgs, repeat_id=0)
+    second = client.complete(msgs, repeat_id=1)
+    again = client.complete(msgs, repeat_id=1)
+    assert (first.text, second.text, again.text) == ("a", "b", "b")
+    assert (first.cached, second.cached, again.cached) == (False, False, True)
+    assert len(transport.requests) == 2
+
+
+def test_no_repeat_id_keeps_legacy_cache_key(settings: Settings) -> None:
+    transport = Recorder([_response("legacy"), _response("repeat0")])
+    client = _client(settings, transport)
+    msgs = [{"role": "user", "content": "hi"}]
+    client.complete(msgs)
+    assert client.complete(msgs).cached is True
+    assert client.complete(msgs, repeat_id=0).text == "repeat0"
+    assert len(transport.requests) == 2
+
+
 def test_cumulative_usage_blocks_request(settings: Settings) -> None:
     from trajjudge.usage import UsageRecord, utc_now
     UsageLog(settings.usage_log).append(UsageRecord(

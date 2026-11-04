@@ -272,6 +272,7 @@ class LLMClient:
         response_format: Mapping[str, Any] | None = None,
         tag: str = "",
         use_cache: bool = True,
+        repeat_id: int | None = None,
     ) -> LLMResult:
         """Run one chat completion.
 
@@ -289,6 +290,9 @@ class LLMClient:
             response_format: Optional JSON output format, included in the cache key.
             tag: Free-form label written into the usage log (e.g. ``smoke``).
             use_cache: Retained for compatibility; cache lookup and storage are always enabled.
+            repeat_id: Index of an intentional repeated sample. Distinct values get
+                distinct cache entries so repeats are real requests; ``None`` leaves
+                the key unchanged (legacy entries stay valid).
 
         Returns:
             The parsed response, with ``cached=True`` on cache hits.
@@ -317,17 +321,18 @@ class LLMClient:
             request["response_format"] = dict(response_format)
         request["extra_body"] = {"thinking": {"type": "enabled" if thinking_on else "disabled"}}
 
-        key = make_key(
-            {
-                "version": CACHE_VERSION,
-                "base_url": self.settings.base_url,
-                "model": model_id,
-                "thinking": thinking_on,
-                "messages": list(messages),
-                "request": request,
-                "tools": list(tools or []),
-            }
-        )
+        key_payload: dict[str, Any] = {
+            "version": CACHE_VERSION,
+            "base_url": self.settings.base_url,
+            "model": model_id,
+            "thinking": thinking_on,
+            "messages": list(messages),
+            "request": request,
+            "tools": list(tools or []),
+        }
+        if repeat_id is not None:
+            key_payload["repeat_id"] = repeat_id
+        key = make_key(key_payload)
 
         cached = self.cache.get(key)
         if cached is not None:
