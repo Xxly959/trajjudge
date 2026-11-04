@@ -80,3 +80,51 @@ def test_mixed_blocks_preserve_text_and_error_flags(tmp_path: Path) -> None:
     assert any(row["role"] == "user" and row["content"] == "Additional user context" for row in trace.messages)
     assert any(row.get("reasoning_content") == "  exact reasoning\n" for row in trace.messages)
     assert trace.metadata["events"]["4"]["message"]["content"][0]["is_error"] is True
+
+
+def _synthetic(tmp_path: Path, blocks: list[tuple[str, list[dict[str, Any]]]]) -> Path:
+    """Write a minimal synthetic trace from (role, content-blocks) pairs."""
+    rows: list[dict[str, Any]] = [{"type": "trace_start", "trace_id": "t", "task_id": "T"}]
+    rows += [{"type": "message", "trace_id": "t", "message": {"role": r, "content": c}} for r, c in blocks]
+    rows.append({"type": "trace_end", "trace_id": "t"})
+    path = tmp_path / "synthetic.jsonl"
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    return path
+
+
+def test_trace_without_tool_calls(tmp_path: Path) -> None:
+    trace = adapt_trace(_synthetic(tmp_path, [
+        ("user", [{"type": "text", "text": "hi"}]), ("assistant", [{"type": "text", "text": "hello"}])]))
+    assert [m["role"] for m in trace.messages] == ["user", "assistant"]
+    assert not any("tool_calls" in m for m in trace.messages)
+
+
+def test_empty_content_is_kept_not_dropped(tmp_path: Path) -> None:
+    trace = adapt_trace(_synthetic(tmp_path, [("user", [{"type": "text", "text": "hi"}]), ("assistant", [])]))
+    assert trace.messages[-1] == {"role": "assistant", "content": ""}
+    assert not trace.metadata["unmapped_content"]
+
+
+def test_parallel_tool_calls_pair_by_id_in_order(tmp_path: Path) -> None:
+    use = lambda i: {"type": "tool_use", "id": i, "name": "f", "input": {"k": i}}
+    res = lambda i, text, err: {"type": "tool_result", "tool_use_id": i, "content": [{"type": "text", "text": text}], "is_error": err}
+    trace = adapt_trace(_synthetic(tmp_path, [
+        ("user", [{"type": "text", "text": "go"}]),
+        ("assistant", [use("a"), use("b")]),
+        ("user", [res("b", "second", True), res("a", "first", False)]),
+        ("assistant", [{"type": "text", "text": "done"}])]))
+    assistant = trace.messages[1]
+    assert [c["id"] for c in assistant["tool_calls"]] == ["a", "b"]
+    assert assistant["content"] is None
+    tools = [m for m in trace.messages if m["role"] == "tool"]
+    assert [(m["tool_call_id"], m["content"]) for m in tools] == [("b", "second"), ("a", "first")]
+    assert trace.metadata["events"]["3"]["message"]["content"][0]["is_error"] is True
+
+
+def test_unanswered_parallel_call_is_rejected(tmp_path: Path) -> None:
+    use = lambda i: {"type": "tool_use", "id": i, "name": "f", "input": {}}
+    path = _synthetic(tmp_path, [("user", [{"type": "text", "text": "go"}]), ("assistant", [use("a"), use("b")]),
+        ("user", [{"type": "tool_result", "tool_use_id": "a", "content": [{"type": "text", "text": "x"}]}]),
+        ("assistant", [{"type": "text", "text": "done"}])])
+    with pytest.raises(ValueError, match="incomplete|no corresponding"):
+        adapt_trace(path)

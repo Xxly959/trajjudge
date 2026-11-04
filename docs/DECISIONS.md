@@ -274,3 +274,12 @@
 **S7 审查修复补充**：独立只读审查发现混合model/thinking能被接受、NaN错误分数使digest失败两项P2。先增加7个失败回归，再拒绝混合模型/思考配置与非已审定thinking-off设置；成功模型行须匹配原始s6账本tag/model/thinking/token证据。非有限分在表中继续为ERROR，只在digest编码时转为明确invalid_nonfinite标记，不改分数、不放宽断言。完整104项测试及24项S7定向测试通过。
 
 **S7 实测验收补充**：新克隆新venv测试104 passed（无.env、无outputs、禁socket）；安装上游676个文件前后delta=0。恢复三类本地证据而不恢复已有scores/报告后，禁socket/无密钥make phase1成功；每次4缓存命中、0新增模型请求。重复和跨目录报告SHA-256相同，缺缓存exit2并保留1条error/null行，不更新旧报告或请求网络。阶段19次真实completion、54064输入/2874输出、保守总额$0.019668保持不变。
+
+
+---
+
+## D23 审计修正：repeat_id 进入缓存键（2026-11-04）
+
+**背景**：RQ2 需要对同一轨迹重复打分；缓存键无重复编号时，重复调用会命中同一条缓存，实验无效。
+
+**决定**：`LLMClient.complete(repeat_id=...)`；非 None 时写入缓存键，None 时键不变（保持阶段一缓存与报告可复现）。`use_cache` 空参数暂保留（有测试守护），`is_error` 暂只留在 metadata、不改动 judge 输入；若 P4/P2 发现工具报错可见性影响评分，再另立决策。仅使用 deepseek-flash，无 pro 价格，故 pro 不进入预算。已删除工具生成的 docs/superpowers。

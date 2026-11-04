@@ -1118,3 +1118,10 @@ $ rtk proxy git -C ../claw-eval status --short
 ```
 
 仅按明确路径暂存README/报告/代码/测试/设计与日志；无新依赖，未提交原始轨迹/缓存/账本或.env。阶段一S1–S7完成，本关新增付费调用0，预算内结束，不自行进入阶段二。
+
+
+---
+
+## 阶段一审计（2026-11-04）
+
+详见 docs/AUDIT_PHASE1.md。结论：上游未改动、密钥无泄漏、make phase1 离线复现（报告哈希一致，账本新增4行均为缓存命中）。修复：缓存键加入 repeat_id（+2测试）；adapter 补4个边界测试（无工具、空内容、并行多工具、未应答调用）；README 补单一供应商/自评偏好局限；删除 docs/superpowers。未解决：runner 输出缺 repeat_id/版本字段（P3 处理）；沙箱内 2 个 multiprocessing 测试因信号量权限失败，沙箱外通过。LLM 调用 0 次，新增花费 $0。

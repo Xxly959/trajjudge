@@ -199,6 +199,9 @@ They test structure only; paid scoring uses original local traces.
 
 ## Safeguards and limitations
 
+- **Single provider, self-preference risk.** Agents and judges are both DeepSeek (`deepseek-flash`). A judge may favour outputs from its own model family, and no result here generalises to other vendors' judges. Cross-vendor validation is not yet done.
+- **Defensive evaluation only.** Planned injection tests use benign grading-manipulation strings against our own judge configurations.
+
 - One provider, two tasks and one trial cannot establish human agreement,
   statistical correlation, stability, injection resistance or model benefit.
 - Framework scores use native task rubrics with DeepSeek replacing benchmark
