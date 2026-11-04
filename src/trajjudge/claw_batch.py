@@ -50,6 +50,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", choices=sorted(CONFIGS), required=True)
     parser.add_argument("--tasks-file", default="configs/p2_tasks.json")
     parser.add_argument("--only", nargs="*", default=None, help="restrict to these task ids")
+    parser.add_argument("--exclude", nargs="*", default=[], help="task ids to skip (e.g. runaway tasks)")
     parser.add_argument("--stage-cap-usd", type=float, required=True)
     parser.add_argument("--run", action="store_true")
     args = parser.parse_args(argv)
@@ -66,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
     if command("git", "-C", str(UPSTREAM), "rev-parse", "HEAD") != EXPECTED_COMMIT or command("git", "-C", str(UPSTREAM), "status", "--porcelain"):
         raise S5Stop("Claw-Eval differs from the reviewed clean checkout")
     selected = json.loads((PROJECT_ROOT / args.tasks_file).read_text())
-    tasks = {row["task_id"]: row["max_turns"] for row in selected if args.only is None or row["task_id"] in args.only}
+    tasks = {row["task_id"]: row["max_turns"] for row in selected if (args.only is None or row["task_id"] in args.only) and row["task_id"] not in args.exclude}
     all_ids = [p.name for p in (UPSTREAM / "tasks").iterdir() if p.is_dir()]
     if bad := ambiguous_filters(list(tasks), all_ids):
         raise S5Stop(f"ambiguous native filter for {bad}")

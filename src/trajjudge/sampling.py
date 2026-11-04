@@ -73,3 +73,32 @@ def stratified_sample(candidates: list[dict[str, Any]], quotas: Mapping[str, int
                     chosen.append(groups[category].pop(0))
                     taken += 1
     return chosen
+
+
+def select_for_annotation(rows: list[dict[str, Any]], count: int, *, seed: int, max_fail_share: float = 0.6) -> list[dict[str, Any]]:
+    """Choose ``count`` trajectories to annotate, over-sampling official failures.
+
+    Rows need ``trace_id``, ``category``, ``config`` and ``passed`` (official pass flag).
+    Official failures are taken first (up to ``max_fail_share`` of ``count``), alternating agent
+    configs; the rest are official passes drawn round-robin over categories. Pure function of inputs.
+    """
+    rng = random.Random(seed)
+    ordered = sorted(rows, key=lambda r: r["trace_id"])
+    rng.shuffle(ordered)
+
+    def round_robin(pool: list[dict[str, Any]], want: int) -> list[dict[str, Any]]:
+        buckets: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+        for row in pool:
+            buckets[(row["category"], row["config"])].append(row)
+        keys = sorted(buckets)
+        picked: list[dict[str, Any]] = []
+        while len(picked) < want and any(buckets.values()):
+            for key in keys:
+                if buckets[key] and len(picked) < want:
+                    picked.append(buckets[key].pop())
+        return picked
+
+    fails = round_robin([r for r in ordered if not r["passed"]], int(count * max_fail_share))
+    chosen_ids = {r["trace_id"] for r in fails}
+    passes = round_robin([r for r in ordered if r["passed"] and r["trace_id"] not in chosen_ids], count - len(fails))
+    return fails + passes

@@ -283,3 +283,23 @@
 **背景**：RQ2 需要对同一轨迹重复打分；缓存键无重复编号时，重复调用会命中同一条缓存，实验无效。
 
 **决定**：`LLMClient.complete(repeat_id=...)`；非 None 时写入缓存键，None 时键不变（保持阶段一缓存与报告可复现）。`use_cache` 空参数暂保留（有测试守护），`is_error` 暂只留在 metadata、不改动 judge 输入；若 P4/P2 发现工具报错可见性影响评分，再另立决策。仅使用 deepseek-flash，无 pro 价格，故 pro 不进入预算。已删除工具生成的 docs/superpowers。
+
+
+---
+
+## D24 RQ1 判定阈值预注册（2026-11-04，人工标签产生之前）
+
+- 二分类口径：human/official 的 pass 为正类。
+- `TrajectoryAccuracyGrader`：score ≥ 2 判通过（上游量表定义：3 与 2 均“达成任务目标”，仅 2 含多余步骤；1 为未达成）。
+- `TrajectoryComprehensiveGrader`：score ≥ 0.6 判通过（连续量表，阈值无上游定义，事先固定，不看标签调参）；同时报告与阈值无关的 AUC。
+- 规则型 grader（循环检测、观察信息增益）不是结果型评分，只做探索性 AUC，不做 pass/fail 阈值结论。
+- 主配置：deepseek-flash、thinking 关、Direct、repeat 0；其它配置属于 RQ2 分析。
+- 指标：准确率、Cohen's κ、PABAK、混淆矩阵、分类别、基线（永远通过/多数类/随机）、95% bootstrap CI（2000 次，固定种子）。官方分部分由 LLM 评分，仅作第二参照。若 κ 在类别极偏时无定义，报告 PABAK 与原始一致率。
+
+## D25 P2/P3 工程决定（2026-11-04）
+
+- Claw 批量运行沿用已审计的 S5 绑定（共享客户端、账本、请求配额），用 profile 取代两任务白名单；agent `max_tokens` 两种配置均为 4096（2048 时有任务被截断，且两配置需一致）。
+- 任务选择：确定性分层（hard14/medium16/easy10，种子固定），排除 user_agent、多模态、真实联网/OCR 服务，max_turns≤30；T102_xss_filter 两次跑到 30 轮且 token 失控（单次约 $0.16 未完成），记录后排除。
+- LLMClient 改为线程安全（锁、飞行中预算预留、引用计数式 pending 标记），为 P3 并发；仍不支持多个进程同时写同一账本（pending 标记会互相阻塞——保守行为，已确认）。
+- 账本对账：一次 agent 请求失败（15.7 秒无响应、状态未知）使累计成本变为“未知”并按设计阻止后续请求。已将该行以保守上界（重试请求的 prompt token + 4096 输出）改为 `unknown_reconciled` 并保留原行于 outputs/usage/reconciliation.jsonl；供应商控制台为准。
+- 上游发现（供 P5）：OpenJudge `TrajectoryAccuracyGrader` 将模型输出分数钳制到 [1,3]（99 变 3），空消息返回 0.0（超出量表）；我们在 `judging.check_raw` 里重新解析原始输出，把钳制视为无效行而非有效分。

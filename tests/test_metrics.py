@@ -51,3 +51,10 @@ def test_stability_summary_perfect_and_unstable() -> None:
     assert f["pairwise_disagreement"] == pytest.approx((0.25 + 0 + 0.25) / 3)
     with pytest.raises(ValueError):
         m.stability_summary({"a": [1]}, 2)
+
+
+def test_auc_known_values() -> None:
+    assert m.auc([True, True, False, False], [0.9, 0.8, 0.3, 0.1]) == 1.0
+    assert m.auc([True, False], [0.5, 0.5]) == 0.5
+    assert m.auc([True, True, False], [0.2, 0.9, 0.5]) == pytest.approx(0.5)
+    assert m.auc([True, True], [1, 2]) is None

@@ -134,3 +134,13 @@ def label_counts(labels: Sequence[bool]) -> dict[str, int]:
     """Class balance report (kappa becomes unstable when one class is rare)."""
     c = Counter(labels)
     return {"pass": c[True], "fail": c[False]}
+
+
+def auc(labels: Sequence[bool], scores: Sequence[float]) -> float | None:
+    """Probability a random positive outscores a random negative (ties count half); ``None`` if one class is absent."""
+    pos = [s for l, s in zip(labels, scores) if l]
+    neg = [s for l, s in zip(labels, scores) if not l]
+    if not pos or not neg:
+        return None
+    wins = sum((p > n) + 0.5 * (p == n) for p in pos for n in neg)
+    return wins / (len(pos) * len(neg))

@@ -36,3 +36,14 @@ def test_ambiguous_filters_and_resume(tmp_path: Path) -> None:
     manifest.write_text("".join(json.dumps(r) + "\n" for r in [{"task_id": "x", "status": "complete"}, {"task_id": "y", "status": "stopped"}]))
     assert completed_tasks(manifest) == {"x"}
     assert completed_tasks(tmp_path / "none") == set()
+
+
+def test_annotation_selection_oversamples_failures_and_is_deterministic() -> None:
+    from trajjudge.sampling import select_for_annotation
+    rows = [{"trace_id": f"t{i}", "category": "ab"[i % 2], "config": "xy"[i % 3 % 2], "passed": i % 5 == 0} for i in range(60)]
+    rows = [{**r, "passed": not (i < 10)} for i, r in enumerate(rows)]  # 10 failures, 50 passes
+    pick = select_for_annotation(rows, 20, seed=3)
+    assert pick == select_for_annotation(rows, 20, seed=3)
+    assert len(pick) == 20 and len({r["trace_id"] for r in pick}) == 20
+    assert sum(not r["passed"] for r in pick) == 10
+    assert {r["category"] for r in pick if r["passed"]} == {"a", "b"}

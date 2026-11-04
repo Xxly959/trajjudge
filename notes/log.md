@@ -1135,3 +1135,13 @@ $ rtk proxy git -C ../claw-eval status --short
 - 校准 6 个任务（thinking 关）：max_tokens=2048 时 2 个任务因 finish_reason=length 被安全停止，上调到 4096（两配置一致，避免上限混杂）。
 - 结果（官方分，DeepSeek 重评，非榜单）：T156 0.882、T025zh 0.986、T115zh 0.952、T018 1.0、T158 完成；T102_xss_filter 在 30 轮、约 70 万输入 token 后被预算守卫拦下（未完成）。已完成的均通过——失败样本偏少的风险成立。
 - 成本：本关累计 $0.295（总账本 $0.315），单任务差异极大（$0.01–$0.16）。按此外推 80 条会超过批准的 $1.0，故停止，等待决定。
+
+---
+
+## P2/P3/P4 基础设施与 P2 运行进度（2026-11-04）
+
+- 新增：annotation.py + scripts/annotate.py（盲标工具）、docs/ANNOTATION_GUIDE.md、judging.py（可重复、并发、可续跑的 judge 运行，含 repeat_id、strategy、defended）、perturb.py（4 个良性模板×2 位置 + 不可信数据防御模板）、metrics.py/agreement.py、scripts/run_stability.py、probe_sampling.py、select_annotation_set.py、docs/OPENJUDGE_SURVEY.md。全套测试通过。
+- 测试发现真实缺陷：未校验原始输出时，上游会把非法分钳制成合法分；已加 check_raw。
+- agent 批量：flash 关 thinking 已完成约 29/39 任务，官方失败极少（约 2/29）——标注集失败样本偏少风险成立；已启动剩余任务及 thinking 开配置。
+- 一次账本“状态未知”事件及其对账见 DECISIONS D25。
+- P3.1 探针被另一进程的 pending 标记阻塞（已写入的 30 条错误行已删除，未花费）；等 agent 批量结束后再跑。
