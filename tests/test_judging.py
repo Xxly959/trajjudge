@@ -91,3 +91,16 @@ def test_invalid_verdict_is_error_row_not_zero(settings: Settings, tmp_path: Pat
 def test_rule_graders_need_no_model(messages: list[dict[str, Any]]) -> None:
     row = rule_row("t1", messages, "action_loop_detection", COMMIT)
     assert row["judge_model"] is None and row["status"] == "ok" and 0.0 <= row["score"] <= 1.0
+
+
+def test_defended_config_changes_prompt_and_cache_identity(settings: Settings, tmp_path: Path, messages: list[dict[str, Any]]) -> None:
+    transport = Transport([3])
+    client = LLMClient(settings, transport=transport)
+    out = tmp_path / "rows.jsonl"
+    plain, guarded = JudgeConfig("trajectory_accuracy", False), JudgeConfig("trajectory_accuracy", False, defended=True)
+    assert plain.name != guarded.name
+    run_jobs([("t", messages, plain, 0, "original"), ("t", messages, guarded, 0, "original")], client, out, workers=1)
+    assert len(transport.requests) == 2
+    texts = ["".join(str(m["content"]) for m in r["messages"]) for r in transport.requests]
+    assert sum("untrusted data" in t for t in texts) == 1
+    assert {r["defended"] for r in load_rows(out)} == {False, True}

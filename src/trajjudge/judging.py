@@ -25,6 +25,7 @@ from openjudge.graders.schema import GraderScore
 from .config import PROJECT_ROOT
 from .llm import LLMClient, LLMError
 from .openjudge_bridge import openjudge_model
+from .perturb import defended_template
 from .usage import utc_now
 
 LLM_GRADERS = ("trajectory_accuracy", "trajectory_comprehensive")
@@ -44,6 +45,7 @@ class JudgeConfig:
     num_evaluations: int = 1
     max_tokens: int | None = None
     temperature: float | None = None
+    defended: bool = False
 
     def __post_init__(self) -> None:
         if self.grader not in LLM_GRADERS or self.strategy not in STRATEGIES:
@@ -55,7 +57,8 @@ class JudgeConfig:
     def name(self) -> str:
         """Stable identifier used to group rows."""
         temp = "" if self.temperature is None else f"|t={self.temperature}"
-        return f"{self.grader}|think={'on' if self.thinking else 'off'}|{self.strategy}{self.num_evaluations}{temp}"
+        guard = "|def" if self.defended else ""
+        return f"{self.grader}|think={'on' if self.thinking else 'off'}|{self.strategy}{self.num_evaluations}{temp}{guard}"
 
     @property
     def effective_max_tokens(self) -> int:
@@ -83,7 +86,7 @@ def base_row(trace_id: str, config: JudgeConfig, judge_model: str | None, repeat
     return {"trace_id": trace_id, "grader": config.grader, "config": config.name, "score": None, "reason": "",
             "judge_model": judge_model, "thinking": config.thinking, "strategy": config.strategy,
             "num_evaluations": config.num_evaluations, "temperature": config.temperature,
-            "max_tokens": config.effective_max_tokens, "repeat_id": repeat_id, "openjudge_commit": commit,
+            "max_tokens": config.effective_max_tokens, "defended": config.defended, "repeat_id": repeat_id, "openjudge_commit": commit,
             "timestamp": utc_now(), "usage": {}, "status": "ok", **extra}
 
 
@@ -106,7 +109,8 @@ async def _grade(messages: list[dict[str, Any]], config: JudgeConfig, client: LL
     async with openjudge_model(client, thinking=config.thinking, max_tokens=config.effective_max_tokens, tag=tag,
                                repeat_id=repeat_id, temperature=config.temperature) as (model, bridge):
         cls = TrajectoryAccuracyGrader if config.grader == "trajectory_accuracy" else TrajectoryComprehensiveGrader
-        result = await cls(model=model, strategy=_strategy(config)).aevaluate(messages=messages)
+        template = defended_template(cls.DEFAULT_TEMPLATE) if config.defended else None
+        result = await cls(model=model, strategy=_strategy(config), template=template).aevaluate(messages=messages)
         return result, bridge
 
 
@@ -163,14 +167,19 @@ def load_rows(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def latest_rows(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the last row per key, so a retried error row is superseded by its successful rerun."""
+    return list({row_key(r): r for r in rows}.values())
+
+
 def run_jobs(jobs: Sequence[tuple[str, list[dict[str, Any]], JudgeConfig, int, str]], client: LLMClient, output: Path,
              *, workers: int = 8) -> dict[str, int]:
     """Run (trace_id, messages, config, repeat_id, variant) jobs concurrently, appending rows to ``output``.
 
-    Existing ok/error rows are skipped. A fatal (budget) error stops scheduling new jobs.
+    Existing ok rows are skipped (error rows are retried; use ``latest_rows`` to read). A fatal (budget) error stops scheduling new jobs.
     """
     output.parent.mkdir(parents=True, exist_ok=True)
-    done = {row_key({**r}) for r in load_rows(output)}
+    done = {row_key(r) for r in load_rows(output) if r["status"] == "ok"}
     commit = openjudge_commit()
     lock, stop = threading.Lock(), threading.Event()
     counts = {"run": 0, "skipped": 0, "error": 0}
