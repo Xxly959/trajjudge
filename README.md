@@ -2,7 +2,7 @@
 
 Reliability and prompt-injection audit of LLM graders on agent trajectories.
 
-**Status: phase 1, S1–S3 complete (skeleton, DeepSeek probe and OpenJudge weather smoke).** S4–S7 land incrementally; see
+**Status: phase 1, S1–S4 complete (skeleton, endpoint probes and Claw-Eval reconnaissance).** S5–S7 land incrementally; see
 `notes/log.md` for the per-stage record and `docs/DECISIONS.md` for rationale.
 
 ## What this project studies
@@ -160,3 +160,21 @@ then builds the editable upstream package alone with metadata/build directories
 redirected to `.cache/openjudge-build`. It checks upstream file hashes before and
 after installation. `PYTHONDONTWRITEBYTECODE=1` keeps imports from writing bytecode
 into the read-only source; Makefile targets export it automatically.
+
+
+## Claw-Eval reconnaissance (S4)
+
+See [the reconnaissance report](notes/claw_eval_recon.md) for source-backed config,
+CLI, sandbox, trace and scoring details. No Claw-Eval tasks or Docker services
+were run in S4. The proposed S5 pilot is two general text tasks,
+`T010_contact_lookup` and `T002_email_triage`, with one trial and one worker.
+Their required local fixtures exist; attachment tasks with missing files were
+excluded from this proposal.
+
+Native endpoint configuration supports DeepSeek, but native execution still
+needs the project's cache, accounting and budget integration before a paid run.
+The report includes command shapes for review, not a ready-to-run paid pipeline.
+Agent thinking can be disabled in config; native Claw-Eval judge thinking stays
+on under the earlier decision. The proposal requires user confirmation at the
+S4 gate, with costs estimated at $0.03–$0.10 and a $0.75 batch reservation within
+the overall $3 budget. These are estimates, not measured Claw-Eval results.

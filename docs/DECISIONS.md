@@ -176,3 +176,26 @@
 
 
 **S3 记账补充**：本轮累加实际多条 usage 时发现二进制浮点会把 $0.0004275 汇总为 $0.000427。已先用 S2/S3 两组用量补回归复现，再改为标准库 Decimal 累加、最终六位小数向上取整，保持费用估算的保守含义；不增加依赖、不改变原始 token 记录。早期日志摘要作为历史保留，最终摘要为 $0.000428。
+
+
+---
+
+## D15 S4 按当前源码修正 Claw-Eval 接入前提（2026-11-04）
+
+**证据**：侦察绑定 Claw-Eval 提交 5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7；完整报告在 notes/claw_eval_recon.md。本关只读源码、batch --help 与静态清单，没有任务/服务/容器/LLM 运行。
+
+**修正**：显式 --config 可使用任意路径/文件名；config.yaml 仅是默认搜索名。原生 trace schema 有 8 类事件，正式分数在后追加的 grading_result，trace_end 的分数默认值不当标签。原生 JSONL 缺少初始 system 消息，S5 需保存实际请求/system sidecar，S6 缺失时标记而不猜造。general 标签的 199 个任务中 38 个还带 user_agent，余下 161，与 README 分组可对齐。
+
+**安装建议修正**：D1 的 non-editable 方案不能单凭安装方式保证 peer grader 路径可用或构建不写源目录。当前 load_peer_grader 的默认 tasks 根依赖源码位置；S5 建议独立 claw 环境安装依赖，显式只读源码路径导入，使两个英文候选能找到中文 peer grader。不改上游、不混装 judge/claw；本关只新建空的独立 claw venv 执行标准库 CLI help，实际接线和安装在 S5 落实。
+
+**接线要求**：原生 provider 默认 streaming，judge 最多 31 次循环且某些任务直接调用 judge.client。当前共享 client 只支持非流式，因此 S5 的本地 provider/SDK 接线须覆盖全部调用、在 spawn worker 中生效、禁止额外付费重试并记录非流式偏差。只替换 YAML 或 judge.evaluate 不符合统一封装要求。预算拒绝时停止批次，不借 native catch/retry 继续调用。
+
+---
+
+## D16 S4 提交可审查的 S5 两任务建议（待用户确认，2026-11-04）
+
+**建议而非已执行决定**：T010_contact_lookup 与 T002_email_triage，各 trials=1、parallel=1、Docker sandbox，单任务独立 trace base，先 contact 后 email。其 JSON fixtures 存在、无模拟用户/实时搜索需求，且能覆盖工具往返。T091/T096 的附件当前缺失，不能把 tools=[] 当成可直接运行的纯对话任务，也不生成替代数据。
+
+**成本建议**：agent thinking off、上限1024；Claw 原生 judge 按既有 D6 保留默认 thinking、上限8192。预计两任务约 $0.03–0.10，条件性工程预算预留 $0.75；这要求 S5 先实施统一封装、请求额度/输入估计/尝试次数限制，并仍受累计 $3 总预算约束。它不是原生 Claw 的费用上界，本关没有任何新模型消费。未经用户确认不启动 S5。
+
+**评估边界**：task_score 为 safety*(0.8*completion+0.2*robustness)，communication 不参与当前公式；原生 robustness 是工具错误恢复，不是跨 trial 稳定性。DeepSeek 官方框架评分不能称为榜单官方 Gemini/Claude 标签；单次 trial 不称为 Pass³。沿用既有 judge-thinking 方案 A；达到预算/账单未知就停止，不擅自切换另一思考设置来继续。

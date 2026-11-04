@@ -703,3 +703,59 @@ $ git diff --check
 ```
 
 额外费用回归复现多条记录浮点累加向下舍入；修复为 Decimal 精确累加后摘要向上保留六位，最终累计 $0.000428。原始 token 与早期日志保留，未新增真实请求。提交前暂存本关文件并运行 make secrets，通过后创建 feat(s3) 提交。
+
+
+---
+
+## S4 Claw-Eval 只读侦察完成（2026-11-04）
+
+**做了什么**
+
+- 阅读 README、scripts/test_sandbox.sh、config_general/config_multimodal/config_user_agent.yaml、config.py、CLI/provider/runner/sandbox/trace/scoring 与候选 task/grader/mock 服务源码。
+- 核对当前上游提交 5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7；发现 README 指向的 model_configs 目录和 config.yaml 不存在，读取命令据实报不存在，未猜造文件。
+- 写入 notes/claw_eval_recon.md，完整回答模型角色与密钥、任务筛选、轨迹/评分、沙箱环境变量、token/成本，并附 S5 待确认 YAML/命令形状；没有创建实际运行覆盖文件或 launcher，没有提前实现 S5/S6。
+- 在本项目 .venvs/claw 新建独立 Python3.12 空环境，显式 PYTHONPATH 指向只读源码、关闭字节码，仅执行 batch --help。未安装 Claw 包或依赖到任何环境，没有混装 judge 环境。
+- 静态清单：300 task.yaml；general=199，其中含 user_agent 的38、无 user_agent 的161；multimodal=101。两个完整 task filter 各唯一命中1项。
+- 建议 T010_contact_lookup + T002_email_triage；fixtures分别为2157/5436 bytes且存在。T091/T096附件缺失，未下载、生成或替换；不自动加第三任务。
+- 纠正旧判断：--config 任意文件名有效；8种事件及 grading_result 才是正式取分来源；system 初始消息未写原生trace；native provider默认流式、judge多层重试/直接client调用使单纯改配置无法满足统一封装。
+
+**证据（关键输出）**
+
+```text
+$ uv venv --python 3.12 --cache-dir .cache/uv .venvs/claw
+Using CPython 3.12.13
+Creating virtual environment at: .venvs/claw
+
+$ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/Users/x/agent-eval/claw-eval/src .venvs/claw/bin/python -m claw_eval.cli batch --help
+usage: claw-eval batch [-h] [--tasks-dir TASKS_DIR] [--filter FILTER]
+                      [--tag TAG] [--range RANGE] [--parallel PARALLEL]
+                      [--config CONFIG] [--trials TRIALS] [--trace-dir TRACE_DIR]
+                      [--sandbox] [--sandbox-image SANDBOX_IMAGE] ...
+
+$ python ...  # 只读 YAML 清单与文件存在性统计
+ task_files: 300
+ general_without_user_agent_tag: 161
+ general_and_user_agent_tag: 38
+ T010_contact_lookup: exactly 1 task; required fixture exists
+ T002_email_triage: exactly 1 task; required fixture exists
+ T091/T096: required attachments missing
+
+$ python ...  # 仅读取现有 usage，不创建客户端/请求
+ calls: 20, cached_calls: 13
+ prompt_tokens: 997, completion_tokens: 107, cost_usd: 0.000428
+
+$ git -C ../claw-eval status --short
+# 空；上游干净。
+
+$ git diff --check
+# 无输出，exit 0。
+```
+
+**成本与未解决问题**
+
+- 本关新 LLM 调用0、token0、费用0；阶段已有保守估算仍为 $0.000428。
+- 两任务预计合计60k输入/12k输出、约$0.0324；建议向用户报告区间$0.03–0.10及$0.75预留。后者只有在 S5 实施原轮数、输出上限、输入估计边界、judge请求额度和统一三次尝试后才是可用工程预算，不是原生Claw的费用保证。
+- 需要用户确认两任务方案后，S5先完成本项目内provider/SDK与worker接线、mock覆盖、独立依赖安装、Docker前置检查，再按护栏实际运行。本关没有Docker/任务/LLM运行证据，不宣称已接通Claw。
+- 本轮仅改文档，未新增依赖或产品代码，因此不重复运行全量测试；提交前执行密钥扫描与diff检查。先前56项测试结果属于S3记录，不冒充S4新测试结果。
+
+**下一步**：S4文档提交后停关，等待用户确认S5方案。
