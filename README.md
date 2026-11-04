@@ -2,7 +2,7 @@
 
 Reliability and prompt-injection audit of LLM graders on agent trajectories.
 
-**Status: phase 1, S1–S4 complete (skeleton, endpoint probes and Claw-Eval reconnaissance).** S5–S7 land incrementally; see
+**Status: phase 1, S1–S5 complete (integration probes, reconnaissance and a two-task Claw-Eval pilot).** S6–S7 land incrementally; see
 `notes/log.md` for the per-stage record and `docs/DECISIONS.md` for rationale.
 
 ## What this project studies
@@ -178,3 +178,57 @@ Agent thinking can be disabled in config; native Claw-Eval judge thinking stays
 on under the earlier decision. The proposal requires user confirmation at the
 S4 gate, with costs estimated at $0.03–$0.10 and a $0.75 batch reservation within
 the overall $3 budget. These are estimates, not measured Claw-Eval results.
+
+
+## Two-task Claw-Eval pilot (S5)
+
+Use the independent Claw environment and the unmodified upstream source:
+
+```bash
+make install-claw
+rtk proxy docker build -f ../claw-eval/Dockerfile.agent -t trajjudge-claw-agent:s5 ../claw-eval
+make claw-preflight
+make claw-pilot
+```
+
+The installer reads the upstream host requirements into `.venvs/claw`; it does
+not install OpenJudge or build the upstream package. The launcher supplies
+read-only source paths so English graders can locate their peer graders.
+It safely loads `.env`, validates all model endpoints and the reviewed upstream
+commit, checks fixtures/ports, and checks a disposable Docker sandbox.
+Only `T010_contact_lookup` and `T002_email_triage` are permitted, one trial each,
+with one spawn worker. Existing `outputs/claw_eval/s5/pilot.json` blocks an extra
+run or overwrite. The default script invocation prints an estimate only.
+
+Outputs remain local and ignored:
+
+- `outputs/claw_eval/s5/pilot.json`: results, trace paths, image ID, config/pricing
+  hashes, upstream commit, cost ledger summary and runtime differences.
+- Per-task native `batch_results.json`, `batch_summary.json` and JSONL traces.
+- Per-task `s5_sidecar/requests.jsonl`: exact model request bodies, actual trace ID,
+  system prompt, mode, response usage and cache status; no authentication headers.
+
+The project-local worker bindings preserve native message conversion, response
+parsing, task execution and graders. They route both agent calls and direct
+`judge.client` calls through the shared client. Agent thinking is disabled and
+output is capped at 1,024 tokens; native judge thinking remains enabled at default
+effort, with its 8,192-token cap. A local non-streaming transport and 60-second
+network timeout replace upstream streaming/300-second timeout and layered retries.
+The shared client permits at most three attempts. Each task has its original
+agent turn limit and at most one logical judge request. Input is never truncated;
+requests above the conservative 48k input estimate are rejected. This threshold
+was raised from the provisional S4 value because the native tool schema alone
+made first-request estimates exceed 22k. The $0.75 batch reservation and $3 stage
+budget remain in force and may stop a task early.
+
+On a fatal guard or request error, `S5Stop` bypasses upstream broad retry handlers
+while context managers clean resources. A stopped trace may be incomplete;
+sidecars and the pilot manifest mark that failure rather than manufacture a score.
+All runtime differences are recorded. These are DeepSeek re-runs of framework
+rubrics in mock environments, not leaderboard-comparable Gemini/Claude results.
+No human labels, repeated-trial stability tests or new injection variants were made.
+
+Observed one-run pilot: T010 score 0.8040, T002 score 0.8500. Nine paid completions
+used 38,728 input and 2,161 output tokens; the peak-price conservative estimate
+is $0.014212. This is connectivity evidence from two tasks, not a reliability
+or model-benefit result. See `notes/log.md` for the measured breakdown.

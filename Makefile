@@ -6,12 +6,15 @@ export PYTHONDONTWRITEBYTECODE := 1
 OPENJUDGE_ARGS ?=
 SMOKE_ARGS ?=
 
-.PHONY: help install install-openjudge test secrets smoke smoke-openjudge phase1
+.PHONY: help install install-openjudge install-claw claw-preflight claw-pilot test secrets smoke smoke-openjudge phase1
 
 help:
 	@echo "install  create .venvs/judge and install trajjudge (editable) + dev deps"
 	@echo "install-openjudge  install the read-only upstream editable (S3)"
 	@echo "smoke-openjudge    run or replay the weather grader smoke (S3)"
+	@echo "install-claw  install independent Claw host dependencies"
+	@echo "claw-preflight  check the S5 sandbox without model calls"
+	@echo "claw-pilot  run the fixed two-task S5 pilot once"
 	@echo "test     run the offline test suite (all LLM calls are mocked)"
 	@echo "secrets  fail if a provider-looking key is tracked by git"
 	@echo "smoke    probe the DeepSeek endpoint (network, stage S2)"
@@ -25,6 +28,18 @@ install: $(VENV)/pyvenv.cfg
 
 install-openjudge: $(VENV)/pyvenv.cfg
 	$(PY) scripts/install_openjudge.py
+
+.venvs/claw/pyvenv.cfg:
+	uv venv --python 3.12 .venvs/claw
+
+install-claw: .venvs/claw/pyvenv.cfg
+	.venvs/claw/bin/python scripts/install_claw.py
+
+claw-preflight:
+	.venvs/claw/bin/python scripts/run_claw_eval.py --preflight
+
+claw-pilot:
+	.venvs/claw/bin/python scripts/run_claw_eval.py --run
 
 test:
 	$(PY) -m pytest

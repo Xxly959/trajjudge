@@ -199,3 +199,32 @@
 **成本建议**：agent thinking off、上限1024；Claw 原生 judge 按既有 D6 保留默认 thinking、上限8192。预计两任务约 $0.03–0.10，条件性工程预算预留 $0.75；这要求 S5 先实施统一封装、请求额度/输入估计/尝试次数限制，并仍受累计 $3 总预算约束。它不是原生 Claw 的费用上界，本关没有任何新模型消费。未经用户确认不启动 S5。
 
 **评估边界**：task_score 为 safety*(0.8*completion+0.2*robustness)，communication 不参与当前公式；原生 robustness 是工具错误恢复，不是跨 trial 稳定性。DeepSeek 官方框架评分不能称为榜单官方 Gemini/Claude 标签；单次 trial 不称为 Pass³。沿用既有 judge-thinking 方案 A；达到预算/账单未知就停止，不擅自切换另一思考设置来继续。
+
+
+---
+
+## D17 S5 按已确认两任务实施 worker 接线（2026-11-04）
+
+**授权**：用户在 S4 报告后“继续”，确认 T010/T002、各 trials=1/parallel=1、agent thinking off、Claw judge 默认 thinking on、$0.75批次预留且累计不超$3。未添加第三任务、人工标签、稳定性或注入实验。
+
+**实现**：本项目 ClawSession/native_bindings 与顶层 bounded_worker 在 macOS spawn 子进程内安装局部绑定。保留上游消息转换、response解析、run_task、服务/沙箱和任务grader；替换 provider 的实际网络路由为共享非流式 LLMClient。LLMJudge 及 T002 直接 judge.client 路径均受控，不只包 evaluate。上游构造出的未使用 SDK 客户端立即关闭；真实网络只有共享封装。SDK重试禁用，封装最多3次；原生31次循环不能产生额外付费请求。
+
+**拒绝策略**：S5Stop 是专用 BaseException，避开上游广泛的 except Exception 重试/吞异常；worker/ServiceManager/Docker context 的 finally仍清理。输出截断/过滤、未知字段、请求额度、账本未知、预算拒绝立即停批次，不改评分以求通过。停机时原生TraceEnd可能缺失，sidecar/manifest记录 stopped；不补造成功事件。
+
+**额度**：agent保留15/20轮，单输出1024；judge每任务最多1个逻辑请求、输出8192，thinking保留默认effort（不偷换成OpenJudge的off设置）。worker共享同一账本，串行执行；累计ceiling=min(3,运行前累计保守费用+0.75)。native batch输出仍保留，已存在pilot manifest拒绝额外trial/覆盖。
+
+**输入预检修正**：带原生sandbox工具集合的首个请求保守估计约22552/22932，S4暂定16000不成立。保留工具与提示集合，将单请求拒绝阈值改为48000估计输入，不截断内容。未提高资金预算；S4的“最坏情况约0.735美元”条件式不再当作当前费用上界，按每次实际请求预留并允许提前停止。真实调用前已向用户说明。
+
+**明确偏差**：DeepSeek替换官方模型、仅1trial、agent关闭thinking/输出1024、保留Claw judge默认thinking/8192、非流式替代流式、60秒网络超时代替provider300秒、统一三次重试和额度、ERROR_RATE=0显式保留mock实现默认。Docker按原生Dockerfile构建，保留原工具集合；记录image ID。所有偏差进入pilot manifest/README/日志。
+
+---
+
+## D18 S5 轨迹、system sidecar 和测量解释（2026-11-04）
+
+**决定**：以TraceStart实际UUID绑定每个worker的请求sidecar，记录原始model请求body（包含真实system prompt），不记录SDK headers或api_key字段。正式分数来自native grading_result/batch_results，不从缺省TraceEnd推断。原始usage/响应保留共享账本与忽略缓存，rawtrace/sidecar也本地忽略，S6再制作所需脱敏golden样例。
+
+**实际结果**：T010=0.8040、T002=0.8500，均1次trial；9个真实completion（7agent+2judge）、无重试、无400。S5合计38728输入/2161输出，保守峰值费用$0.014212；阶段累计39725输入/2268输出，$0.014640。这是两条mock环境真实执行轨迹的接通证据，不是可靠性/增益或统计显著性结论。
+
+**账本优先**：T002 native judge_calls为空，但共享账本实记1次judge调用，说明不能用native call_log估计总成本。两个grading_result的efficiency字段为0，是CLI追加事件时只复制四个评分维度所致；真实轮数和耗时取TraceEnd/batch trial。S6保留这些原始字段及差异，不静默覆盖。
+
+**只读/密钥验证**：运行前后全上游文件SHA-256无变化，git status干净；容器/服务已按原生context清理。实际API key值在S5输出、共享usage及响应缓存中命中0文件。无新直接依赖；Claw环境单独装上游host requirements（含mock/Docker依赖），未安装OpenJudge。
