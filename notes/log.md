@@ -374,3 +374,332 @@ $ git diff --check
 ```
 
 提交前先暂存本关文件，再执行 make secrets（4 个检查场景），通过后创建 feat(s2) 提交。未新增任何依赖，未修改上游。
+
+
+### S3 天气冒烟（2026-11-04T09:23:11+00:00）
+
+命令：`python scripts/smoke_openjudge.py `
+
+```json
+{
+  "trace_id": "openjudge-docs-weather",
+  "grader": "trajectory_accuracy",
+  "score": 3.0,
+  "reason": "The trajectory is logically coherent, efficient, and directly fulfills the user's request by calling the weather tool and reporting the result. No unnecessary steps.",
+  "metadata": {
+    "raw_score": 3.0
+  },
+  "judge_model": "deepseek-flash",
+  "thinking": false,
+  "returned_reasoning": false,
+  "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f",
+  "timestamp": "2026-11-04T09:23:11+00:00",
+  "cached": false,
+  "response_format_policy": "json_object with local validation against the upstream callback schema",
+  "wire_observations": [
+    {
+      "thinking": {
+        "type": "disabled"
+      },
+      "response_format": {
+        "type": "json_object"
+      },
+      "request_fields": [
+        "max_tokens",
+        "messages",
+        "model",
+        "response_format",
+        "stream",
+        "thinking"
+      ]
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 504,
+    "completion_tokens": 38,
+    "raw_usage": {
+      "completion_tokens": 38,
+      "prompt_tokens": 504,
+      "total_tokens": 542,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 504
+    }
+  },
+  "sample_source": {
+    "source": "OpenJudge/docs/built_in_graders/agent_graders.md",
+    "section": "TrajectoryAccuracyGrader",
+    "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+  },
+  "estimate": {
+    "completion_calls": 1,
+    "input_tokens_estimate": 1200,
+    "output_tokens_cap": 768,
+    "cost_usd_estimate": 0.001282,
+    "reserve_usd": 0.02,
+    "pricing_basis": "peak/cache-miss conservative estimate"
+  },
+  "cumulative_usage": {
+    "calls": 16,
+    "cached_calls": 9,
+    "prompt_tokens": 997,
+    "completion_tokens": 107,
+    "cost_usd": 0.000427,
+    "unpriced_models": []
+  }
+}
+```
+
+
+### S3 天气冒烟（2026-11-04T09:24:23+00:00）
+
+命令：`python scripts/smoke_openjudge.py --offline`
+
+```json
+{
+  "trace_id": "openjudge-docs-weather",
+  "grader": "trajectory_accuracy",
+  "score": 3.0,
+  "reason": "The trajectory is logically coherent, efficient, and directly fulfills the user's request by calling the weather tool and reporting the result. No unnecessary steps.",
+  "metadata": {
+    "raw_score": 3.0
+  },
+  "judge_model": "deepseek-flash",
+  "thinking": false,
+  "returned_reasoning": false,
+  "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f",
+  "timestamp": "2026-11-04T09:24:23+00:00",
+  "cached": true,
+  "response_format_policy": "json_object with local validation against the upstream callback schema",
+  "wire_observations": [
+    {
+      "thinking": {
+        "type": "disabled"
+      },
+      "response_format": {
+        "type": "json_object"
+      },
+      "request_fields": [
+        "max_tokens",
+        "messages",
+        "model",
+        "response_format",
+        "stream",
+        "thinking"
+      ]
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 504,
+    "completion_tokens": 38,
+    "raw_usage": {
+      "completion_tokens": 38,
+      "completion_tokens_details": null,
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 504,
+      "prompt_tokens": 504,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      },
+      "total_tokens": 542
+    }
+  },
+  "sample_source": {
+    "source": "OpenJudge/docs/built_in_graders/agent_graders.md",
+    "section": "TrajectoryAccuracyGrader",
+    "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+  },
+  "estimate": {
+    "completion_calls": 1,
+    "input_tokens_estimate": 1200,
+    "output_tokens_cap": 768,
+    "cost_usd_estimate": 0.001282,
+    "reserve_usd": 0.02,
+    "pricing_basis": "peak/cache-miss conservative estimate"
+  },
+  "cumulative_usage": {
+    "calls": 18,
+    "cached_calls": 11,
+    "prompt_tokens": 997,
+    "completion_tokens": 107,
+    "cost_usd": 0.000427,
+    "unpriced_models": []
+  }
+}
+```
+
+
+---
+
+## S3 OpenJudge 冒烟完成（2026-11-04）
+
+**做了什么**
+
+- 先读 OpenJudge README/pyproject、OpenAIChatModel/BaseChatModel、LLMGrader、TrajectoryAccuracyGrader、schema 和天气官方样例；本关只做 Accuracy 冒烟，不实现 S6 的四 grader runner。
+- 上游提交：7d27246484e91c6ed4a349b6ebe7bd4629d9378f，开始时 git status --short 为空。
+- 确认 api_key/base_url 或 OPENAI_* 环境变量均可设置；本项目显式传设置。extra_body 进入 self.kwargs 再传 SDK，本轮实际观察到 thinking.type=disabled。
+- 发现 LLMGrader 默认 JSON Schema 与 DeepSeek 官方 JSON object 接口的差异；本地子类只做响应格式适配和原 callback schema 校验，native model/SDK/grader 仍实际执行，底层请求统一走 LLMClient。完整供应商响应加入忽略缓存，response_format 加入缓存键，未知参数/streaming 明确拒绝。
+- 以 editable 方式直接安装 ../OpenJudge，没有复制替代来源、没有修改上游。OpenJudge 的运行依赖装到现有 judge 环境；未装 dev/训练 extras、未混入 Claw-Eval。新增本地安装 helper 与 Makefile install-openjudge/smoke-openjudge 入口，无新增本项目直接依赖。
+- samples/weather.json 通过 AST 从官方 TrajectoryAccuracyGrader 文档示例提取，messages 逐字段相同，记录来源与提交哈希；samples/weather-score.json 保存真实结果。没有生成或代替人工标签。
+- 模型调用前已告知：1 次 completion，估计输入 1200、输出上限 768 tokens，保守费用 $0.001282，本关预留 $0.02。
+
+**安装与诊断证据**
+
+首次对整组依赖使用相同 setuptools build_base，jieba/rouge-score 并行构建目录冲突，jieba wheel 构建失败。停止后核对 676 个上游文件，变化 0；改为先正常安装运行依赖，再只对 OpenJudge editable 构建做重定向，安装成功。
+
+```text
+$ make install-openjudge
+Checked 21 packages
+py-openjudge==0.2.0 (from file:///Users/x/agent-eval/OpenJudge)
+Upstream file delta: 0 (676 files verified)
+
+$ python ...  # PYTHONDONTWRITEBYTECODE=1，读取安装 metadata 与导入位置
+Imported source: /Users/x/agent-eval/OpenJudge/openjudge/__init__.py
+Editable metadata: {"url":"file:///Users/x/agent-eval/OpenJudge","dir_info":{"editable":true}}
+```
+
+**真实调用证据**
+
+```text
+$ make smoke-openjudge OPENJUDGE_ARGS=--estimate
+completion_calls: 1, input_tokens_estimate: 1200, output_tokens_cap: 768
+cost_usd_estimate: 0.001282, reserve_usd: 0.02
+
+$ make smoke-openjudge
+score: 3.0
+grade reason: The trajectory is logically coherent, efficient, and directly fulfills the user's request by calling the weather tool and reporting the result. No unnecessary steps.
+thinking: false, returned_reasoning: false, cached: false
+wire thinking: {"type":"disabled"}
+wire response_format: {"type":"json_object"}
+usage: 504 input + 38 output = 542 tokens
+```
+
+本关一次付费请求、无重试，按配置高峰价保守费用 $0.0001968；S2+S3 累计 997 输入、107 输出，1104 tokens，保守费用精确计算 $0.0004275（最终摘要向上保留六位小数为 $0.000428；自动追加的早期摘要保留当时浮点舍入值）。价格为估算而非精确账单。
+
+**验证与未解决问题**
+
+- 四个 mock 集成用例先失败（bridge/response_format 尚未实现），实现后通过：真实 OpenJudge/native SDK 调用链、缓存回放、缺失 score 返回 GraderError、未知参数不发请求。另有 AST 官方样例一致性检查。
+- 本关 extra_body 关闭 thinking 已实测成功，不需要备选方案。原生 grader 对异常 score 的限幅仍是上游行为，本关只验证合法天气样例，完整供应商响应保留供审计，不据此宣称 grader 可靠。
+- 上游仍为只读依赖；后续若变更上游提交或模板，旧缓存未必命中。直接运行 judge 命令时须设置 PYTHONDONTWRITEBYTECODE=1，Makefile 已统一设置。
+- S4 只读 Claw-Eval 侦察尚未执行，S5/S6/S7 不提前开展。
+
+**下一步**：完成本关离线回放、测试与提交，停关等待用户“继续”。
+
+
+### S3 天气冒烟（2026-11-04T09:27:30+00:00）
+
+命令：`python scripts/smoke_openjudge.py --offline`
+
+```json
+{
+  "trace_id": "openjudge-docs-weather",
+  "grader": "trajectory_accuracy",
+  "score": 3.0,
+  "reason": "The trajectory is logically coherent, efficient, and directly fulfills the user's request by calling the weather tool and reporting the result. No unnecessary steps.",
+  "metadata": {
+    "raw_score": 3.0
+  },
+  "judge_model": "deepseek-flash",
+  "thinking": false,
+  "returned_reasoning": false,
+  "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f",
+  "timestamp": "2026-11-04T09:27:30+00:00",
+  "cached": true,
+  "response_format_policy": "json_object with local validation against the upstream callback schema",
+  "wire_observations": [
+    {
+      "thinking": {
+        "type": "disabled"
+      },
+      "response_format": {
+        "type": "json_object"
+      },
+      "request_fields": [
+        "max_tokens",
+        "messages",
+        "model",
+        "response_format",
+        "stream",
+        "thinking"
+      ]
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 504,
+    "completion_tokens": 38,
+    "raw_usage": {
+      "completion_tokens": 38,
+      "completion_tokens_details": null,
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 504,
+      "prompt_tokens": 504,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      },
+      "total_tokens": 542
+    }
+  },
+  "sample_source": {
+    "source": "OpenJudge/docs/built_in_graders/agent_graders.md",
+    "section": "TrajectoryAccuracyGrader",
+    "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+  },
+  "estimate": {
+    "completion_calls": 1,
+    "input_tokens_estimate": 1200,
+    "output_tokens_cap": 768,
+    "cost_usd_estimate": 0.001282,
+    "reserve_usd": 0.02,
+    "pricing_basis": "peak/cache-miss conservative estimate"
+  },
+  "cumulative_usage": {
+    "calls": 20,
+    "cached_calls": 13,
+    "prompt_tokens": 997,
+    "completion_tokens": 107,
+    "cost_usd": 0.000428,
+    "unpriced_models": []
+  }
+}
+```
+
+
+**S3 最终验证**
+
+```text
+$ make test
+56 passed in 2.89s
+
+$ make smoke-openjudge OPENJUDGE_ARGS=--offline
+score: 3.0, cached: true
+cumulative prompt_tokens: 997, completion_tokens: 107, cost_usd: 0.000428
+
+$ uv pip check --python .venvs/judge/bin/python
+Checked 98 packages; All installed packages are compatible
+
+$ python ...  # 对照初始上游 SHA-256 manifest
+Final upstream file delta: 0
+
+$ git -C ../OpenJudge status --short
+# 空；上游工作区干净。
+
+$ git diff --check
+# 无输出，exit 0。
+```
+
+额外费用回归复现多条记录浮点累加向下舍入；修复为 Decimal 精确累加后摘要向上保留六位，最终累计 $0.000428。原始 token 与早期日志保留，未新增真实请求。提交前暂存本关文件并运行 make secrets，通过后创建 feat(s3) 提交。

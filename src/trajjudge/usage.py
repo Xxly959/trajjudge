@@ -13,6 +13,7 @@ import math
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from decimal import Decimal, ROUND_CEILING
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -166,6 +167,7 @@ def summarize(records: Iterable[UsageRecord], pricing: Mapping[str, Price]) -> U
     summary = UsageSummary()
     unpriced: set[str] = set()
     unknown_usage = False
+    cost = Decimal(0)
     for record in records:
         summary.calls += 1
         if record.cached:
@@ -180,16 +182,15 @@ def summarize(records: Iterable[UsageRecord], pricing: Mapping[str, Price]) -> U
         if price is None:
             unpriced.add(record.model)
             continue
-        if summary.cost_usd is not None:
-            summary.cost_usd += (
-                record.prompt_tokens / 1_000_000 * price.input_per_mtok
-                + record.completion_tokens / 1_000_000 * price.output_per_mtok
-            )
+        cost += (
+            Decimal(record.prompt_tokens) * Decimal(str(price.input_per_mtok))
+            + Decimal(record.completion_tokens) * Decimal(str(price.output_per_mtok))
+        ) / Decimal(1_000_000)
     if unpriced:
         summary.unpriced_models = sorted(unpriced)
         summary.cost_usd = None
     elif unknown_usage:
         summary.cost_usd = None
     elif summary.cost_usd is not None:
-        summary.cost_usd = round(summary.cost_usd, 6)
+        summary.cost_usd = float(cost.quantize(Decimal("0.000001"), rounding=ROUND_CEILING))
     return summary

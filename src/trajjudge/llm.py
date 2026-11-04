@@ -18,7 +18,7 @@ import json
 import math
 import random
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -77,6 +77,7 @@ class LLMResult:
     cached: bool = False
     latency_ms: float = 0.0
     tag: str = ""
+    raw_response: dict[str, Any] = field(default_factory=dict)
 
     @property
     def returned_reasoning(self) -> bool:
@@ -98,6 +99,7 @@ class LLMResult:
             "completion_tokens": self.completion_tokens,
             "latency_ms": self.latency_ms,
             "tag": self.tag,
+            "raw_response": self.raw_response,
         }
 
     @classmethod
@@ -122,6 +124,7 @@ class LLMResult:
             cached=cached,
             latency_ms=0.0,
             tag=str(raw.get("tag", "")),
+            raw_response=dict(raw.get("raw_response") or {}),
         )
 
 
@@ -266,6 +269,7 @@ class LLMClient:
         max_tokens: int | None = None,
         reasoning_effort: str | None = None,
         tool_choice: str | Mapping[str, Any] | None = None,
+        response_format: Mapping[str, Any] | None = None,
         tag: str = "",
         use_cache: bool = True,
     ) -> LLMResult:
@@ -282,6 +286,7 @@ class LLMClient:
             max_tokens: Completion cap; defaults to 1,024 when ``None``.
             reasoning_effort: Optional provider thinking effort, included in the cache key.
             tool_choice: Optional tool selection policy, included in the cache key.
+            response_format: Optional JSON output format, included in the cache key.
             tag: Free-form label written into the usage log (e.g. ``smoke``).
             use_cache: Retained for compatibility; cache lookup and storage are always enabled.
 
@@ -308,6 +313,8 @@ class LLMClient:
             request["tool_choice"] = tool_choice
         if reasoning_effort is not None:
             request["reasoning_effort"] = reasoning_effort
+        if response_format is not None:
+            request["response_format"] = dict(response_format)
         request["extra_body"] = {"thinking": {"type": "enabled" if thinking_on else "disabled"}}
 
         key = make_key(
@@ -432,6 +439,7 @@ class LLMClient:
             cached=False,
             latency_ms=latency_ms,
             tag=tag,
+            raw_response=dict(raw) if isinstance(raw, Mapping) else raw.model_dump(mode="json"),
         )
 
     def _record(self, result: LLMResult, *, tag: str) -> None:

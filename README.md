@@ -2,7 +2,7 @@
 
 Reliability and prompt-injection audit of LLM graders on agent trajectories.
 
-**Status: phase 1, S1–S2 complete (skeleton and DeepSeek smoke probe).** S3–S7 land incrementally; see
+**Status: phase 1, S1–S3 complete (skeleton, DeepSeek probe and OpenJudge weather smoke).** S4–S7 land incrementally; see
 `notes/log.md` for the per-stage record and `docs/DECISIONS.md` for rationale.
 
 ## What this project studies
@@ -38,6 +38,7 @@ docs/DECISIONS.md  design decisions and their rationale
 
 ```bash
 make install            # creates .venvs/judge (Python 3.12) and installs this package
+make install-openjudge  # editable upstream install, with build output kept in this project
 cp .env.example .env    # then put the real DeepSeek key in .env
 make test               # offline
 make smoke              # bounded DeepSeek probe; uses cached responses when present
@@ -117,3 +118,45 @@ the pending marker prevents silently continuing after that failure.
 `make test` blocks network connections and mocks all LLM responses. `make secrets`
 checks both staged blobs and nonignored working files, including `.env.example`.
 Run it immediately before every commit. Checks report paths only, never values.
+
+
+## OpenJudge weather smoke (S3)
+
+After `make install-openjudge`, run:
+
+```bash
+make smoke-openjudge OPENJUDGE_ARGS=--estimate
+make smoke-openjudge
+make smoke-openjudge OPENJUDGE_ARGS=--offline
+```
+
+The fixture in `samples/weather.json` is copied exactly from the
+`TrajectoryAccuracyGrader` example in the upstream agent-graders documentation.
+`samples/weather-score.json` records the real smoke result, usage, requested
+thinking mode, observed request parameters, and upstream commit. An offline
+replay writes `outputs/openjudge/weather-score-offline.json`, preserving the
+original online evidence. These are toy documentation examples, not human labels
+or evidence of judge reliability.
+
+The native `OpenAIChatModel` accepts explicit `api_key`/`base_url` or reads
+`OPENAI_API_KEY`/`OPENAI_BASE_URL`. We pass the project settings explicitly;
+`extra_body={"thinking": {"type": "disabled"}}` travels through its native chat
+method and the OpenAI SDK. Its SDK HTTP transport delegates to the shared
+`LLMClient`, so cached and paid OpenJudge calls use the existing accounting,
+retry and budget controls. Only serial non-streaming completions are supported;
+unknown request parameters fail rather than disappear.
+
+The grader normally asks the SDK for JSON Schema structured output. DeepSeek's
+[documented response format](https://api-docs.deepseek.com/api/create-chat-completion/)
+is JSON object output. A project-local subclass selects `json_object` and validates
+the parsed object against the original upstream callback schema. Prompts, grader
+logic and upstream files are preserved; this response-format adaptation is an
+explicit runtime difference. No additional live negative Schema request was made.
+
+OpenJudge's declared runtime dependencies include pandas, NumPy, SciPy and
+scikit-learn; they are installed only in the judge environment. No training or
+development extras are installed. The installer first installs those dependencies,
+then builds the editable upstream package alone with metadata/build directories
+redirected to `.cache/openjudge-build`. It checks upstream file hashes before and
+after installation. `PYTHONDONTWRITEBYTECODE=1` keeps imports from writing bytecode
+into the read-only source; Makefile targets export it automatically.

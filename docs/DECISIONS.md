@@ -150,3 +150,29 @@
 **决定**：配置保存完整价格信息，现有预算/汇总继续统一按高峰输入 cache miss 与高峰输出价格保守计算，不冒充精确账单，不依赖运行时段或假期判断。供应商原始 usage 保留在本地账本，包括 prompt-cache 明细。探针还加上不超过累计预算的 $0.05 批次预留；运行前打印约 5,000 输入 + 4,224 输出 tokens 的 $0.006569 估算。
 
 **影响**：估算大于实际 token 对应金额不表示计费异常；应清楚标注保守估算。若供应商调整价格，下一次真实批次前重新核实。S2 本次真实 493 输入、69 输出 tokens，保守费用 $0.000231；不将后续缓存回放算作新增模型消费。
+
+
+---
+
+## D13 S3 保持原生 OpenJudge 调用链并统一记账（2026-11-04）
+
+**证据**：源码 openjudge/models/openai_chat_model.py 的构造函数接受 api_key/base_url，未传时读取 OPENAI_API_KEY/OPENAI_BASE_URL；**kwargs 存到 self.kwargs 后合并到 achat 的 SDK 参数。因此 extra_body 可透传。本轮真实天气调用中，SDK 请求体观察到 thinking.type=disabled，供应商没有返回 reasoning_content。
+
+**决定**：本项目的 DeepSeekOpenJudgeModel 继承上游 OpenAIChatModel，通过原生 achat 与 SDK 处理请求/结果。自定义本地 SDK HTTP transport 接收序列化 JSON，再交给统一 LLMClient；它不打开第二条网络路径、不记录请求头。统一封装扩展 response_format 参数（进入缓存键）并缓存完整供应商 JSON，用于原生 SDK 离线回放。只支持串行、非流式调用，未识别参数报错而不静默丢弃。
+
+**JSON 差异**：LLMGrader 默认传 Pydantic structured_model，原生模型会请求 JSON Schema；DeepSeek 当前官方接口只列 text/json_object（https://api-docs.deepseek.com/api/create-chat-completion/）。本地子类改成 json_object，随后仍按原来的 Pydantic callback schema 本地校验，避免缺失 score 被默认值掩盖。评分提示和上游 grader 实现不变。这是显式响应格式适配，不声称“未改变原生运行行为”；未额外发送 Schema 负向真实请求。
+
+**结果**：无需关闭 thinking 的替代方案；本轮已验证 extra_body 的实际请求路径。score=3 仅为官方玩具样例的真实模型输出，既不是人工标签，也不是一致性/稳定性/抗注入证据。额外预算采用 $0.02 批次预留，仍计入累计 $3。
+
+---
+
+## D14 S3 editable 安装不得污染上游（2026-11-04）
+
+**决定**：make install-openjudge 使用 scripts/install_openjudge.py。先按上游 pyproject 声明安装运行依赖，再对 ../OpenJudge 单独执行 uv pip install --no-deps -e；该第二步用 DIST_EXTRA_CONFIG 将 setuptools egg_info/build 目录指到本项目 .cache/openjudge-build。全程关闭 Python 字节码写入，上游文件的安装前后 SHA-256 指纹必须一致。
+
+**原因**：首次把重定向环境作用于整组依赖，jieba/rouge-score 共享 build 目录而发生构建冲突；已改为分两步。失败尝试及成功安装均核对上游文件变化为 0，不删除或修改上游来解决问题。direct_url.json 确认 editable=true，openjudge.__file__ 指向真实 ../OpenJudge。
+
+**依赖理由**：pandas/NumPy/SciPy/scikit-learn 等由 OpenJudge 自身声明，属于用户要求的真实 editable 安装所需运行依赖，仅装在 judge 环境；不添加其 dev/训练 extras。本项目没有新增直接依赖。SDK transport 复用当前 OpenAI SDK 对应的 httpx/httpx2，不额外创建独立 HTTP 依赖。Makefile 导出 PYTHONDONTWRITEBYTECODE=1，README 的直接命令也须遵守这一上游只读边界。
+
+
+**S3 记账补充**：本轮累加实际多条 usage 时发现二进制浮点会把 $0.0004275 汇总为 $0.000427。已先用 S2/S3 两组用量补回归复现，再改为标准库 Decimal 累加、最终六位小数向上取整，保持费用估算的保守含义；不增加依赖、不改变原始 token 记录。早期日志摘要作为历史保留，最终摘要为 $0.000428。

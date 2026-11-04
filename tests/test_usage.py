@@ -78,3 +78,9 @@ def test_load_pricing_skips_null_entries(tmp_path: Path) -> None:
 
     assert set(prices) == {"known"}
     assert prices["known"].input_per_mtok == 0.5
+
+
+def test_conservative_cost_rounding_never_rounds_down() -> None:
+    pricing = {"m": Price(input_per_mtok=0.3, output_per_mtok=1.2)}
+    result = summarize([_record(prompt=493, completion=69), _record(prompt=504, completion=38)], pricing)
+    assert result.cost_usd == 0.000428

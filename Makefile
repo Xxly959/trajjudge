@@ -2,12 +2,16 @@ VENV ?= .venvs/judge
 PY ?= $(VENV)/bin/python
 UV_CACHE_DIR ?= $(CURDIR)/.cache/uv
 export UV_CACHE_DIR
+export PYTHONDONTWRITEBYTECODE := 1
+OPENJUDGE_ARGS ?=
 SMOKE_ARGS ?=
 
-.PHONY: help install test secrets smoke phase1
+.PHONY: help install install-openjudge test secrets smoke smoke-openjudge phase1
 
 help:
 	@echo "install  create .venvs/judge and install trajjudge (editable) + dev deps"
+	@echo "install-openjudge  install the read-only upstream editable (S3)"
+	@echo "smoke-openjudge    run or replay the weather grader smoke (S3)"
 	@echo "test     run the offline test suite (all LLM calls are mocked)"
 	@echo "secrets  fail if a provider-looking key is tracked by git"
 	@echo "smoke    probe the DeepSeek endpoint (network, stage S2)"
@@ -19,6 +23,9 @@ $(VENV)/pyvenv.cfg:
 install: $(VENV)/pyvenv.cfg
 	uv pip install --python $(PY) -e ".[dev]"
 
+install-openjudge: $(VENV)/pyvenv.cfg
+	$(PY) scripts/install_openjudge.py
+
 test:
 	$(PY) -m pytest
 
@@ -27,6 +34,9 @@ secrets:
 
 smoke:
 	$(PY) scripts/smoke_llm.py $(SMOKE_ARGS)
+
+smoke-openjudge:
+	$(PY) scripts/smoke_openjudge.py $(OPENJUDGE_ARGS)
 
 phase1:
 	$(PY) scripts/run_phase1.py
