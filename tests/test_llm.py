@@ -134,13 +134,13 @@ def test_thinking_disabled_sends_extra_body(settings: Settings) -> None:
     assert transport.requests[0]["extra_body"] == {"thinking": {"type": "disabled"}}
 
 
-def test_thinking_enabled_omits_extra_body(settings: Settings) -> None:
+def test_thinking_enabled_sends_explicit_extra_body(settings: Settings) -> None:
     transport = Recorder([_response("x", reasoning="because")])
     client = _client(settings, transport)
 
     result = client.complete([{"role": "user", "content": "hi"}], thinking=True)
 
-    assert "extra_body" not in transport.requests[0]
+    assert transport.requests[0]["extra_body"] == {"thinking": {"type": "enabled"}}
     assert result.returned_reasoning is True
 
 

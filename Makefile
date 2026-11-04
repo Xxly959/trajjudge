@@ -2,6 +2,7 @@ VENV ?= .venvs/judge
 PY ?= $(VENV)/bin/python
 UV_CACHE_DIR ?= $(CURDIR)/.cache/uv
 export UV_CACHE_DIR
+SMOKE_ARGS ?=
 
 .PHONY: help install test secrets smoke phase1
 
@@ -25,7 +26,7 @@ secrets:
 	$(PY) -m pytest tests/test_no_secrets.py -q
 
 smoke:
-	$(PY) scripts/smoke_llm.py
+	$(PY) scripts/smoke_llm.py $(SMOKE_ARGS)
 
 phase1:
 	$(PY) scripts/run_phase1.py

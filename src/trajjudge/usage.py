@@ -34,6 +34,7 @@ class UsageRecord:
     status: str = "success"
     usage_known: bool = True
     raw_usage: dict[str, Any] = field(default_factory=dict)
+    endpoint: str = "chat.completions"
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-serialisable representation."""
@@ -49,6 +50,7 @@ class UsageRecord:
             "status": self.status,
             "usage_known": self.usage_known,
             "raw_usage": self.raw_usage,
+            "endpoint": self.endpoint,
         }
 
     @classmethod
@@ -75,6 +77,7 @@ class UsageRecord:
             status=str(raw.get("status", "success")),
             usage_known=bool(raw.get("usage_known", True)),
             raw_usage=dict(raw.get("raw_usage") or {}),
+            endpoint=str(raw.get("endpoint", "chat.completions")),
         )
 
 
@@ -167,6 +170,8 @@ def summarize(records: Iterable[UsageRecord], pricing: Mapping[str, Price]) -> U
         summary.calls += 1
         if record.cached:
             summary.cached_calls += 1
+            continue
+        if record.endpoint == "models":
             continue
         unknown_usage |= not record.usage_known
         summary.prompt_tokens += record.prompt_tokens

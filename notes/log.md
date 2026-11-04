@@ -118,3 +118,259 @@ $ git diff --cached --check
 ```
 
 本次将全部 S1 修复作为单独的 fix(s1) 提交。提交前再次执行 make secrets 检查暂存区与工作区；本关结束后按用户要求停关，S2 尚未开始。没有 DeepSeek 请求，LLM 成本 USD 0。
+
+
+### S2 探针结果（2026-11-04T07:59:15+00:00）
+
+命令：`python scripts/smoke_llm.py --model deepseek-flash`
+
+模型列表：`deepseek-flash, deepseek-v4-pro`；离线回放：False。
+
+```json
+{
+  "timestamp": "2026-11-04T07:59:15+00:00",
+  "models": [
+    "deepseek-flash",
+    "deepseek-v4-pro"
+  ],
+  "estimate": {
+    "model": "deepseek-flash",
+    "completion_calls": 5,
+    "input_tokens_estimate": 5000,
+    "output_tokens_cap": 4224,
+    "cost_usd_estimate": 0.006569,
+    "attempt_limit": 3,
+    "batch_reserve_usd": 0.05,
+    "pricing_basis": "peak input cache-miss and peak output; conservative estimate, not invoice"
+  },
+  "offline": false,
+  "results": [
+    {
+      "probe": "plain",
+      "model": "deepseek-flash",
+      "thinking": false,
+      "prompt_tokens": 13,
+      "completion_tokens": 5,
+      "returned_reasoning": false,
+      "cached": false,
+      "tool_calls": 0,
+      "answer": "S2_READY"
+    },
+    {
+      "probe": "thinking_off",
+      "model": "deepseek-flash",
+      "thinking": false,
+      "prompt_tokens": 18,
+      "completion_tokens": 1,
+      "returned_reasoning": false,
+      "cached": false,
+      "tool_calls": 0,
+      "answer": "5"
+    },
+    {
+      "probe": "thinking_on",
+      "model": "deepseek-flash",
+      "thinking": true,
+      "prompt_tokens": 44,
+      "completion_tokens": 15,
+      "returned_reasoning": true,
+      "cached": false,
+      "tool_calls": 0,
+      "answer": "5"
+    },
+    {
+      "probe": "tool_request",
+      "model": "deepseek-flash",
+      "thinking": true,
+      "prompt_tokens": 313,
+      "completion_tokens": 40,
+      "returned_reasoning": true,
+      "cached": false,
+      "tool_calls": 1,
+      "answer": ""
+    },
+    {
+      "probe": "tool_followup",
+      "model": "deepseek-flash",
+      "thinking": true,
+      "prompt_tokens": 105,
+      "completion_tokens": 8,
+      "returned_reasoning": false,
+      "cached": false,
+      "tool_calls": 0,
+      "answer": "S2_TOOL_OK_731",
+      "reasoning_replayed_verbatim": true
+    }
+  ],
+  "cumulative_usage": {
+    "calls": 7,
+    "cached_calls": 1,
+    "prompt_tokens": 493,
+    "completion_tokens": 69,
+    "cost_usd": 0.000231,
+    "unpriced_models": []
+  }
+}
+```
+
+
+### S2 探针结果（2026-11-04T08:00:08+00:00）
+
+命令：`python scripts/smoke_llm.py --offline`
+
+模型列表：`deepseek-flash, deepseek-v4-pro`；离线回放：True。
+
+```json
+{
+  "timestamp": "2026-11-04T08:00:08+00:00",
+  "models": [
+    "deepseek-flash",
+    "deepseek-v4-pro"
+  ],
+  "estimate": {
+    "model": "deepseek-flash",
+    "completion_calls": 5,
+    "input_tokens_estimate": 5000,
+    "output_tokens_cap": 4224,
+    "cost_usd_estimate": 0.006569,
+    "attempt_limit": 3,
+    "batch_reserve_usd": 0.05,
+    "pricing_basis": "peak input cache-miss and peak output; conservative estimate, not invoice"
+  },
+  "offline": true,
+  "results": [
+    {
+      "probe": "plain",
+      "model": "deepseek-flash",
+      "thinking": false,
+      "prompt_tokens": 13,
+      "completion_tokens": 5,
+      "returned_reasoning": false,
+      "cached": true,
+      "tool_calls": 0,
+      "answer": "S2_READY"
+    },
+    {
+      "probe": "thinking_off",
+      "model": "deepseek-flash",
+      "thinking": false,
+      "prompt_tokens": 18,
+      "completion_tokens": 1,
+      "returned_reasoning": false,
+      "cached": true,
+      "tool_calls": 0,
+      "answer": "5"
+    },
+    {
+      "probe": "thinking_on",
+      "model": "deepseek-flash",
+      "thinking": true,
+      "prompt_tokens": 44,
+      "completion_tokens": 15,
+      "returned_reasoning": true,
+      "cached": true,
+      "tool_calls": 0,
+      "answer": "5"
+    },
+    {
+      "probe": "tool_request",
+      "model": "deepseek-flash",
+      "thinking": true,
+      "prompt_tokens": 313,
+      "completion_tokens": 40,
+      "returned_reasoning": true,
+      "cached": true,
+      "tool_calls": 1,
+      "answer": ""
+    },
+    {
+      "probe": "tool_followup",
+      "model": "deepseek-flash",
+      "thinking": true,
+      "prompt_tokens": 105,
+      "completion_tokens": 8,
+      "returned_reasoning": false,
+      "cached": true,
+      "tool_calls": 0,
+      "answer": "S2_TOOL_OK_731",
+      "reasoning_replayed_verbatim": true
+    }
+  ],
+  "cumulative_usage": {
+    "calls": 13,
+    "cached_calls": 7,
+    "prompt_tokens": 493,
+    "completion_tokens": 69,
+    "cost_usd": 0.000231,
+    "unpriced_models": []
+  }
+}
+```
+
+
+---
+
+## S2 接入探针完成（2026-11-04）
+
+**做了什么**
+
+- 用户指定 deepseek-flash，密钥从既有 .env 读取，不打印、不写入受跟踪文件；本轮不运行 S3。
+- 先只读检查当前封装并查阅 DeepSeek 官方模型列表、thinking/tool-call 和价格文档。首次只读客户端调用实际列出 deepseek-flash、deepseek-v4-pro；之后正式入口的模型发现、缓存读取和错误重试均在共享 usage 中记录（endpoint=models，无生成 token）。
+- 批量调用前已向用户报告：5 次 completion，约 5,000 输入、最多 4,224 输出 tokens；按高峰/cache-miss 估算 $0.006569，包含重试和额外上下文的批次预留 $0.05，计入总预算 $3。
+- 新增 scripts/smoke_llm.py 和 trajjudge.smoke，支持 --list-models、--estimate、--model、--offline；普通对话、thinking off/on、工具请求/结果续答全部通过共享 LLMClient。工具仅为确定性本地 fixture，不调用其他服务。每个探针检查固定答案，工具请求检查一次调用/参数，reasoning_content 原样回传；不放宽断言或删除测试。
+- thinking 显式 enabled/disabled；开启时 low effort，以减少探针成本。工具续答保持 tools 并设置 tool_choice=none，限制为单轮工具往返。配置两角色均为已验证且用户选择的 deepseek-flash，新增官方价格来源/核实日期与高峰/低峰数据，不新增依赖。
+- 新增 5 个探针测试时先得到 5 failed，随后全部通过；并增加无密钥离线配置回归。原 thinking-on 测试由“省略默认参数”改为断言显式 enabled，其他覆盖保留。离线测试统一阻止网络连接。
+
+**真实调用结果**
+
+| 探针 | thinking 请求 | 输入 tokens | 输出 tokens | 返回 reasoning_content | tool_calls |
+|---|---|---:|---:|---|---:|
+| 普通对话 | off | 13 | 5 | 否 | 0 |
+| thinking off | off | 18 | 1 | 否 | 0 |
+| thinking on | on / low | 44 | 15 | 是 | 0 |
+| 工具请求 | on / low | 313 | 40 | 是 | 1 |
+| 工具续答 | on / low | 105 | 8 | 否 | 0 |
+
+总计 493 输入 + 69 输出 = 562 tokens；按配置高峰价格保守估算 $0.000231（未四舍五入为 $0.0002307），不是供应商精确账单。5 次 completion 均无重试、无 400；预期回答分别为 S2_READY、5、5、工具调用、S2_TOOL_OK_731。续答未返回 reasoning_content 是观察结果，不隐藏，也不等同于已确认供应商实际关闭 thinking。
+
+**证据（关键命令与输出）**
+
+```text
+$ python scripts/smoke_llm.py --model deepseek-flash --estimate
+models: [deepseek-flash, deepseek-v4-pro]
+completion_calls: 5, input_tokens_estimate: 5000, output_tokens_cap: 4224
+cost_usd_estimate: 0.006569, batch_reserve_usd: 0.05
+
+$ python scripts/smoke_llm.py --model deepseek-flash
+# 5 个探针通过，reasoning_replayed_verbatim: true。
+prompt_tokens: 493, completion_tokens: 69, cost_usd: 0.000231
+
+$ make smoke SMOKE_ARGS=--offline
+# 模型列表和全部 5 个 completion 均 cached:true。
+# 客户端禁止 SDK 请求；没有新增模型请求或 token 消费。
+prompt_tokens: 493, completion_tokens: 69, cost_usd: 0.000231
+```
+
+在线摘要保存 outputs/smoke/s2.json；离线摘要保存 outputs/smoke/s2-offline.json；原始 reasoning 和响应在 .cache/llm，完整 usage 在 outputs/usage/usage.jsonl，均为本地忽略文件。上方自动追加的两份摘要保留实际时间戳和逐条结果，可供核查。
+
+**未解决问题 / 边界**
+
+- 本关仅证明 DeepSeek 直接接口和本项目封装的接通；不证明 OpenJudge/Claw-Eval 已兼容，也不证明评分质量、稳定性或抗注入能力。
+- 未发送故意省略 reasoning_content 的真实负向请求，因此没有“缺失时必然 400”的本次实验结论；该规则来自官方文档。正确回传的请求已实际成功。
+- 费用使用高峰/cache-miss 保守价格，实际供应商缓存命中与低峰可能更便宜。当前累计模型消费仍为 562 tokens，缓存回放不增加。
+- 本地缓存不入 Git，其他克隆需先运行探针或获得缓存，才能离线回放。S3 的 editable OpenJudge 冒烟、额外参数验证尚待下一关。
+
+**下一步**：提交 S2 后停关，等待用户“继续”。
+
+
+**S2 最终离线验证**
+
+```text
+$ make test
+50 passed in 0.49s
+
+$ git diff --check
+# 无输出，exit 0。
+```
+
+提交前先暂存本关文件，再执行 make secrets（4 个检查场景），通过后创建 feat(s2) 提交。未新增任何依赖，未修改上游。

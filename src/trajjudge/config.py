@@ -98,6 +98,7 @@ def load_settings(
     config_file: Path | None = None,
     *,
     require_models: bool = True,
+    require_key: bool = True,
 ) -> Settings:
     """Load settings from ``.env`` plus the YAML config.
 
@@ -107,6 +108,7 @@ def load_settings(
         require_models: When true (the default), missing model ids raise
             :class:`ConfigError` instead of being returned as empty strings.
             Tests that only exercise unrelated behaviour pass ``False``.
+        require_key: Set false for offline cache replay only.
 
     Raises:
         ConfigError: If the API key or a required model id is missing.
@@ -126,7 +128,7 @@ def load_settings(
     paths: Mapping[str, Any] = raw.get("paths") or {}
 
     api_key = merged.get("DEEPSEEK_API_KEY", "").strip()
-    if not api_key:
+    if require_key and not api_key:
         raise ConfigError(
             f"DEEPSEEK_API_KEY is not set. Put it in {env_path} (git-ignored) "
             "or export it in the environment."

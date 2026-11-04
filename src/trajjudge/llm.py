@@ -180,6 +180,7 @@ class LLMClient:
         backoff_base: float = 1.0,
         backoff_cap: float = 30.0,
         timeout: float = 180.0,
+        offline: bool = False,
         jitter: Callable[[], float] = random.random,
     ) -> None:
         if max_attempts < 1 or timeout <= 0:
@@ -192,6 +193,8 @@ class LLMClient:
         self.backoff_base = backoff_base
         self.backoff_cap = backoff_cap
         self.timeout = timeout
+        self.offline = offline
+        self.last_models_cached = False
         self.jitter = jitter
         self._client = client
         self._transport: Transport | None = transport
@@ -199,6 +202,8 @@ class LLMClient:
     # ---------------------------------------------------------------- client
 
     def _get_client(self) -> Any:
+        if self.offline:
+            raise LLMError("offline mode forbids SDK requests")
         if self._client is None:
             from openai import OpenAI  # imported lazily so tests stay offline
 
@@ -214,10 +219,39 @@ class LLMClient:
         return self._get_client().chat.completions.create(**request)
 
     def list_models(self) -> list[str]:
-        """Return the model ids advertised by the endpoint, sorted."""
-        response = self._get_client().models.list()
-        ids = [str(_field(item, "id", "")) for item in _field(response, "data", []) or []]
-        return sorted(model for model in ids if model)
+        """Discover model IDs with cached metadata, retries and zero-token logs."""
+        key = make_key({"endpoint": "models", "base_url": self.settings.base_url, "version": 1})
+        cached = self.cache.get(key)
+        self.last_models_cached = cached is not None
+        if cached is not None:
+            self._record_models(cached=True)
+            return list(cached["models"])
+        if self.offline:
+            raise LLMError("offline mode: model-list cache miss")
+        for attempt in range(1, self.max_attempts + 1):
+            try:
+                response = self._get_client().models.list()
+            except Exception as exc:
+                self._record_models(status="error")
+                if attempt >= self.max_attempts or not _is_retryable(exc):
+                    raise LLMError(f"model discovery failed after {attempt} attempt(s)") from None
+                delay = min(self.backoff_cap, self.backoff_base * 2 ** (attempt - 1))
+                self.sleep(delay * (1 + 0.3 * self.jitter()))
+                continue
+            self._record_models()
+            ids = sorted({str(_field(item, "id", "")) for item in _field(response, "data", []) or []} - {""})
+            if not ids:
+                raise LLMError("model discovery returned no model IDs")
+            self.cache.put(key, {"models": ids, "timestamp": utc_now()})
+            return ids
+        raise LLMError("model discovery attempts exhausted")
+
+    def _record_models(self, *, cached: bool = False, status: str = "success") -> None:
+        self.usage_log.append(UsageRecord(
+            timestamp=utc_now(), tag="models", model="model-discovery", thinking=False,
+            prompt_tokens=0, completion_tokens=0, latency_ms=0, cached=cached,
+            status=status, endpoint="models",
+        ))
 
     # ------------------------------------------------------------- interface
 
@@ -230,6 +264,8 @@ class LLMClient:
         tools: Sequence[Mapping[str, Any]] | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
+        reasoning_effort: str | None = None,
+        tool_choice: str | Mapping[str, Any] | None = None,
         tag: str = "",
         use_cache: bool = True,
     ) -> LLMResult:
@@ -244,6 +280,8 @@ class LLMClient:
                 echoed back in subsequent assistant turns when thinking is on.
             temperature: Sampling temperature; omitted when ``None``.
             max_tokens: Completion cap; defaults to 1,024 when ``None``.
+            reasoning_effort: Optional provider thinking effort, included in the cache key.
+            tool_choice: Optional tool selection policy, included in the cache key.
             tag: Free-form label written into the usage log (e.g. ``smoke``).
             use_cache: Retained for compatibility; cache lookup and storage are always enabled.
 
@@ -266,8 +304,11 @@ class LLMClient:
         request["max_tokens"] = max_tokens if max_tokens is not None else 1024
         if tools:
             request["tools"] = list(tools)
-        if not thinking_on:
-            request["extra_body"] = {"thinking": {"type": "disabled"}}
+        if tool_choice is not None:
+            request["tool_choice"] = tool_choice
+        if reasoning_effort is not None:
+            request["reasoning_effort"] = reasoning_effort
+        request["extra_body"] = {"thinking": {"type": "enabled" if thinking_on else "disabled"}}
 
         key = make_key(
             {
@@ -287,6 +328,8 @@ class LLMClient:
             self._record(result, tag=tag or result.tag)
             return result
 
+        if self.offline:
+            raise LLMError("offline mode: completion cache miss")
         self._check_budget(request)
         started = time.monotonic()
         raw = self._call_with_retries(request, tag=tag, thinking=thinking_on)

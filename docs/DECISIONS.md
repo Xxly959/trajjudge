@@ -122,3 +122,31 @@
 **环境**：Python 范围限定为 >=3.11,<3.13，Makefile 默认 3.12。judge/claw 分环境布局和此前确认的 D6 方案保持不变。本轮全新隔离环境使用 uv editable 安装成功，因此撤销固定 pip 绕行；保留旧日志作为历史，不将历史 EEXIST 推广为当前 uv 必然失败。Makefile 的 VENV/PY/UV_CACHE_DIR 可覆盖，默认 uv 缓存在本项目忽略目录。
 
 **验证**：测试增加自动网络阻断；无新增运行时或开发依赖。新环境可联网安装依赖，安装后测试完全离线；另外已验证依赖缓存存在时，新的 venv 能离线完成 Makefile 安装。
+
+
+---
+
+## D11 S2 模型选择与探针范围（2026-11-04）
+
+**背景与证据**：用户本轮明确要求使用 deepseek-flash。先通过统一客户端请求模型列表，实际返回 deepseek-flash、deepseek-v4-pro 后才回填配置。agent/judge 两个角色都记录选择的 ID，尚未执行对应上游接入。
+
+**决定**：只使用 deepseek-flash。S2 为普通对话、thinking off/on 和一次本地工具调用往返，共 5 次 completion；输出上限分别为 64、64、1024、1536、1536。thinking 显式传 enabled/disabled，开启时使用 reasoning_effort=low，所有生成参数与工具策略参与缓存键。工具续答仍携带 tools，并设置 tool_choice=none 限制为一次工具调用；上一轮 reasoning_content 逐字回传。本关不发送故意缺失 reasoning 的负向真实请求，不据此声称验证了供应商错误分支。
+
+**理由**：用最小可检查的固定答案验证接口接通、模式切换及正确的工具往返。低 thinking effort 是成本选择，与默认 high 的差异必须记录；这不是 judge 质量或研究效果证据。
+
+**官方来源**：
+- https://api-docs.deepseek.com/guides/thinking_mode/
+- https://api-docs.deepseek.com/api/create-chat-completion/
+- https://api-docs.deepseek.com/api/list-models/
+
+**缓存与离线**：模型列表是无生成 token 的元数据请求，也在统一封装中缓存、重试并写 usage（endpoint=models）；汇总时单独排除其费用。--offline 禁止创建 SDK/发请求，缓存缺失即失败，load_settings 可在该模式不要求密钥。在线和离线的摘要分别写入不同的本地输出文件，完整结果追加 notes，缓存不入 Git。
+
+---
+
+## D12 S2 价格与成本记法（2026-11-04）
+
+**来源**：https://api-docs.deepseek.com/quick_start/pricing/ ，本轮通过官方页面核实。deepseek-flash 每百万 token 的高峰价格：输入 cache miss $0.30、输入 cache hit $0.006、输出 $1.20；低峰对应 $0.15、$0.003、$0.60。
+
+**决定**：配置保存完整价格信息，现有预算/汇总继续统一按高峰输入 cache miss 与高峰输出价格保守计算，不冒充精确账单，不依赖运行时段或假期判断。供应商原始 usage 保留在本地账本，包括 prompt-cache 明细。探针还加上不超过累计预算的 $0.05 批次预留；运行前打印约 5,000 输入 + 4,224 输出 tokens 的 $0.006569 估算。
+
+**影响**：估算大于实际 token 对应金额不表示计费异常；应清楚标注保守估算。若供应商调整价格，下一次真实批次前重新核实。S2 本次真实 493 输入、69 输出 tokens，保守费用 $0.000231；不将后续缓存回放算作新增模型消费。

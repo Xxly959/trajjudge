@@ -2,7 +2,7 @@
 
 Reliability and prompt-injection audit of LLM graders on agent trajectories.
 
-**Status: phase 1, stage S1 (skeleton).** Stages S2–S7 land incrementally; see
+**Status: phase 1, S1–S2 complete (skeleton and DeepSeek smoke probe).** S3–S7 land incrementally; see
 `notes/log.md` for the per-stage record and `docs/DECISIONS.md` for rationale.
 
 ## What this project studies
@@ -40,12 +40,40 @@ docs/DECISIONS.md  design decisions and their rationale
 make install            # creates .venvs/judge (Python 3.12) and installs this package
 cp .env.example .env    # then put the real DeepSeek key in .env
 make test               # offline
-make smoke              # available after S2; currently the script is not implemented
+make smoke              # bounded DeepSeek probe; uses cached responses when present
+make smoke SMOKE_ARGS=--offline  # replay the complete probe without network access
 ```
 
-Model identifiers are **not** hardcoded. `configs/deepseek.yaml` ships with `null`
-model ids on purpose: run `make smoke`, which lists the models the endpoint actually
-serves, then copy the exact ids into the config.
+The selected model is `deepseek-flash`, confirmed by the endpoint's model list
+on 2026-11-04. Both configured roles use that ID following the user's selection.
+Model IDs live in `configs/deepseek.yaml`, not in Python code. To inspect the
+cached model list or estimate the probe before paid completions:
+
+```bash
+.venvs/judge/bin/python scripts/smoke_llm.py --list-models
+.venvs/judge/bin/python scripts/smoke_llm.py --estimate
+```
+
+The probe runs five completions: plain chat, thinking off, thinking on, a local
+tool request in thinking mode, and a follow-up carrying the unchanged assistant
+`reasoning_content`. Thinking probes use `reasoning_effort="low"`; this is an
+explicit cost choice, different from the provider's default high effort.
+The tool is a deterministic local fixture, not a real weather/search service.
+Only reasoning presence is printed; reasoning text stays in the ignored cache.
+
+Each run prints usage and appends its summary to `notes/log.md`. Local evidence
+is saved as `outputs/smoke/s2.json` (online) and `s2-offline.json` (cache replay).
+Model discovery also uses the shared cache, retry policy and usage log; its
+metadata requests consume zero model tokens and are excluded from costs.
+`--offline` forbids SDK requests and does not require a key. A cache miss fails.
+Caches and usage logs are local ignored data; another clone needs to populate
+or obtain these caches before offline replay.
+
+Prices were checked against the [official pricing page](https://api-docs.deepseek.com/quick_start/pricing/)
+on 2026-11-04. Reports and budget checks use peak input cache-miss/output prices
+($0.30/$1.20 per million tokens), even during off-peak hours or prompt-cache hits.
+The probe has an additional $0.05 reservation within the cumulative $3 budget.
+This is a conservative estimate, not the provider's invoice.
 
 ## Constraints
 

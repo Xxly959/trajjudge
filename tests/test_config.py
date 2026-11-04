@@ -90,3 +90,10 @@ def test_model_for_rejects_unknown_role(settings: Settings) -> None:
     assert settings.model_for("agent") == "agent-test"
     with pytest.raises(ConfigError):
         settings.model_for("grader")
+
+
+def test_offline_settings_do_not_require_key(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    config = _write(tmp_path / "deepseek.yaml", "models:\n  judge: j\n  agent: a\n")
+    result = load_settings(env_file=tmp_path / "missing.env", config_file=config, require_key=False)
+    assert result.api_key == ""
