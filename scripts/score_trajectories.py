@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from trajjudge.adapter import AdaptedTrace, adapt_trace
+from trajjudge.artifacts import artifact_path
 from trajjudge.config import PROJECT_ROOT, ConfigError, load_settings
 from trajjudge.llm import LLMClient, LLMError
 from trajjudge.runner import GRADERS, run_graders
@@ -25,7 +26,8 @@ def load_pilot_traces(path: Path) -> list[AdaptedTrace]:
         raise ValueError("a completed pilot with one to three tasks is required")
     traces: list[AdaptedTrace] = []
     for task in tasks:
-        trace = adapt_trace(Path(task["trial"]["trace"]), sidecar_path=Path(task["sidecar"]))
+        trace = adapt_trace(artifact_path(task["trial"]["trace"], PROJECT_ROOT),
+                            sidecar_path=artifact_path(task["sidecar"], PROJECT_ROOT))
         official = trace.metadata.get("official_result")
         if trace.task_id != task["task_id"] or not trace.metadata["has_trace_end"]:
             raise ValueError("pilot task identity or completion does not match its trace")

@@ -1,296 +1,247 @@
 # trajjudge
 
-Reliability and prompt-injection audit of LLM graders on agent trajectories.
+An open research project on the reliability and prompt-injection resistance of
+LLM graders evaluating agent trajectories. It connects
+[Claw-Eval](https://github.com/claw-eval/claw-eval) traces to
+[OpenJudge](https://github.com/agentscope-ai/OpenJudge) graders.
 
-**Status: phase 1, S1–S5 complete (integration probes, reconnaissance and a two-task Claw-Eval pilot).** S6–S7 land incrementally; see
-`notes/log.md` for the per-stage record and `docs/DECISIONS.md` for rationale.
+**Phase 1 is complete: integration, two real task executions, four graders and a
+[v0 report](reports/phase1.md).** This establishes a reproducible pipeline. It does
+not establish judge reliability, agreement with humans, stability or injection
+resistance. Human annotation and those experiments remain future work.
 
-## What this project studies
+## Research questions
 
-Given agent trajectories produced by [Claw-Eval](../claw-eval), how trustworthy are
-the verdicts of [OpenJudge](../OpenJudge) graders that are supposed to score them?
+1. **Agreement:** how do trajectory graders compare with benchmark rubric scores
+   and, after human annotation, human judgments?
+2. **Stability:** how much do judgments vary across repeated evaluations?
+3. **Injection resistance:** can instructions embedded in trajectory content
+   change a judge's verdict?
 
-Three research questions drive phase 1:
+Phase 1 prepares evidence for these questions; it does not answer them from two
+examples. No human labels, stability runs or injection experiments were generated.
 
-1. **Agreement** — how closely do LLM trajectory graders track the benchmark's own
-   scores (and, in phase 2, human labels)?
-2. **Stability** — does the same grader return the same verdict on repeated runs?
-3. **Robustness to injection** — do instructions embedded in tool output or task
-   fixtures move the score?
+## Pipeline
 
-Phase 1 only connects the pipeline end to end and publishes a v0 report; stability
-and injection experiments are phase 2.
-
-## Layout
-
+```mermaid
+flowchart TD
+    A[Claw-Eval: two tasks, one trial each] --> B[Native traces and framework scores]
+    A --> C[Actual request sidecars with system text]
+    B --> D[Adapter: OpenAI messages and full source metadata]
+    C --> D
+    D --> E[OpenJudge Accuracy and Comprehensive]
+    D --> F[Action loop and Observation gain rules]
+    E --> G[Per-trace grader JSONL]
+    F --> G
+    B --> H[v0 report: scores, costs and limitations]
+    G --> H
+    I[Shared DeepSeek client: retries, timeout, budget, cache, usage] --> A
+    I --> E
+    I --> H
 ```
-src/trajjudge/     config, unified LLM client (cache + retries + usage), adapter, runner
-configs/           DeepSeek endpoint, pricing table, (later) Claw-Eval overrides
-scripts/           smoke probe, phase-1 entry point, report generator
-tests/             offline suite; every LLM call is mocked
-samples/           small fixtures such as the OpenJudge weather trajectory
-data/              local, git-ignored working data
-notes/log.md       per-stage command log (Chinese)
-docs/DECISIONS.md  design decisions and their rationale
-```
 
-## Quickstart
+Live execution routes every model role through the shared client. `make phase1`
+replays the OpenJudge calls from cache, runs the rules locally and regenerates
+the report. It never reruns Claw-Eval or falls back to a paid request.
+
+## Setup and offline tests
+
+Use macOS, uv, and sibling source checkouts. Clone this repository as
+`agent-eval/my-project/`, with `agent-eval/OpenJudge/` and
+`agent-eval/claw-eval/` beside it. The audited commits are:
+
+| Dependency | Commit |
+| --- | --- |
+| OpenJudge | `7d27246484e91c6ed4a349b6ebe7bd4629d9378f` |
+| Claw-Eval | `5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7` |
+
+For **new dependency clones**, the commands below use the audited OpenJudge
+checkout's recorded source URL. Verify existing upstream versions without
+changing those checkouts.
 
 ```bash
-make install            # creates .venvs/judge (Python 3.12) and installs this package
-make install-openjudge  # editable upstream install, with build output kept in this project
-cp .env.example .env    # then put the real DeepSeek key in .env
-make test               # offline
-make smoke              # bounded DeepSeek probe; uses cached responses when present
-make smoke SMOKE_ARGS=--offline  # replay the complete probe without network access
+# From agent-eval/, after cloning this repository as my-project/:
+git clone https://github.com/Xxly959/OpenJudge.git OpenJudge
+git -C OpenJudge checkout 7d27246484e91c6ed4a349b6ebe7bd4629d9378f
+git clone https://github.com/claw-eval/claw-eval.git claw-eval
+git -C claw-eval checkout 5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7
+cd my-project
+make install
+make install-openjudge
+make test
+make secrets
 ```
 
-The selected model is `deepseek-flash`, confirmed by the endpoint's model list
-on 2026-11-04. Both configured roles use that ID following the user's selection.
-Model IDs live in `configs/deepseek.yaml`, not in Python code. To inspect the
-cached model list or estimate the probe before paid completions:
+Installation may need network access for Python/packages. Once installed,
+`make test` is offline, blocks sockets and mocks all LLM replies. Tests need the
+sibling source checkouts, but no API key, prior outputs or Docker daemon.
+They include two anonymized real-run structural goldens and native OpenJudge
+integration with synthetic provider replies.
+
+Python support is `>=3.11,<3.13`; Make selects 3.12. `.venvs/judge` holds this
+package and editable OpenJudge. `.venvs/claw` holds Claw host dependencies; these
+environments are separate. The OpenJudge installer redirects build/egg metadata
+into this project's cache and verifies upstream file hashes before/after.
+Make exports `PYTHONDONTWRITEBYTECODE=1` to prevent bytecode writes upstream.
+NumPy/pandas/SciPy/scikit-learn are OpenJudge runtime requirements; no training
+extras or report-specific dependency was added.
+
+## Rebuild the report offline
+
+With the original local evidence and cache present:
 
 ```bash
-.venvs/judge/bin/python scripts/smoke_llm.py --list-models
-.venvs/judge/bin/python scripts/smoke_llm.py --estimate
+make phase1
 ```
 
-The probe runs five completions: plain chat, thinking off, thinking on, a local
-tool request in thinking mode, and a follow-up carrying the unchanged assistant
-`reasoning_content`. Thinking probes use `reasoning_effort="low"`; this is an
-explicit cost choice, different from the provider's default high effort.
-The tool is a deterministic local fixture, not a real weather/search service.
-Only reasoning presence is printed; reasoning text stays in the ignored cache.
+This writes `outputs/grades/s6-offline.jsonl`, its replay summary, full adapted
+snapshots and `reports/phase1.md`. It needs neither credentials nor Docker and
+makes zero network requests. Missing cache entries, invalid verdicts or unknown
+accounting return nonzero. A failed command has not refreshed the report; inspect
+its partial/error output instead of relying on an older Markdown file.
 
-Each run prints usage and appends its summary to `notes/log.md`. Local evidence
-is saved as `outputs/smoke/s2.json` (online) and `s2-offline.json` (cache replay).
-Model discovery also uses the shared cache, retry policy and usage log; its
-metadata requests consume zero model tokens and are excluded from costs.
-`--offline` forbids SDK requests and does not require a key. A cache miss fails.
-Caches and usage logs are local ignored data; another clone needs to populate
-or obtain these caches before offline replay.
+The committed report is readable in a source-only clone. Regenerating the real
+report also requires these ignored local trees; mocked fixtures cannot replace
+the actual experiment and its paid ledger:
 
-Prices were checked against the [official pricing page](https://api-docs.deepseek.com/quick_start/pricing/)
-on 2026-11-04. Reports and budget checks use peak input cache-miss/output prices
-($0.30/$1.20 per million tokens), even during off-peak hours or prompt-cache hits.
-The probe has an additional $0.05 reservation within the cumulative $3 budget.
-This is a conservative estimate, not the provider's invoice.
+```text
+outputs/claw_eval/s5/       native traces, sidecars and completed pilot manifest
+outputs/usage/             original append-only usage ledger
+.cache/llm/                complete provider-response cache
+```
 
-## Constraints
-
-- One provider only (DeepSeek). Cross-provider claims are out of scope for phase 1.
-- No upstream forks: `../claw-eval` and `../OpenJudge` are read-only dependencies.
-- Costs are tracked per call in `outputs/usage/usage.jsonl`; the phase-1 budget is
-  roughly USD 3.
-
-
-## S1 safeguards and current limits
-
-Python 3.11–3.12 is supported; `make install` selects Python 3.12 and uses uv
-for the isolated editable installation. The uv cache defaults to `.cache/uv`;
-set `UV_CACHE_DIR` to override it. Judge and Claw-Eval environments stay separate.
-No runtime dependency was added by the S1 repair.
-
-Every completion checks the disk cache first, including calls with the legacy
-`use_cache=False` argument. Cache format v2 includes the endpoint and all request
-parameters. Existing v1 cache files are not reused. Cache hits need no pricing
-lookup or SDK creation. S6/S7 will add the complete offline report pipeline;
-`make phase1` remains a stage placeholder today.
-
-Before a paid completion, the client requires verified model prices and checks
-the cumulative USD 3 budget. It reserves all configured attempts using a
-conservative estimate (serialized UTF-8 request bytes plus 4,096 input tokens,
-and `max_tokens`, default 1,024, for output). This is an engineering estimate,
-not a provider billing guarantee. Execution must be serial; parallel processes
-must not share this budget ledger. Batch estimates will still be presented for
-approval at the relevant gate. SDK retries are disabled; the wrapper owns retries.
-
-Usage is logged before response parsing or cache writes. Raw provider usage is
-preserved, including cache/reasoning details when present. Input cost currently
-uses the configured input price for all input tokens, a conservative estimate
-when the provider discounts prompt-cache hits. It is not an exact invoice.
-Failed attempts are recorded separately. Unknown billing, a corrupt ledger, or
-a `.pending` accounting marker blocks new paid completions; reconcile with the
-provider before resuming, rather than deleting records to bypass the guard.
-Cache hits remain available. A full disk cannot guarantee a usage-log write;
-the pending marker prevents silently continuing after that failure.
-
-`make test` blocks network connections and mocks all LLM responses. `make secrets`
-checks both staged blobs and nonignored working files, including `.env.example`.
-Run it immediately before every commit. Checks report paths only, never values.
-
-
-## OpenJudge weather smoke (S3)
-
-After `make install-openjudge`, run:
+For local backup and restore into a fresh checkout:
 
 ```bash
+tar -czf /tmp/trajjudge-phase1-local.tgz outputs/claw_eval/s5 outputs/usage .cache/llm
+# In the fresh my-project/, after installing its environment:
+tar -xzf /tmp/trajjudge-phase1-local.tgz
+make phase1
+```
+
+Keep this bundle local: it contains raw trajectory/model content and is not a
+publication artifact. `.env` is excluded. Legacy absolute manifest paths resolve
+under the current checkout's `outputs/`, without falling back to another working
+tree. Cache keys retain original messages, endpoint, model and parameters.
+The report uses original paid timestamps and usage, so repeated replay leaves
+its Markdown byte-identical. To render existing scores without grader replay:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 .venvs/judge/bin/python scripts/report.py
+```
+
+## Reproduce live integration
+
+These commands incur usage. The total phase-1 budget is USD 3; batch estimates
+and smaller reservations apply inside that ceiling. Create `.env` from the
+example only if absent, then edit `DEEPSEEK_API_KEY` locally. Never print its
+contents or put the key in a shell command. All model calls use
+`https://api.deepseek.com` through the shared client.
+
+```bash
+cp -n .env.example .env
+# Edit .env locally.
+make smoke SMOKE_ARGS=--list-models
+make smoke SMOKE_ARGS=--estimate
+make smoke
 make smoke-openjudge OPENJUDGE_ARGS=--estimate
 make smoke-openjudge
-make smoke-openjudge OPENJUDGE_ARGS=--offline
-```
-
-The fixture in `samples/weather.json` is copied exactly from the
-`TrajectoryAccuracyGrader` example in the upstream agent-graders documentation.
-`samples/weather-score.json` records the real smoke result, usage, requested
-thinking mode, observed request parameters, and upstream commit. An offline
-replay writes `outputs/openjudge/weather-score-offline.json`, preserving the
-original online evidence. These are toy documentation examples, not human labels
-or evidence of judge reliability.
-
-The native `OpenAIChatModel` accepts explicit `api_key`/`base_url` or reads
-`OPENAI_API_KEY`/`OPENAI_BASE_URL`. We pass the project settings explicitly;
-`extra_body={"thinking": {"type": "disabled"}}` travels through its native chat
-method and the OpenAI SDK. Its SDK HTTP transport delegates to the shared
-`LLMClient`, so cached and paid OpenJudge calls use the existing accounting,
-retry and budget controls. Only serial non-streaming completions are supported;
-unknown request parameters fail rather than disappear.
-
-The grader normally asks the SDK for JSON Schema structured output. DeepSeek's
-[documented response format](https://api-docs.deepseek.com/api/create-chat-completion/)
-is JSON object output. A project-local subclass selects `json_object` and validates
-the parsed object against the original upstream callback schema. Prompts, grader
-logic and upstream files are preserved; this response-format adaptation is an
-explicit runtime difference. No additional live negative Schema request was made.
-
-OpenJudge's declared runtime dependencies include pandas, NumPy, SciPy and
-scikit-learn; they are installed only in the judge environment. No training or
-development extras are installed. The installer first installs those dependencies,
-then builds the editable upstream package alone with metadata/build directories
-redirected to `.cache/openjudge-build`. It checks upstream file hashes before and
-after installation. `PYTHONDONTWRITEBYTECODE=1` keeps imports from writing bytecode
-into the read-only source; Makefile targets export it automatically.
-
-
-## Claw-Eval reconnaissance (S4)
-
-See [the reconnaissance report](notes/claw_eval_recon.md) for source-backed config,
-CLI, sandbox, trace and scoring details. No Claw-Eval tasks or Docker services
-were run in S4. The proposed S5 pilot is two general text tasks,
-`T010_contact_lookup` and `T002_email_triage`, with one trial and one worker.
-Their required local fixtures exist; attachment tasks with missing files were
-excluded from this proposal.
-
-Native endpoint configuration supports DeepSeek, but native execution still
-needs the project's cache, accounting and budget integration before a paid run.
-The report includes command shapes for review, not a ready-to-run paid pipeline.
-Agent thinking can be disabled in config; native Claw-Eval judge thinking stays
-on under the earlier decision. The proposal requires user confirmation at the
-S4 gate, with costs estimated at $0.03–$0.10 and a $0.75 batch reservation within
-the overall $3 budget. These are estimates, not measured Claw-Eval results.
-
-
-## Two-task Claw-Eval pilot (S5)
-
-Use the independent Claw environment and the unmodified upstream source:
-
-```bash
 make install-claw
-rtk proxy docker build -f ../claw-eval/Dockerfile.agent -t trajjudge-claw-agent:s5 ../claw-eval
+docker build -f ../claw-eval/Dockerfile.agent -t trajjudge-claw-agent:s5 ../claw-eval
 make claw-preflight
 make claw-pilot
+make score-trajectories
+make score-trajectories SCORE_ARGS=--run
+make phase1
 ```
 
-The installer reads the upstream host requirements into `.venvs/claw`; it does
-not install OpenJudge or build the upstream package. The launcher supplies
-read-only source paths so English graders can locate their peer graders.
-It safely loads `.env`, validates all model endpoints and the reviewed upstream
-commit, checks fixtures/ports, and checks a disposable Docker sandbox.
-Only `T010_contact_lookup` and `T002_email_triage` are permitted, one trial each,
-with one spawn worker. Existing `outputs/claw_eval/s5/pilot.json` blocks an extra
-run or overwrite. The default script invocation prints an estimate only.
+`deepseek-flash` was discovered on 2026-11-04 and selected by the user. Verify
+model discovery before a new experiment; IDs live in `configs/deepseek.yaml`.
+S2 probes plain chat, thinking off/on and a thinking-mode tool round trip carrying
+the exact assistant `reasoning_content`. Thinking probes use explicit low effort
+to bound cost. Only reasoning presence is printed; text stays in the ignored cache.
+The S3 weather fixture matches OpenJudge's documented example exactly; its score
+is a connectivity result, not a research label.
 
-Outputs remain local and ignored:
+The bounded pilot permits only `T010_contact_lookup` and `T002_email_triage`,
+one trial each, one spawn worker and the original Docker sandbox/mock services.
+It validates commit/config/fixtures/ports and preserves native message conversion,
+task execution and rubric graders, including direct `judge.client` calls.
+These tasks do not use a simulated-user model. A completed `pilot.json` prevents
+an accidental rerun; existing S6 online output similarly prevents another paid
+batch. Default pilot/scoring script invocations estimate only. See the
+[read-only reconnaissance](notes/claw_eval_recon.md) for source-backed details.
 
-- `outputs/claw_eval/s5/pilot.json`: results, trace paths, image ID, config/pricing
-  hashes, upstream commit, cost ledger summary and runtime differences.
-- Per-task native `batch_results.json`, `batch_summary.json` and JSONL traces.
-- Per-task `s5_sidecar/requests.jsonl`: exact model request bodies, actual trace ID,
-  system prompt, mode, response usage and cache status; no authentication headers.
+## Measurements and contracts
 
-The project-local worker bindings preserve native message conversion, response
-parsing, task execution and graders. They route both agent calls and direct
-`judge.client` calls through the shared client. Agent thinking is disabled and
-output is capped at 1,024 tokens; native judge thinking remains enabled at default
-effort, with its 8,192-token cap. A local non-streaming transport and 60-second
-network timeout replace upstream streaming/300-second timeout and layered retries.
-The shared client permits at most three attempts. Each task has its original
-agent turn limit and at most one logical judge request. Input is never truncated;
-requests above the conservative 48k input estimate are rejected. This threshold
-was raised from the provisional S4 value because the native tool schema alone
-made first-request estimates exceed 22k. The $0.75 batch reservation and $3 stage
-budget remain in force and may stop a task early.
+The [v0 report](reports/phase1.md) contains two trajectories and eight verdicts.
+Phase 1 used 19 actual completion attempts, 54,064 input and 2,874 output tokens,
+with conservative peak-price cost **$0.019668**. Report replay adds zero paid calls.
 
-On a fatal guard or request error, `S5Stop` bypasses upstream broad retry handlers
-while context managers clean resources. A stopped trace may be incomplete;
-sidecars and the pilot manifest mark that failure rather than manufacture a score.
-All runtime differences are recorded. These are DeepSeek re-runs of framework
-rubrics in mock environments, not leaderboard-comparable Gemini/Claude results.
-No human labels, repeated-trial stability tests or new injection variants were made.
+| Grader | Scale | Model / native setting |
+| --- | --- | --- |
+| TrajectoryAccuracyGrader | 1–3 | DeepSeek Flash, thinking off, output cap 1,024 |
+| TrajectoryComprehensiveGrader | 0–1 | DeepSeek Flash, thinking off, output cap 3,072 |
+| ActionLoopDetectionGrader | 0–1 | No model, similarity threshold 1.0 |
+| ObservationInformationGainGrader | 0–1 | No model, similarity threshold 0.5 |
 
-Observed one-run pilot: T010 score 0.8040, T002 score 0.8500. Nine paid completions
-used 38,728 input and 2,161 output tokens; the peak-price conservative estimate
-is $0.014212. This is connectivity evidence from two tasks, not a reliability
-or model-benefit result. See `notes/log.md` for the measured breakdown.
+The adapter preserves every original event/sidecar in metadata, maps assistant
+calls and tool IDs exactly, and retains reasoning text. Tool names are joined by
+ID; system text comes from matching real request sidecars. Unsupported semantic
+content prevents scoring. Final native `grading_result` supplies the framework
+score; all grading history remains. TraceEnd default scores are not labels.
+Each grader row includes trace ID, grader, score, reason, model/thinking,
+OpenJudge commit, timestamp, usage and provenance. Rules have null model/thinking
+and zero usage. Errors have null scores. Full metadata snapshots are referenced
+by the rows. Goldens under `tests/fixtures/claw_s5/` use independent native SDK
+messages; IDs, addresses, phones and host paths are redacted with provenance.
+They test structure only; paid scoring uses original local traces.
 
-## Trajectory adaptation and four graders (S6)
+## Safeguards and limitations
 
-After the completed S5 pilot, install OpenJudge in the judge environment and run:
+- One provider, two tasks and one trial cannot establish human agreement,
+  statistical correlation, stability, injection resistance or model benefit.
+- Framework scores use native task rubrics with DeepSeek replacing benchmark
+  Gemini/Claude roles; they are not leaderboard-comparable official labels.
+- S5 agent thinking is off/output cap 1,024; its framework judge keeps default
+  thinking on/cap 8,192. OpenJudge thinking is off. Non-streaming IO, 60-second
+  timeout, controlled retries and a 48k conservative input-estimate guard differ
+  from native execution. Inputs are not truncated; full deviations are in the report.
+- OpenJudge's native model supports API key/base URL and `extra_body`. Our local
+  subclass replaces JSON Schema requests with DeepSeek JSON-object output and
+  original-schema validation before callbacks, through the shared SDK transport.
+  Upstream prompts/formulas/files are preserved; this is an explicit runtime change.
+- Comprehensive counts assistant tool-call batches (2/3), not individual calls
+  (2/8). Its four raw dimensions are 1–5, normalized overall to 0–1. Its native
+  prompt excludes system text, so its score cannot establish system compliance.
+- Both rules use Jaccard word overlap, not semantic correctness or useful
+  information gain. Native Accuracy clamping and Comprehensive empty-step fallback
+  are guarded by raw score/schema checks, full step coverage and output completion.
+- The shared client owns 429/5xx/timeout backoff, timeout, disk cache and per-attempt
+  usage. SDK retries are disabled. Execution is serial; concurrent experiments
+  must not share a budget ledger. Unknown usage, corrupt ledgers or pending
+  accounting blocks new paid calls and prevents a complete-cost report.
+- Cache keys include endpoint, model, messages, tools, thinking, output format and
+  supported parameters. Cache is checked first; offline misses fail without an
+  endpoint fallback. Cached logical tokens are not counted as new spending.
+- Costs use [verified peak/cache-miss prices](https://api-docs.deepseek.com/quick_start/pricing/)
+  from 2026-11-04, not an exact invoice. Raw usage retains provider cache/reasoning
+  details. Verify prices before future paid work.
+- Original safety fixtures were retained, with no new attack payload, manual label,
+  stability experiment or injection variant added in phase 1.
+- Raw evidence/caches, venvs and `.env` stay ignored. `make secrets` checks staged
+  blobs and nonignored files, reports paths only and must pass before every commit.
+  Project commands do not modify the upstream source files.
 
-```bash
-make score-trajectories                     # estimate only; no network
-make score-trajectories SCORE_ARGS=--run    # one reviewed scoring batch
-make score-trajectories SCORE_ARGS=--offline
-make test                                  # network blocked; model replies mocked
+## Files
+
+```text
+src/trajjudge/       shared IO, adapter, native bridges, runner and reporting
+configs/            endpoint/model/thinking, pricing and Claw-Eval overrides
+scripts/            installers, probes, bounded pilot, scoring and report
+tests/              offline mocked tests and anonymized real structural goldens
+samples/            official weather example and recorded smoke verdict
+reports/phase1.md    generated v0 report
+notes/log.md        gate-by-gate commands/results in Chinese
+docs/DECISIONS.md   design decisions, deviations and rationale
 ```
-
-The command reads `outputs/claw_eval/s5/pilot.json` and the original traces and
-request sidecars. It requires completed traces, matching task identities and
-framework scores, and actual system text. An existing `outputs/grades/s6.jsonl`
-blocks another paid batch. Offline replay requires the local response cache;
-missing entries cause errors without opening a network connection. Online and
-offline outputs have separate filenames and usage summaries.
-
-`adapter.py` maps native text/tool blocks to OpenAI messages, preserves assistant
-tool calls and reasoning content, and requires unique tool IDs with exactly one
-linked result each. Tool names are joined by ID for the comprehensive grader.
-Every original event and sidecar row remains in metadata, with an event-to-message
-map and explicit unsupported-content flags. Unsupported semantic content prevents
-scoring. Missing system text is marked, never invented; S5 sidecars supply it.
-The latest `grading_result` supplies the framework result, with the full grading
-history retained. Default scores in `trace_end` are not used as labels.
-
-`runner.py` runs native OpenJudge graders serially:
-
-| Grader | Scale | Model calls per trace | Settings |
-| --- | --- | --- | --- |
-| TrajectoryAccuracyGrader | 1–3 | 1 | DeepSeek Flash, thinking off, output cap 1,024 |
-| TrajectoryComprehensiveGrader | 0–1 | 1 | DeepSeek Flash, thinking off, output cap 3,072 |
-| ActionLoopDetectionGrader | 0–1 | 0 | Native similarity threshold 1.0 |
-| ObservationInformationGainGrader | 0–1 | 0 | Native similarity threshold 0.5 |
-
-Each JSONL row includes trace ID, grader, score, reason, judge model/thinking
-(`null` for rules), OpenJudge commit, timestamp, usage and provenance. Full adapted
-traces are in `outputs/grades/adapted/`; score rows reference them. Usage separates
-logical cached tokens from newly billed tokens. Each result is flushed immediately;
-transport or accounting failures stop the batch after an explicit error record.
-Invalid, incomplete or truncated verdicts have `status=error` and `score=null`.
-
-The comprehensive grader defines a step as an assistant message containing one
-or more tool calls: these traces have 2 and 3 steps, with 2 and 8 individual calls.
-Step indices must cover the entire native step sequence exactly once. Its raw
-four dimensions use 1–5; upstream normalization yields the 0–1 overall score.
-The local model subclass validates the upstream schema **before** its callback,
-preventing invalid step data from becoming a numeric zero. Raw accuracy values
-are also checked before accepting upstream score clamping. Native comprehensive
-prompt extraction excludes system text; that grader cannot assess compliance with
-the original system instructions from these prompts alone. The two rules use word
-overlap/Jaccard, so their scores are lexical diagnostics rather than semantic or
-task-success labels. Scales and rubrics differ from the Claw-Eval framework score.
-
-Two anonymized real-run goldens live under `tests/fixtures/claw_s5/`. Expected
-messages come from native SDK request conversion, independently of the adapter.
-`provenance.json` records source hashes and redactions. The fixtures replace IDs,
-email addresses, phone numbers, host paths and localhost hosts consistently.
-They test structure only and are not human labels; paid scoring uses the original
-local traces. No dependency was added for S6. The v0 report remains the S7 gate.

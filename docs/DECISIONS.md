@@ -250,3 +250,27 @@
 **step定义与局限**：Comprehensive按assistant含tool_calls的一整轮计step，不按单个工具调用；T010为2轮/2调用，T002为3轮/8调用，要求覆盖索引0..N-1。其四维raw分1–5，整体由原生公式归一化0–1；Accuracy为1–3，不能直接和Claw task_score求差。原生Comprehensive提取提示时丢弃system文本，故该分不能证明system遵从；原始system仍保留在adapter与metadata。两个规则使用Jaccard词重叠与原生threshold1.0/0.5，不代表语义信息增益或任务正确性。
 
 **预算**：4次真实completion预计30000输入、8192输出上限，峰值估算$0.018831；批次预留$0.15且累计不超$3，每请求仍预留重试费用。实际14339输入+606输出，4次请求、无重试，保守费用$0.005029；阶段累计54064输入+2874输出、$0.019668。S6输出已存在则拒绝再次付费执行，--offline复用响应缓存。只完成S6，不提前创建S7报告或阶段二实验。
+
+---
+
+## D21 S7 离线回放后生成确定性 v0 报告（2026-11-04）
+
+**授权与取舍**：用户在S6完成后“继续”，按原始S7计划完成报告与验收。沿用当前已确认的工作目录/分关单提交约定，不额外切换分支或要求重复批准。选择先用同一请求参数从缓存重放原生四grader，再报告；不只复制旧分数文件，不使用脱敏golden替代实验，不新增真实模型调用。直接scripts/report.py保留为仅渲染已有分数的入口。
+
+**报告契约**：按native TraceStart真实UUID连接manifest/原生grading_result/四grader行，每条pilot轨迹始终保留一行。重复/外来/冲突provenance拒绝；缺失或错误分数显示MISSING/ERROR并使报告INCOMPLETE，不替换为0、不从分母删掉。表中保留各自量纲，Claw列明确是本次DeepSeek重跑的框架分，不称榜单官方Gemini/Claude标签；不计算小样本相关性或人工一致性。
+
+**成本与确定性**：费用只由共享账本非cached completion计算，模型发现排除；原始paid usage可按S2/S3/S5 agent/S5 judge/S6区分。缺账本直接失败；未知价格/usage或.pending记账标记使总额UNKNOWN、状态不完整，不能冒充0费用。表中分组独立向上取六位，阶段总额从未四舍五入的明细独立计算，不能简单求已取整行之和。报告时间与digest来自原始paid证据，排除不断变化的缓存回放时间/重复账本行；因此同一证据重复make phase1内容一致。用临时文件后原子替换报告；命令非零时旧报告不当作本次成功证据。
+
+**实现边界**：scripts/run_phase1.py只启动score_trajectories.py --offline与report.py，遇非零停止，无付费回退、无Claw重跑；schema/step不合格仍保留S6错误行。本关只用标准库与现有usage/YAML模块，不新增依赖。README重写目标/三问/Mermaid/固定commit/独立venv/离线和live区别/局限。
+
+## D22 S7 可迁移证据与干净克隆验收（2026-11-04）
+
+**路径修正**：S5原始manifest有绝对路径，直接复制到另一工作树会读取旧位置。新增本地artifact_path仅把outputs后的路径映射到当前项目；当前副本缺失即拒绝，不回退旧工作区，即使旧文件仍存在；符号链接逃逸也拒绝。评分缓存输入保持原文，metadata记录新的本地位置和相同源hash，不改原始trace/sidecar或上游。
+
+**可复现边界**：源码克隆可在装好依赖后离线make test，无.env、原始输出或Docker需求；实际报告重建另需本地S5 rawtrace/sidecar/manifest、原始usage账本、完整.cache/llm三者一起恢复。README给本地备份/新目录恢复命令，不把raw模型文本/响应缓存作为公开Git产物。只有脱敏结构golden和不含原文的数值报告入库。
+
+**验收设计**：在.cache/s7-validation创建不带.env/.venvs/outputs的新Git克隆，覆盖待提交S7文件；两个上游为相同固定版本的只读源码链接。创建全新judge venv、按README安装并跑测试，再只恢复必要证据/缓存，禁socket且去除密钥后make phase1。uv离线安装首次因缓存缺pytest包失败；安装允许访问包索引，不谎称安装离线，离线要求覆盖安装完成后的测试与报告回放。最终结果见notes/log.md。
+
+**S7 审查修复补充**：独立只读审查发现混合model/thinking能被接受、NaN错误分数使digest失败两项P2。先增加7个失败回归，再拒绝混合模型/思考配置与非已审定thinking-off设置；成功模型行须匹配原始s6账本tag/model/thinking/token证据。非有限分在表中继续为ERROR，只在digest编码时转为明确invalid_nonfinite标记，不改分数、不放宽断言。完整104项测试及24项S7定向测试通过。
+
+**S7 实测验收补充**：新克隆新venv测试104 passed（无.env、无outputs、禁socket）；安装上游676个文件前后delta=0。恢复三类本地证据而不恢复已有scores/报告后，禁socket/无密钥make phase1成功；每次4缓存命中、0新增模型请求。重复和跨目录报告SHA-256相同，缺缓存exit2并保留1条error/null行，不更新旧报告或请求网络。阶段19次真实completion、54064输入/2874输出、保守总额$0.019668保持不变。

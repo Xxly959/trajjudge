@@ -1008,3 +1008,113 @@ $ rtk proxy git -C ../claw-eval status --short
 ```
 
 独立只读代码审查无重要发现；审查另跑adapter/runner 17项测试全部通过，未访问密钥或发真实请求。提交仅包含本关明确路径；.env、outputs、响应缓存未暂存。S6结束，等待用户“继续”进入S7生成v0报告。
+
+## S7：报告 v0、离线重建与复现验收（2026-11-04）
+
+**授权与范围**：用户在S6之后“继续”。按阶段一原计划完成report.py、README、make phase1接线与验收，不做人工标注、稳定性/注入实验或新的真实模型调用；一个关卡一个commit。实现计划保存于docs/superpowers/plans/2026-11-04-phase1-closeout.md，设计理由见D21/D22。
+
+**实现**
+
+- scripts/run_phase1.py强制score_trajectories.py --offline，然后report.py；缺缓存/失败即停止，无付费回退、不重跑Claw。报告模块只用标准库与既有usage/YAML代码，不新增依赖。
+- 按native TraceStart UUID/最终grading_result校验manifest和grader行，保留每条轨迹，缺失/错误显示MISSING/ERROR而不是0；错配/重复/外来行拒绝。LLM行核对原始usage tag/model/thinking/token，不混合模型/思考配置。
+- 成本只计算原账本非cached completion；缺账本拒绝，unknown价格/usage/pending记账产生UNKNOWN/INCOMPLETE。报告保留原始paid时间与稳定digest，排除重复回放日志的变动。
+- S5绝对路径重定位到当前outputs，缺失本地文件不回退旧位置，符号链接逃逸拒绝。原trace和缓存输入不改；因此恢复到新克隆仍能命中真实cache。
+- README重写为目标、三问、Mermaid流水线、上游固定提交、独立uv环境、offline/live复现步骤、证据备份恢复和局限。reports/phase1.md每条真实轨迹一行，保留四grader原量纲，Claw分明示DeepSeek框架重跑、非榜单官方标签。
+
+**测试与审查过程**
+
+```text
+$ rtk proxy env PYTHONDONTWRITEBYTECODE=1 .venvs/judge/bin/python -m pytest tests/test_reporting.py tests/test_phase1.py -q
+14 failed  # 实现前，缺reporting模块/phase1入口
+14 passed  # 首轮实现后
+
+$ rtk proxy env PYTHONDONTWRITEBYTECODE=1 .venvs/judge/bin/python -m pytest tests/test_artifacts.py tests/test_reporting.py -q
+1 failed  # 新增pending记账回归先复现报告错误complete
+# 修正pending后，S7定向17项通过。
+
+# 独立只读审查发现两个P2：混合model/thinking被接受；NaN让digest编码失败。
+$ rtk proxy env PYTHONDONTWRITEBYTECODE=1 .venvs/judge/bin/python -m pytest tests/test_reporting.py -q
+7 failed  # 新增model/思考模式/账本不匹配与NaN/Inf回归，先RED
+
+$ rtk proxy env PYTHONDONTWRITEBYTECODE=1 .venvs/judge/bin/python -m pytest tests/test_reporting.py tests/test_phase1.py tests/test_artifacts.py -q
+24 passed  # 修复后GREEN，不放宽断言、不删除测试
+
+$ rtk proxy make test
+104 passed in 4.18s
+```
+
+**干净克隆验证**
+
+- 用git clone --no-hardlinks在.cache/s7-validation/agent-eval/my-project创建独立源码克隆，再覆盖待提交S7文件。初始无.env、.venvs或outputs；两个固定commit上游通过只读源码链接复用，没有修改。验证的是新的项目源码/venv，不声称另外下载了全新的上游仓库。
+- 首次UV_OFFLINE=1 make install因本地pytest wheel未缓存而失败；正常make install访问包索引成功。安装联网属于环境准备，未发LLM请求。fresh环境Python3.12.13、OpenAI SDK3.45.0、pytest9.2.0；当前原环境SDK3.42.1，两个环境都验证。
+- make install-openjudge成功，editable路径指向真实上游；676文件指纹delta=0。无Claw包安装进judge环境。
+
+```text
+# cwd=.cache/s7-validation/agent-eval/my-project
+$ rtk proxy make install
+Installed 21 packages (new judge venv)
+
+$ rtk proxy make install-openjudge
+Installed upstream runtime dependencies and editable py-openjudge
+Upstream file delta: 0 (676 files verified)
+
+$ rtk proxy env -u DEEPSEEK_API_KEY -u DEEPSEEK_BASE_URL PYTHONPATH=/Users/x/agent-eval/my-project/.cache/s7-validation/no-network make test
+104 passed in 32.35s
+
+# sitecustomize在每个Python进程禁connect/connect_ex/create_connection/getaddrinfo；
+# 无.env，仍无原始outputs；测试的LLM均mock，不需要Docker。
+```
+
+随后只复制outputs/claw_eval/s5、outputs/usage、.cache/llm；不复制已有outputs/grades，并删除这个临时克隆的旧reports/phase1.md。原仓库原始数据不删除/改写。
+
+```text
+# cwd=.cache/s7-validation/agent-eval/my-project；同一禁网环境，仍无.env
+$ rtk proxy env -u DEEPSEEK_API_KEY -u DEEPSEEK_BASE_URL PYTHONPATH=/Users/x/agent-eval/my-project/.cache/s7-validation/no-network make phase1
+status=complete
+batch_usage: calls=4 cached_calls=4 prompt_tokens=0 completion_tokens=0 cost_usd=0
+Report complete: .../reports/phase1.md
+
+# 临时校验脚本重复make phase1，并在临时克隆移走.cache/llm复现cache miss，
+# finally恢复后重跑；主工作区也在禁网环境重建。只操作临时派生产物。
+report_reconstructed_from_cache=true
+repeated_report_byte_identical=true
+cross_checkout_report_byte_identical=true
+new_actual_completions=0
+cache_hits_per_replay=4
+cache_miss_exit_code=2
+cache_miss_error_rows=1  # status=error, score=null
+cache_miss_report_not_overwritten=true
+report_sha256=1eb5ca65ba3b7654353451bacebef97a12fe616574962556c163345869abd0b8
+cumulative_cost_usd=0.019668
+```
+
+校验完整结果存outputs/verification/s7.json；详细派生命令输出在.cache/s7-validation/*.log。本关0新增付费调用；阶段仍19次真实completion、54064输入+2874输出=56938 tokens，保守费用$0.019668/$3。表格行各自向上取整，与从未取整明细计算的总额可能有末位差，报告已说明。
+
+**未解决边界**：单一供应商/2任务/1trial，不证明评分可靠性或一致性；没有人工标签。Claw框架本次分数与榜单Gemini/Claude不同；Comprehensive排除system、规则仅Jaccard。原始trace/sidecar/cache/usage保持本地忽略，纯源码克隆只能读已提交报告和跑mock测试，真实离线报告须恢复三类证据。安装依赖可能需要网络。所有已知运行偏差在报告/README/DECISIONS中列出，不进入阶段二。
+
+**S7 最终提交前检查**
+
+```text
+$ rtk proxy make test
+104 passed in 4.05s
+
+$ rtk proxy make secrets  # 全部13个S7文件暂存后
+4 passed
+
+$ rtk proxy git diff --cached --check
+# 无输出，exit 0。
+
+$ rtk proxy git ls-files .env
+# 无输出，没有跟踪密钥文件。
+
+$ rtk proxy git check-ignore .env outputs/usage/usage.jsonl .cache/llm
+.env
+outputs/usage/usage.jsonl
+.cache/llm
+
+$ rtk proxy git -C ../OpenJudge status --short
+$ rtk proxy git -C ../claw-eval status --short
+# 均无输出，上游保持干净。
+```
+
+仅按明确路径暂存README/报告/代码/测试/设计与日志；无新依赖，未提交原始轨迹/缓存/账本或.env。阶段一S1–S7完成，本关新增付费调用0，预算内结束，不自行进入阶段二。
