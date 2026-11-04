@@ -232,3 +232,65 @@ Observed one-run pilot: T010 score 0.8040, T002 score 0.8500. Nine paid completi
 used 38,728 input and 2,161 output tokens; the peak-price conservative estimate
 is $0.014212. This is connectivity evidence from two tasks, not a reliability
 or model-benefit result. See `notes/log.md` for the measured breakdown.
+
+## Trajectory adaptation and four graders (S6)
+
+After the completed S5 pilot, install OpenJudge in the judge environment and run:
+
+```bash
+make score-trajectories                     # estimate only; no network
+make score-trajectories SCORE_ARGS=--run    # one reviewed scoring batch
+make score-trajectories SCORE_ARGS=--offline
+make test                                  # network blocked; model replies mocked
+```
+
+The command reads `outputs/claw_eval/s5/pilot.json` and the original traces and
+request sidecars. It requires completed traces, matching task identities and
+framework scores, and actual system text. An existing `outputs/grades/s6.jsonl`
+blocks another paid batch. Offline replay requires the local response cache;
+missing entries cause errors without opening a network connection. Online and
+offline outputs have separate filenames and usage summaries.
+
+`adapter.py` maps native text/tool blocks to OpenAI messages, preserves assistant
+tool calls and reasoning content, and requires unique tool IDs with exactly one
+linked result each. Tool names are joined by ID for the comprehensive grader.
+Every original event and sidecar row remains in metadata, with an event-to-message
+map and explicit unsupported-content flags. Unsupported semantic content prevents
+scoring. Missing system text is marked, never invented; S5 sidecars supply it.
+The latest `grading_result` supplies the framework result, with the full grading
+history retained. Default scores in `trace_end` are not used as labels.
+
+`runner.py` runs native OpenJudge graders serially:
+
+| Grader | Scale | Model calls per trace | Settings |
+| --- | --- | --- | --- |
+| TrajectoryAccuracyGrader | 1–3 | 1 | DeepSeek Flash, thinking off, output cap 1,024 |
+| TrajectoryComprehensiveGrader | 0–1 | 1 | DeepSeek Flash, thinking off, output cap 3,072 |
+| ActionLoopDetectionGrader | 0–1 | 0 | Native similarity threshold 1.0 |
+| ObservationInformationGainGrader | 0–1 | 0 | Native similarity threshold 0.5 |
+
+Each JSONL row includes trace ID, grader, score, reason, judge model/thinking
+(`null` for rules), OpenJudge commit, timestamp, usage and provenance. Full adapted
+traces are in `outputs/grades/adapted/`; score rows reference them. Usage separates
+logical cached tokens from newly billed tokens. Each result is flushed immediately;
+transport or accounting failures stop the batch after an explicit error record.
+Invalid, incomplete or truncated verdicts have `status=error` and `score=null`.
+
+The comprehensive grader defines a step as an assistant message containing one
+or more tool calls: these traces have 2 and 3 steps, with 2 and 8 individual calls.
+Step indices must cover the entire native step sequence exactly once. Its raw
+four dimensions use 1–5; upstream normalization yields the 0–1 overall score.
+The local model subclass validates the upstream schema **before** its callback,
+preventing invalid step data from becoming a numeric zero. Raw accuracy values
+are also checked before accepting upstream score clamping. Native comprehensive
+prompt extraction excludes system text; that grader cannot assess compliance with
+the original system instructions from these prompts alone. The two rules use word
+overlap/Jaccard, so their scores are lexical diagnostics rather than semantic or
+task-success labels. Scales and rubrics differ from the Claw-Eval framework score.
+
+Two anonymized real-run goldens live under `tests/fixtures/claw_s5/`. Expected
+messages come from native SDK request conversion, independently of the adapter.
+`provenance.json` records source hashes and redactions. The fixtures replace IDs,
+email addresses, phone numbers, host paths and localhost hosts consistently.
+They test structure only and are not human labels; paid scoring uses the original
+local traces. No dependency was added for S6. The v0 report remains the S7 gate.

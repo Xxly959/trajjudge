@@ -917,3 +917,94 @@ $ git diff --check
 ```
 
 make secrets在暂存S5文件后再次运行，通过才提交；未把.env、venv、raw traces、缓存、展开后的配置或实际key加入Git。本关结束，不启动S6。
+
+## S6：真实轨迹 adapter 与四 grader 流水线（2026-11-04）
+
+**授权与范围**：S5结束后用户“继续”。本关复用T010/T002真实轨迹，不重跑Claw任务、不制作人工标签、不做稳定性/注入实验、不提前写S7报告。
+
+**先读与实现**
+
+- 对照当前OpenJudge四类grader、原生消息转换函数、两条实际JSONL和S5请求sidecar。Comprehensive按assistant含工具的一轮计step：T010 2步/2工具，T002 3步/8工具；不将8工具错当8步。
+- 在adapter实现前，从原生最后SDK请求和最终assistant原生转换构造golden期望，统一脱敏后落tests/fixtures/claw_s5。source hash和脱敏/sidecar选取规则在provenance.json，属于结构断言，不是质量标签。
+- adapter保留全部原事件/sidecar、event→message映射及未知字段；工具ID严格对齐，reasoning_content不改空白；从同一trace实际请求恢复system，不猜造。最后grading_result作为框架结果，所有历史保留。
+- runner逐轨迹串行调用Accuracy、Comprehensive、ActionLoop、ObservationInformationGain，立即写JSONL并保存完整metadata快照。错误记录score=null/status=error；transport/账单未知时停批次。
+- 发现原生Accuracy有clamp、Comprehensive callback可能将非法step变成0；本地schema校验前移到callback之前，并验证原始score、finish_reason、全部step索引，不改变上游公式。新增重复/漏步/截断回归用例。
+- scripts/score_trajectories.py默认只估算，--run执行一次，--offline禁止真实请求；已有在线文件拒绝重新付费跑。Makefile新增score-trajectories目标，无新依赖。
+
+**运行前成本说明**：已告知用户预计4次completion，约30000输入+8192输出上限，峰值/cache-miss约$0.018831；预留$0.15且累计不超$3。规则型4次评分无需模型。每请求另由统一封装预留包括重试在内的费用。
+
+**命令与输出证据**
+
+```text
+$ rtk proxy make test  # adapter/runner首轮实现后
+77 passed in 3.68s
+
+$ rtk proxy make score-trajectories
+traces=2 completion_calls=4 rule_evaluations=4
+input_tokens_estimate=30000 output_tokens_cap=8192
+cost_usd_estimate=0.018831 batch_reserve_usd=0.15 stage_budget_usd=3.0
+
+$ rtk proxy make score-trajectories SCORE_ARGS=--run
+status=complete
+batch_usage: calls=4 cached_calls=0 prompt_tokens=14339 completion_tokens=606
+cost_usd=0.005029
+cumulative_usage: calls=34 cached_calls=14 prompt_tokens=54064 completion_tokens=2874
+cost_usd=0.019668
+
+$ rtk proxy make score-trajectories SCORE_ARGS=--offline
+status=complete
+batch_usage: calls=4 cached_calls=4 prompt_tokens=0 completion_tokens=0 cost_usd=0
+all eight scores match; all usage.api_calls=0
+
+$ rtk proxy env PYTHONDONTWRITEBYTECODE=1 .venvs/judge/bin/python -m pytest tests/test_runner.py -q
+9 passed
+
+$ rtk proxy env PYTHONDONTWRITEBYTECODE=1 .venvs/judge/bin/python - <<'PY'
+# 禁用socket.connect/connect_ex/create_connection/getaddrinfo后用runpy再次执行--offline；
+# 断言八行的trace_id/grader/score/reason完全相同、真实调用0、缓存命中4，
+# 同时核对wire thinking.type=disabled；结果存outputs/grades/s6-verification.json。
+# 额外按实际key字节值扫描outputs/.cache/llm/tests fixtures，只报数量不报内容。
+PY
+network_blocked=true
+matching_scores_and_reasons=8
+offline_api_calls=0 offline_cache_hits=4
+actual_key_found_in_artifacts=0
+online_thinking_disabled=true comprehensive_step_counts=[2,3]
+```
+
+**本次真实评分（2026-11-04T12:05:02+00:00）**
+
+| task | Claw框架本次分数 | Accuracy (1–3) | Comprehensive (0–1) | ActionLoop (0–1) | ObservationGain (0–1) |
+| --- | --- | --- | --- | --- | --- |
+| T010_contact_lookup | 0.804 | 3 | 0.71875 | 1 | 0.9791666666666667 |
+| T002_email_triage | 0.85 | 3 | 0.875 | 1 | 0.8472530190275026 |
+
+| task/grader | input tokens | output tokens |
+| --- | --- | --- |
+| T010 / Accuracy | 3363 | 62 |
+| T010 / Comprehensive | 1373 | 201 |
+| T002 / Accuracy | 5967 | 68 |
+| T002 / Comprehensive | 3636 | 275 |
+
+**产物**：outputs/grades/s6.jsonl（8行）、s6.summary.json、独立s6-offline.jsonl/summary、adapted/两条完整messages+metadata及s6-verification.json。本地原文与缓存仍忽略；Git只提交脱敏golden、代码/测试和文档。每行含所要求字段、OpenJudge提交7d27246484e91c6ed4a349b6ebe7bd4629d9378f、原始verdict/评分metadata及实际/缓存usage区别；规则行model/thinking为null、usage为0。
+
+**解释与未解决边界**：四类评分的量纲/测量目标不同，不能由两例得出一致性。Claw框架分是DeepSeek本次重跑，不是榜单Gemini/Claude官方标签。Comprehensive原生提取提示时排除system文本，不能据其分数证明system遵从；两个规则是Jaccard词重叠，不是语义信息增益。没有人工标签或S7报告。本关实际14945 tokens、保守费用$0.005029；累计56938 tokens、$0.019668；两次离线重放无新增消费。
+
+**S6 提交前验证**
+
+```text
+$ rtk proxy make test
+80 passed in 3.50s
+
+$ rtk proxy make secrets  # 暂存全部S6新增/修改文件后，含staged blobs检查
+4 passed
+
+$ rtk proxy git diff --check
+# 无输出，exit 0。
+
+$ rtk proxy git -C ../OpenJudge status --short
+$ rtk proxy git -C ../claw-eval status --short
+# 均无输出，上游干净。
+```
+
+独立只读代码审查无重要发现；审查另跑adapter/runner 17项测试全部通过，未访问密钥或发真实请求。提交仅包含本关明确路径；.env、outputs、响应缓存未暂存。S6结束，等待用户“继续”进入S7生成v0报告。

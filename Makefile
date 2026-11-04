@@ -5,8 +5,9 @@ export UV_CACHE_DIR
 export PYTHONDONTWRITEBYTECODE := 1
 OPENJUDGE_ARGS ?=
 SMOKE_ARGS ?=
+SCORE_ARGS ?=
 
-.PHONY: help install install-openjudge install-claw claw-preflight claw-pilot test secrets smoke smoke-openjudge phase1
+.PHONY: help install install-openjudge install-claw claw-preflight claw-pilot test secrets smoke smoke-openjudge score-trajectories phase1
 
 help:
 	@echo "install  create .venvs/judge and install trajjudge (editable) + dev deps"
@@ -15,6 +16,7 @@ help:
 	@echo "install-claw  install independent Claw host dependencies"
 	@echo "claw-preflight  check the S5 sandbox without model calls"
 	@echo "claw-pilot  run the fixed two-task S5 pilot once"
+	@echo "score-trajectories  estimate S6 scoring; SCORE_ARGS=--run or --offline"
 	@echo "test     run the offline test suite (all LLM calls are mocked)"
 	@echo "secrets  fail if a provider-looking key is tracked by git"
 	@echo "smoke    probe the DeepSeek endpoint (network, stage S2)"
@@ -52,6 +54,9 @@ smoke:
 
 smoke-openjudge:
 	$(PY) scripts/smoke_openjudge.py $(OPENJUDGE_ARGS)
+
+score-trajectories:
+	$(PY) scripts/score_trajectories.py $(SCORE_ARGS)
 
 phase1:
 	$(PY) scripts/run_phase1.py

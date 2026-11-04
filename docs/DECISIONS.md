@@ -228,3 +228,25 @@
 **账本优先**：T002 native judge_calls为空，但共享账本实记1次judge调用，说明不能用native call_log估计总成本。两个grading_result的efficiency字段为0，是CLI追加事件时只复制四个评分维度所致；真实轮数和耗时取TraceEnd/batch trial。S6保留这些原始字段及差异，不静默覆盖。
 
 **只读/密钥验证**：运行前后全上游文件SHA-256无变化，git status干净；容器/服务已按原生context清理。实际API key值在S5输出、共享usage及响应缓存中命中0文件。无新直接依赖；Claw环境单独装上游host requirements（含mock/Docker依赖），未安装OpenJudge。
+
+---
+
+## D19 S6 无损 adapter 与真实结构 golden（2026-11-04）
+
+**决定**：OpenAI messages 是源轨迹的评分视图；metadata按事件序号完整保存所有原始event及完整请求sidecar，另外保存event→messages映射、未映射内容、tool.name来源、system来源与完整grading_history。取最后grading_result，不将TraceEnd默认0作为标签。工具调用ID必须唯一、每个结果恰好匹配一次；无法映射的内容保留并标记，runner拒绝对语义不完整视图调用模型。完整适配轨迹单独落本地JSON，评分JSONL引用其路径和source SHA-256，避免每行重复大量原文。
+
+**system恢复**：仅从实际UUID相同的S5首个agent请求恢复真实system；缺失时adapter明确标missing，S6 pilot入口拒绝运行，不拼造官方提示。tool.name从对应assistant.tool_use.name补齐，参数JSON字符串与原生provider一致；reasoning_content原样保留。is_error、audit_snapshot、tool_dispatch、计时/usage、未支持blocks等全部保留在原事件metadata，不声称它们都进入每个原生grader提示。
+
+**golden来源**：T010/T002两条真实执行轨迹，参考messages在adapter实现前由原生最后SDK请求+原生最终assistant转换得到；tool.name仅按ID补充。测试副本统一替换trace/tool IDs、邮箱、电话、宿主路径、localhost hosts。provenance记录源SHA-256与脱敏策略；fixture sidecar只选原始首个agent请求，完整保留该行，选择明确记录。结构预期不含自制质量分数或人工标签。真实评分使用本地原始轨迹，不用脱敏后轨迹替换实验输入。
+
+---
+
+## D20 S6 原生评分结果的完整性与成本（2026-11-04）
+
+**评分**：串行运行2个LLM trajectory graders和2个只接收messages的规则grader；不引入新依赖。OpenJudge提交写入每行。规则行judge_model/thinking为null、usage全0；LLM行明确deepseek-flash、thinking=false，与S5保留thinking=true的Claw judge区别记录。实际API usage和缓存逻辑usage分开，回放不累计新费用。
+
+**严格校验理由**：原生Accuracy会将越界分数clamp到1–3；原生Comprehensive callback会把无有效step转换成0。本地模型子类改为先校验原始上游Pydantic schema，再调用原callback；runner另核对原始score、finish_reason、step数量和唯一连续索引，拒绝截断/漏步/重复索引，不放宽断言来适配模型输出。错误用status=error、score=null，非数值0；每行立即checkpoint，transport/账本错误停批次。该校验是本地运行行为差异，上游文件和原生评分公式不改。
+
+**step定义与局限**：Comprehensive按assistant含tool_calls的一整轮计step，不按单个工具调用；T010为2轮/2调用，T002为3轮/8调用，要求覆盖索引0..N-1。其四维raw分1–5，整体由原生公式归一化0–1；Accuracy为1–3，不能直接和Claw task_score求差。原生Comprehensive提取提示时丢弃system文本，故该分不能证明system遵从；原始system仍保留在adapter与metadata。两个规则使用Jaccard词重叠与原生threshold1.0/0.5，不代表语义信息增益或任务正确性。
+
+**预算**：4次真实completion预计30000输入、8192输出上限，峰值估算$0.018831；批次预留$0.15且累计不超$3，每请求仍预留重试费用。实际14339输入+606输出，4次请求、无重试，保守费用$0.005029；阶段累计54064输入+2874输出、$0.019668。S6输出已存在则拒绝再次付费执行，--offline复用响应缓存。只完成S6，不提前创建S7报告或阶段二实验。

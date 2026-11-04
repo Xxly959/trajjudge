@@ -15,7 +15,7 @@ from typing import Any, AsyncIterator
 from openai import DefaultAsyncHttpxClient
 from openjudge.models import OpenAIChatModel
 
-from .llm import LLMClient, LLMResult
+from .llm import LLMClient, LLMError, LLMResult
 
 
 class SharedCompletionTransport:
@@ -26,6 +26,7 @@ class SharedCompletionTransport:
         self.tag = tag
         self.results: list[LLMResult] = []
         self.observations: list[dict[str, Any]] = []
+        self.failure: str | None = None
 
     async def __aenter__(self) -> SharedCompletionTransport:
         return self
@@ -53,7 +54,11 @@ class SharedCompletionTransport:
             "request_fields": sorted(payload),
         })
         parameters = {key: value for key, value in payload.items() if key not in {"thinking", "stream", "messages"}}
-        result = self.client.complete(payload["messages"], thinking=thinking["type"] == "enabled", tag=self.tag, **parameters)
+        try:
+            result = self.client.complete(payload["messages"], thinking=thinking["type"] == "enabled", tag=self.tag, **parameters)
+        except Exception as exc:
+            self.failure = str(exc) if isinstance(exc, LLMError) else type(exc).__name__
+            raise
         self.results.append(result)
         if not result.raw_response:
             raise ValueError("cache lacks a complete provider response for native SDK replay")
@@ -72,10 +77,17 @@ class DeepSeekOpenJudgeModel(OpenAIChatModel):
         response = await super().achat(
             messages=messages, tools=tools, tool_choice=tool_choice,
             structured_model={"type": "json_object"} if structured_model is not None else None,
-            callback=callback, **kwargs,
+            callback=None, **kwargs,
         )
         if isinstance(structured_model, type) and hasattr(structured_model, "model_validate"):
             structured_model.model_validate(response.parsed)
+        # The native handler catches callback errors. Validate first and invoke
+        # the original callback here so invalid step data cannot become zero.
+        if callback is not None:
+            additions = callback(response)
+            if isinstance(additions, dict):
+                response.parsed = response.parsed or {}
+                response.parsed.update(additions)
         return response
 
 
