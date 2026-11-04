@@ -51,6 +51,9 @@ def _digest_value(value: Any) -> Any:
     return value
 
 
+PHASE1_TAGS = frozenset({"s2", "s3", "s5", "s6"})
+
+
 def _stage(record: UsageRecord) -> str:
     if record.tag.startswith("s2/"):
         return "S2 probe"
@@ -132,7 +135,8 @@ def generate_report(*, pilot_path: Path, scores_path: Path, usage_path: Path,
     if not usage_path.is_file():
         raise ValueError("usage ledger is missing; costs cannot be reconstructed")
     ledger = UsageLog(usage_path).read()
-    actual = [row for row in ledger if not row.cached and row.endpoint != "models"]
+    actual = [row for row in ledger if not row.cached and row.endpoint != "models"
+              and row.tag.split("/")[0] in PHASE1_TAGS]
     if not actual:
         raise ValueError("usage ledger contains no original completion evidence")
     for row in rows:

@@ -1,0 +1,242 @@
+[
+ {
+  "task_id": "T156_onsite_support_dispatch",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T158_month_end_reconciliation",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T110_complaint_investigation",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T157zh_month_end_reconciliation",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T155zh_onsite_support_dispatch",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T148_system_health_check",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T109zh_complaint_investigation",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T162_automation_failure_recovery",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T160_vip_ticket_escalation",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T161zh_automation_failure_recovery",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T159zh_vip_ticket_escalation",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T147zh_system_health_check",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T151zh_supply_chain_investigation",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T152_supply_chain_investigation",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T025zh_ambiguous_contact_email",
+  "category": "communication",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T115zh_ticket_kb_suggestion",
+  "category": "ops",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T111zh_expense_email_check",
+  "category": "workflow",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T026_ambiguous_contact_email",
+  "category": "communication",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T105zh_job_failure_triage",
+  "category": "ops",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T133zh_competitive_intelligence",
+  "category": "workflow",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T128_ticket_assignment",
+  "category": "ops",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T029zh_cross_service_meeting",
+  "category": "workflow",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T142_sla_compliance_audit",
+  "category": "ops",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T144_quarterly_business_insight",
+  "category": "workflow",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T131zh_order_profit_analysis",
+  "category": "ops",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T129zh_business_trip_planning",
+  "category": "workflow",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T119zh_inventory_cost_analysis",
+  "category": "ops",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T030_cross_service_meeting",
+  "category": "workflow",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T106_job_failure_triage",
+  "category": "ops",
+  "difficulty": "medium",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T107zh_ticket_routing",
+  "category": "workflow",
+  "difficulty": "medium",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T102_xss_filter",
+  "category": "terminal",
+  "difficulty": "easy",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T018_ticket_triage",
+  "category": "operations",
+  "difficulty": "easy",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T070zh_js_async_generator_trace",
+  "category": "coding",
+  "difficulty": "easy",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T095_pinbench_apm_market_research",
+  "category": "research",
+  "difficulty": "easy",
+  "max_turns": 16
+ },
+ {
+  "task_id": "T093_pinbench_email_triage_report",
+  "category": "organization",
+  "difficulty": "easy",
+  "max_turns": 18
+ },
+ {
+  "task_id": "T027zh_api_config_audit",
+  "category": "safety",
+  "difficulty": "easy",
+  "max_turns": 25
+ },
+ {
+  "task_id": "T016_kb_search",
+  "category": "knowledge",
+  "difficulty": "easy",
+  "max_turns": 25
+ },
+ {
+  "task_id": "T043zh_service_outage_research",
+  "category": "ops",
+  "difficulty": "easy",
+  "max_turns": 30
+ },
+ {
+  "task_id": "T094_pinbench_project_alpha_summary",
+  "category": "synthesis",
+  "difficulty": "easy",
+  "max_turns": 20
+ },
+ {
+  "task_id": "T099_pinbench_second_brain_recall",
+  "category": "memory",
+  "difficulty": "easy",
+  "max_turns": 8
+ }
+]

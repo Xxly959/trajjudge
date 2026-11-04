@@ -39,7 +39,8 @@ def fingerprint() -> dict[str, str]:
             for path in UPSTREAM.rglob("*") if path.is_file() and ".git" not in path.relative_to(UPSTREAM).parts}
 
 
-def validate_configuration(path: Path, settings: Settings) -> Any:
+def validate_configuration(path: Path, settings: Settings,
+                           extra_body: dict[str, Any] | None = None) -> Any:
     """Fail closed before native load_config can silently choose defaults."""
     if not path.is_file():
         raise S5Stop("pilot config file does not exist")
@@ -53,7 +54,8 @@ def validate_configuration(path: Path, settings: Settings) -> Any:
     for role in (config.model, config.judge, config.user_agent_model):
         if role.api_key != settings.api_key or role.base_url != settings.base_url or role.model_id != "deepseek-flash":
             raise S5Stop("resolved config identity does not match approved settings")
-    if config.model.extra_body != {"thinking": {"type": "disabled"}, "max_tokens": 1024} or not config.judge.enabled or not config.sandbox.enabled:
+    expected = extra_body if extra_body is not None else {"thinking": {"type": "disabled"}, "max_tokens": 1024}
+    if config.model.extra_body != expected or not config.judge.enabled or not config.sandbox.enabled:
         raise S5Stop("pilot thinking, output cap, judge or sandbox configuration changed")
     return config
 

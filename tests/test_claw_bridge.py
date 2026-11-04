@@ -153,3 +153,20 @@ def test_missing_configuration_never_falls_back_to_native_defaults(settings: Set
     from trajjudge.claw_bridge import S5Stop
     with pytest.raises(S5Stop, match="config"):
         validate_configuration(tmp_path / "missing.yaml", settings)
+
+
+def test_profile_allows_thinking_agent_and_prefixes_tags(settings: Settings, tmp_path: Path) -> None:
+    from trajjudge.claw_bridge import ClawSession, S5Stop
+    seen: list[dict[str, Any]] = []
+    def transport(request: dict[str, Any]) -> Any:
+        seen.append(request)
+        return reply()
+    client = LLMClient(replace(settings, agent_model=settings.judge_model), transport=transport)
+    session = ClawSession(client, "T", tmp_path, max_turns=2, agent_thinking=True, agent_cap=4096, tag_prefix="p2/x")
+    session.create("agent", model=settings.judge_model, messages=[{"role": "user", "content": "hi"}],
+                   extra_body={"thinking": {"type": "enabled"}, "max_tokens": 4096})
+    assert seen[0]["extra_body"] == {"thinking": {"type": "enabled"}} and seen[0]["max_tokens"] == 4096
+    assert client.usage_log.read()[-1].tag == "p2/x/T/agent"
+    with pytest.raises(S5Stop):
+        session.create("agent", model=settings.judge_model, messages=[{"role": "user", "content": "hi"}],
+                       extra_body={"thinking": {"type": "disabled"}})

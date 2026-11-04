@@ -33,7 +33,12 @@ class S5Stop(BaseException):
 class ClawSession:
     """One task's request quotas, exact request snapshots and shared client."""
 
-    def __init__(self, client: LLMClient, task_id: str, output: Path, *, max_turns: int) -> None:
+    def __init__(self, client: LLMClient, task_id: str, output: Path, *, max_turns: int,
+                 agent_thinking: bool = False, agent_cap: int = 1024, judge_quota: int = 1,
+                 input_cap: int = INPUT_ESTIMATE_CAP, tag_prefix: str = "s5") -> None:
+        self.tag_prefix = tag_prefix
+        self.agent_thinking, self.agent_cap = agent_thinking, agent_cap
+        self.judge_quota, self.input_cap = judge_quota, input_cap
         self.client = client
         self.task_id = task_id
         self.output = Path(output)
@@ -72,31 +77,31 @@ class ClawSession:
         if thinking_body not in ({"type": "enabled"}, {"type": "disabled"}):
             raise S5Stop("explicit thinking mode is required for the agent")
         thinking = thinking_body["type"] == "enabled"
-        if role == "agent" and thinking:
-            raise S5Stop("agent thinking must remain disabled in this pilot")
+        if role == "agent" and thinking != self.agent_thinking:
+            raise S5Stop("agent thinking mode differs from the approved profile")
         for key, value in extra.items():
             if key in params and params[key] != value:
                 raise S5Stop("conflicting request parameters")
             params[key] = value
-        cap = 1024 if role == "agent" else 8192
+        cap = self.agent_cap if role == "agent" else 8192
         params.setdefault("max_tokens", cap)
         if type(params["max_tokens"]) is not int or not 0 < params["max_tokens"] <= cap:
             raise S5Stop("completion token limit exceeds the approved cap")
         expected = self.client.settings.agent_model if role == "agent" else self.client.settings.judge_model
         if params.get("model") != expected:
             raise S5Stop("unapproved model")
-        if self.counts[role] >= (self.max_turns if role == "agent" else 1):
+        if self.counts[role] >= (self.max_turns if role == "agent" else self.judge_quota):
             raise S5Stop(f"{role} request quota exhausted")
         request = {**params, "extra_body": {"thinking": thinking_body}}
         estimate = len(canonical_json(request).encode("utf-8")) + 4096
-        if estimate > INPUT_ESTIMATE_CAP:
+        if estimate > self.input_cap:
             raise S5Stop("input estimate exceeds the pilot envelope; no content was truncated")
         self.counts[role] += 1
         request_hash = make_key(request)
         self.snapshot({"type": "request", "role": role, "request_hash": request_hash, "request": request, "input_estimate": estimate})
         try:
             messages = params.pop("messages")
-            result = self.client.complete(messages, thinking=thinking, tag=f"s5/{self.task_id}/{role}", **params)
+            result = self.client.complete(messages, thinking=thinking, tag=f"{self.tag_prefix}/{self.task_id}/{role}", **params)
         except LLMError as exc:
             self.snapshot({"type": "stopped", "role": role, "category": "LLMError"})
             raise S5Stop(str(exc)) from None
@@ -174,19 +179,35 @@ def native_bindings(session: ClawSession) -> Iterator[None]:
         loop.TraceWriter = old_loop_writer
 
 
+def load_profile() -> dict[str, Any]:
+    """Return the run profile from ``TRAJJUDGE_CLAW_PROFILE`` (JSON path) or the S5 default.
+
+    A profile holds ``tasks`` (id -> max_turns whitelist), ``agent_thinking``,
+    ``agent_cap``, ``judge_quota``, ``input_cap`` and ``tag_prefix``; it is inherited by spawned workers.
+    """
+    path = os.environ.get("TRAJJUDGE_CLAW_PROFILE")
+    default = {"tasks": TASKS, "agent_thinking": False, "agent_cap": 1024, "judge_quota": 1, "input_cap": INPUT_ESTIMATE_CAP, "tag_prefix": "s5"}
+    return {**default, **json.loads(Path(path).read_text())} if path else default
+
+
 def bounded_worker(**kwargs: Any) -> dict[str, Any]:
     """Spawn-safe native batch worker; bindings are created in the child process."""
     from claw_eval import cli
     from claw_eval.models.task import TaskDefinition
+    profile = load_profile()
+    tasks = profile["tasks"]
     task_id = Path(kwargs["task_dir"]).name
-    if task_id not in TASKS or kwargs["trials"] != 1:
+    if task_id not in tasks or kwargs["trials"] != 1:
         raise S5Stop("worker task/trial is outside the approved whitelist")
     task = TaskDefinition.from_yaml(Path(kwargs["task_dir"]) / "task.yaml")
-    if task.user_agent.enabled or task.environment.max_turns != TASKS[task_id] or task.environment.enable_compact or task.environment.enable_todo:
+    if task.user_agent.enabled or task.environment.max_turns != tasks[task_id] or task.environment.enable_compact or task.environment.enable_todo:
         raise S5Stop("task runtime settings changed from reconnaissance")
     settings = replace(load_settings(), budget_usd=float(os.environ["TRAJJUDGE_S5_CEILING"]))
     client = LLMClient(settings, max_attempts=3, timeout=60)
-    session = ClawSession(client, task_id, Path(kwargs["trace_dir"]) / "s5_sidecar", max_turns=TASKS[task_id])
+    session = ClawSession(client, task_id, Path(kwargs["trace_dir"]) / "s5_sidecar", max_turns=tasks[task_id],
+                          agent_thinking=profile["agent_thinking"], agent_cap=profile["agent_cap"],
+                          judge_quota=profile["judge_quota"], input_cap=profile["input_cap"],
+                          tag_prefix=profile["tag_prefix"])
     # The child imports native CLI afresh under macOS spawn. Refuse accidental
     # recursion if this entry is ever invoked in a patched parent interpreter.
     native_worker = cli._run_single_task

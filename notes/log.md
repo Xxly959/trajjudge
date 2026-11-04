@@ -1125,3 +1125,13 @@ $ rtk proxy git -C ../claw-eval status --short
 ## 阶段一审计（2026-11-04）
 
 详见 docs/AUDIT_PHASE1.md。结论：上游未改动、密钥无泄漏、make phase1 离线复现（报告哈希一致，账本新增4行均为缓存命中）。修复：缓存键加入 repeat_id（+2测试）；adapter 补4个边界测试（无工具、空内容、并行多工具、未应答调用）；README 补单一供应商/自评偏好局限；删除 docs/superpowers。未解决：runner 输出缺 repeat_id/版本字段（P3 处理）；沙箱内 2 个 multiprocessing 测试因信号量权限失败，沙箱外通过。LLM 调用 0 次，新增花费 $0。
+
+
+---
+
+## P2.1 校准运行（2026-11-04，非高峰 UTC 13–21 时）
+
+- 新增 sampling.py（确定性分层选任务：hard14/medium16/easy10，种子 20261104，候选101个：general、无 user_agent、无 web_real/ocr/caption、max_turns≤30）、claw_batch.py（可续跑、按任务隔离失败、预算停止）、两份 agent 配置（flash thinking 关/开，max_tokens 均 4096）、profile 机制（claw_bridge 不再写死两任务；S5 默认行为不变）。阶段一报告按 tag 前缀 s2/s3/s5/s6 过滤账本，哈希不变。
+- 校准 6 个任务（thinking 关）：max_tokens=2048 时 2 个任务因 finish_reason=length 被安全停止，上调到 4096（两配置一致，避免上限混杂）。
+- 结果（官方分，DeepSeek 重评，非榜单）：T156 0.882、T025zh 0.986、T115zh 0.952、T018 1.0、T158 完成；T102_xss_filter 在 30 轮、约 70 万输入 token 后被预算守卫拦下（未完成）。已完成的均通过——失败样本偏少的风险成立。
+- 成本：本关累计 $0.295（总账本 $0.315），单任务差异极大（$0.01–$0.16）。按此外推 80 条会超过批准的 $1.0，故停止，等待决定。
