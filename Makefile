@@ -1,5 +1,7 @@
-PY := .venvs/judge/bin/python
-VENV := .venvs/judge
+VENV ?= .venvs/judge
+PY ?= $(VENV)/bin/python
+UV_CACHE_DIR ?= $(CURDIR)/.cache/uv
+export UV_CACHE_DIR
 
 .PHONY: help install test secrets smoke phase1
 
@@ -10,12 +12,11 @@ help:
 	@echo "smoke    probe the DeepSeek endpoint (network, stage S2)"
 	@echo "phase1   regenerate reports/phase1.md from cached grader output (S7)"
 
-install:
+$(VENV)/pyvenv.cfg:
 	uv venv --python 3.12 $(VENV)
-	uv pip install --python $(PY) pip
-	# pip (not `uv pip`) builds the editable wheel here: uv's source-build temp
-	# handling fails with EEXIST on this machine. See notes/log.md, S1.
-	$(PY) -m pip install -e ".[dev]"
+
+install: $(VENV)/pyvenv.cfg
+	uv pip install --python $(PY) -e ".[dev]"
 
 test:
 	$(PY) -m pytest

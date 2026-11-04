@@ -84,15 +84,15 @@ def test_cache_hit_still_logs_usage(settings: Settings) -> None:
     assert records[1].prompt_tokens == 11
 
 
-def test_use_cache_false_forces_a_request(settings: Settings) -> None:
+def test_use_cache_false_cannot_bypass_a_hit(settings: Settings) -> None:
     transport = Recorder([_response("a"), _response("b")])
     client = _client(settings, transport)
 
     client.complete([{"role": "user", "content": "hi"}])
     result = client.complete([{"role": "user", "content": "hi"}], use_cache=False)
 
-    assert result.text == "b"
-    assert len(transport.requests) == 2
+    assert result.text == "a"
+    assert len(transport.requests) == 1
 
 
 def test_retries_429_then_succeeds(settings: Settings) -> None:
@@ -111,7 +111,7 @@ def test_non_retryable_error_fails_fast(settings: Settings) -> None:
     transport = Recorder([RetryableError(400, "bad request")])
     client = _client(settings, transport)
 
-    with pytest.raises(LLMError, match="bad request"):
+    with pytest.raises(LLMError, match="HTTP status 400"):
         client.complete([{"role": "user", "content": "hi"}])
 
     assert len(transport.requests) == 1
@@ -169,3 +169,133 @@ def test_missing_choices_raises(settings: Settings) -> None:
 
     with pytest.raises(LLMError, match="no choices"):
         client.complete([{"role": "user", "content": "hi"}])
+
+
+def test_usage_survives_cache_write_failure(settings: Settings, monkeypatch: pytest.MonkeyPatch) -> None:
+    client = _client(settings, Recorder([_response()]))
+    def fail(*args: Any) -> None:
+        raise OSError("disk failure")
+    monkeypatch.setattr(client.cache, "put", fail)
+    with pytest.raises(OSError):
+        client.complete([{"role": "user", "content": "hi"}])
+    assert UsageLog(settings.usage_log).read()[0].prompt_tokens == 11
+
+
+def test_malformed_response_still_records_usage(settings: Settings) -> None:
+    client = _client(settings, Recorder([{"choices": [], "usage": {"prompt_tokens": 11, "completion_tokens": 7}}]))
+    with pytest.raises(LLMError):
+        client.complete([{"role": "user", "content": "hi"}])
+    assert UsageLog(settings.usage_log).read()[0].completion_tokens == 7
+
+
+def test_unknown_price_blocks_transport(settings: Settings) -> None:
+    settings.pricing_file.unlink()
+    transport = Recorder([_response()])
+    with pytest.raises(LLMError, match="pric"):
+        _client(settings, transport).complete([{"role": "user", "content": "hi"}])
+    assert not transport.requests
+
+
+def test_budget_exhaustion_blocks_transport(settings: Settings) -> None:
+    settings.pricing_file.write_text("models:\n  judge-test:\n    input_per_mtok: 1000000\n    output_per_mtok: 1000000\n")
+    transport = Recorder([_response()])
+    with pytest.raises(LLMError, match="budget"):
+        _client(settings, transport).complete([{"role": "user", "content": "hi"}])
+    assert not transport.requests
+
+
+def test_failed_attempt_is_logged_and_error_redacted(settings: Settings) -> None:
+    client = _client(settings, Recorder([RetryableError(400, settings.api_key)]))
+    with pytest.raises(LLMError) as caught:
+        client.complete([{"role": "user", "content": "hi"}])
+    assert settings.api_key not in str(caught.value)
+    assert caught.value.__suppress_context__
+    assert len(UsageLog(settings.usage_log).read()) == 1
+
+
+def test_sdk_retries_disabled(settings: Settings) -> None:
+    client = LLMClient(settings)
+    sdk = client._get_client()
+    try:
+        assert sdk.max_retries == 0
+    finally:
+        sdk.close()
+
+
+def test_settings_repr_hides_key(settings: Settings) -> None:
+    assert settings.api_key not in repr(settings)
+
+
+def test_cache_hit_needs_no_price_or_network(settings: Settings) -> None:
+    transport = Recorder([_response()])
+    client = _client(settings, transport)
+    client.complete([{"role": "user", "content": "hi"}])
+    settings.pricing_file.unlink()
+    assert client.complete([{"role": "user", "content": "hi"}]).cached
+    assert len(transport.requests) == 1
+
+
+def test_unknown_billing_blocks_next_call(settings: Settings) -> None:
+    transport = Recorder([{"choices": [{"message": {"content": "ok"}}]}])
+    client = _client(settings, transport)
+    client.complete([{"role": "user", "content": "hi"}])
+    with pytest.raises(LLMError, match="unknown"):
+        client.complete([{"role": "user", "content": "different"}])
+    assert len(transport.requests) == 1
+
+
+def test_corrupt_usage_blocks_request(settings: Settings) -> None:
+    settings.usage_log.parent.mkdir(parents=True)
+    settings.usage_log.write_text("broken json")
+    transport = Recorder([_response()])
+    with pytest.raises(ValueError, match="corrupt"):
+        _client(settings, transport).complete([{"role": "user", "content": "hi"}])
+    assert not transport.requests
+
+
+def test_log_write_failure_leaves_pending_guard(settings: Settings, monkeypatch: pytest.MonkeyPatch) -> None:
+    client = _client(settings, Recorder([_response()]))
+    def fail(*args: Any) -> None:
+        raise OSError("disk failure")
+    monkeypatch.setattr(client.usage_log, "append", fail)
+    with pytest.raises(OSError):
+        client.complete([{"role": "user", "content": "hi"}])
+    other = _client(settings, Recorder([]))
+    with pytest.raises(LLMError, match="pending"):
+        other.complete([{"role": "user", "content": "hi"}])
+
+
+def test_all_5xx_retry_and_attempts_logged(settings: Settings) -> None:
+    transport = Recorder([RetryableError(501), _response()])
+    assert _client(settings, transport).complete([{"role": "user", "content": "hi"}]).text == "ok"
+    records = UsageLog(settings.usage_log).read()
+    assert [record.status for record in records] == ["unknown", "success"]
+
+
+def test_endpoint_participates_in_cache_identity(settings: Settings) -> None:
+    from dataclasses import replace
+    first = _client(settings, Recorder([_response("first")]))
+    first.complete([{"role": "user", "content": "hi"}])
+    second = _client(replace(settings, base_url="https://another.invalid"), Recorder([_response("second")]))
+    assert second.complete([{"role": "user", "content": "hi"}]).text == "second"
+
+
+def test_cumulative_usage_blocks_request(settings: Settings) -> None:
+    from trajjudge.usage import UsageRecord, utc_now
+    UsageLog(settings.usage_log).append(UsageRecord(
+        timestamp=utc_now(), tag="previous-run", model="judge-test", thinking=False,
+        prompt_tokens=3_000_000, completion_tokens=0, latency_ms=0, cached=False,
+    ))
+    transport = Recorder([_response()])
+    with pytest.raises(LLMError, match="budget"):
+        _client(settings, transport).complete([{"role": "user", "content": "hi"}])
+    assert not transport.requests
+
+
+def test_incomplete_usage_record_blocks_request(settings: Settings) -> None:
+    settings.usage_log.parent.mkdir(parents=True)
+    settings.usage_log.write_text("{}\n")
+    transport = Recorder([_response()])
+    with pytest.raises(ValueError, match="corrupt"):
+        _client(settings, transport).complete([{"role": "user", "content": "hi"}])
+    assert not transport.requests

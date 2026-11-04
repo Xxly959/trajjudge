@@ -40,7 +40,7 @@ docs/DECISIONS.md  design decisions and their rationale
 make install            # creates .venvs/judge (Python 3.12) and installs this package
 cp .env.example .env    # then put the real DeepSeek key in .env
 make test               # offline
-make smoke              # network: lists models, then runs the thinking probes
+make smoke              # available after S2; currently the script is not implemented
 ```
 
 Model identifiers are **not** hardcoded. `configs/deepseek.yaml` ships with `null`
@@ -53,3 +53,39 @@ serves, then copy the exact ids into the config.
 - No upstream forks: `../claw-eval` and `../OpenJudge` are read-only dependencies.
 - Costs are tracked per call in `outputs/usage/usage.jsonl`; the phase-1 budget is
   roughly USD 3.
+
+
+## S1 safeguards and current limits
+
+Python 3.11–3.12 is supported; `make install` selects Python 3.12 and uses uv
+for the isolated editable installation. The uv cache defaults to `.cache/uv`;
+set `UV_CACHE_DIR` to override it. Judge and Claw-Eval environments stay separate.
+No runtime dependency was added by the S1 repair.
+
+Every completion checks the disk cache first, including calls with the legacy
+`use_cache=False` argument. Cache format v2 includes the endpoint and all request
+parameters. Existing v1 cache files are not reused. Cache hits need no pricing
+lookup or SDK creation. S6/S7 will add the complete offline report pipeline;
+`make phase1` remains a stage placeholder today.
+
+Before a paid completion, the client requires verified model prices and checks
+the cumulative USD 3 budget. It reserves all configured attempts using a
+conservative estimate (serialized UTF-8 request bytes plus 4,096 input tokens,
+and `max_tokens`, default 1,024, for output). This is an engineering estimate,
+not a provider billing guarantee. Execution must be serial; parallel processes
+must not share this budget ledger. Batch estimates will still be presented for
+approval at the relevant gate. SDK retries are disabled; the wrapper owns retries.
+
+Usage is logged before response parsing or cache writes. Raw provider usage is
+preserved, including cache/reasoning details when present. Input cost currently
+uses the configured input price for all input tokens, a conservative estimate
+when the provider discounts prompt-cache hits. It is not an exact invoice.
+Failed attempts are recorded separately. Unknown billing, a corrupt ledger, or
+a `.pending` accounting marker blocks new paid completions; reconcile with the
+provider before resuming, rather than deleting records to bypass the guard.
+Cache hits remain available. A full disk cannot guarantee a usage-log write;
+the pending marker prevents silently continuing after that failure.
+
+`make test` blocks network connections and mocks all LLM responses. `make secrets`
+checks both staged blobs and nonignored working files, including `.env.example`.
+Run it immediately before every commit. Checks report paths only, never values.

@@ -15,21 +15,23 @@ The API key is held in memory only; it is never logged or persisted here.
 from __future__ import annotations
 
 import json
+import math
 import random
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
-from .cache import DiskCache, make_key
+from .cache import DiskCache, canonical_json, make_key
 from .config import Settings
-from .usage import UsageLog, UsageRecord, utc_now
+from .usage import UsageLog, UsageRecord, load_pricing, summarize, utc_now
 
 Message = dict[str, Any]
 Transport = Callable[[dict[str, Any]], Any]
 SleepFn = Callable[[float], None]
 
-RETRYABLE_STATUS = frozenset({408, 409, 429, 500, 502, 503, 504})
-CACHE_VERSION = 1
+RETRYABLE_STATUS = frozenset({408, 409, 429, *range(500, 600)})
+CACHE_VERSION = 2
 
 
 class LLMError(RuntimeError):
@@ -152,8 +154,8 @@ def _field(obj: Any, name: str, default: Any = None) -> Any:
 
 def _is_retryable(exc: BaseException) -> bool:
     status = _field(exc, "status_code") or _field(exc, "code")
-    if isinstance(status, int) and status in RETRYABLE_STATUS:
-        return True
+    if isinstance(status, int):
+        return status in RETRYABLE_STATUS
     text = str(exc).lower()
     name = type(exc).__name__.lower()
     return any(
@@ -180,6 +182,8 @@ class LLMClient:
         timeout: float = 180.0,
         jitter: Callable[[], float] = random.random,
     ) -> None:
+        if max_attempts < 1 or timeout <= 0:
+            raise ValueError("attempts and timeout must be positive")
         self.settings = settings
         self.cache = cache if cache is not None else DiskCache(settings.cache_dir)
         self.usage_log = usage_log if usage_log is not None else UsageLog(settings.usage_log)
@@ -202,6 +206,7 @@ class LLMClient:
                 api_key=self.settings.api_key,
                 base_url=self.settings.base_url,
                 timeout=self.timeout,
+                max_retries=0,
             )
         return self._client
 
@@ -238,9 +243,9 @@ class LLMClient:
             tools: OpenAI tool schemas. Requires ``reasoning_content`` to be
                 echoed back in subsequent assistant turns when thinking is on.
             temperature: Sampling temperature; omitted when ``None``.
-            max_tokens: Completion cap; omitted when ``None``.
+            max_tokens: Completion cap; defaults to 1,024 when ``None``.
             tag: Free-form label written into the usage log (e.g. ``smoke``).
-            use_cache: Set false to force a network call (still logged).
+            use_cache: Retained for compatibility; cache lookup and storage are always enabled.
 
         Returns:
             The parsed response, with ``cached=True`` on cache hits.
@@ -256,8 +261,9 @@ class LLMClient:
         request: dict[str, Any] = {"model": model_id, "messages": list(messages)}
         if temperature is not None:
             request["temperature"] = temperature
-        if max_tokens is not None:
-            request["max_tokens"] = max_tokens
+        if max_tokens is not None and max_tokens <= 0:
+            raise LLMError("max_tokens must be positive")
+        request["max_tokens"] = max_tokens if max_tokens is not None else 1024
         if tools:
             request["tools"] = list(tools)
         if not thinking_on:
@@ -266,6 +272,7 @@ class LLMClient:
         key = make_key(
             {
                 "version": CACHE_VERSION,
+                "base_url": self.settings.base_url,
                 "model": model_id,
                 "thinking": thinking_on,
                 "messages": list(messages),
@@ -274,42 +281,85 @@ class LLMClient:
             }
         )
 
-        if use_cache:
-            cached = self.cache.get(key)
-            if cached is not None:
-                result = LLMResult.from_dict(cached, cached=True)
-                self._record(result, tag=tag or result.tag)
-                return result
+        cached = self.cache.get(key)
+        if cached is not None:
+            result = LLMResult.from_dict(cached, cached=True)
+            self._record(result, tag=tag or result.tag)
+            return result
 
+        self._check_budget(request)
         started = time.monotonic()
-        raw = self._call_with_retries(request)
+        raw = self._call_with_retries(request, tag=tag, thinking=thinking_on)
         latency_ms = (time.monotonic() - started) * 1000
         result = self._parse(raw, model=model_id, thinking=thinking_on, latency_ms=latency_ms, tag=tag)
 
-        if use_cache:
-            self.cache.put(key, result.to_dict())
-        self._record(result, tag=tag)
+        self.cache.put(key, result.to_dict())
         return result
 
     # -------------------------------------------------------------- internals
 
-    def _call_with_retries(self, request: dict[str, Any]) -> Any:
+    @property
+    def _pending_path(self) -> Path:
+        return self.usage_log.path.with_suffix(".pending")
+
+    def _check_budget(self, request: dict[str, Any]) -> None:
+        """Reserve a conservative per-byte input estimate and all output retries.
+
+        Serial execution only. Provider-side billing remains authoritative.
+        Uncertain billing or interrupted accounting blocks subsequent requests.
+        """
+        if self._pending_path.exists():
+            raise LLMError("unreconciled pending request; budget accounting is uncertain")
+        prices = load_pricing(self.settings.pricing_file)
+        price = prices.get(request["model"])
+        if price is None:
+            raise LLMError("verified pricing required before paid requests")
+        summary = summarize(self.usage_log.read(), prices)
+        if summary.cost_usd is None:
+            raise LLMError("budget accounting unknown; reconcile usage and pricing first")
+        input_bound = len(canonical_json(request).encode("utf-8")) + 4096
+        reserve = self.max_attempts * (
+            input_bound * price.input_per_mtok
+            + request["max_tokens"] * price.output_per_mtok
+        ) / 1_000_000
+        budget = self.settings.budget_usd
+        if not math.isfinite(budget) or budget <= 0 or summary.cost_usd + reserve > budget:
+            raise LLMError("phase-1 budget would be exceeded; request blocked")
+
+    def _call_with_retries(self, request: dict[str, Any], *, tag: str, thinking: bool) -> Any:
         transport = self._transport or self._default_transport
-        last_exc: BaseException | None = None
-        attempts = 0
         for attempt in range(1, self.max_attempts + 1):
-            attempts = attempt
+            self._pending_path.parent.mkdir(parents=True, exist_ok=True)
+            self._pending_path.write_text("Accounting pending; reconcile before resuming.\n")
+            attempt_started = time.monotonic()
             try:
-                return transport(request)
-            except Exception as exc:  # noqa: BLE001 - classified below
-                last_exc = exc
+                raw = transport(request)
+            except Exception as exc:
+                status = _field(exc, "status_code")
+                known_rejection = isinstance(status, int) and 400 <= status < 500 and status != 408
+                self.usage_log.append(UsageRecord(
+                    timestamp=utc_now(), tag=tag, model=request["model"], thinking=thinking,
+                    prompt_tokens=0, completion_tokens=0, latency_ms=(time.monotonic() - attempt_started) * 1000, cached=False,
+                    status="rejected" if known_rejection else "unknown", usage_known=known_rejection,
+                ))
+                self._pending_path.unlink()
                 if attempt >= self.max_attempts or not _is_retryable(exc):
-                    break
+                    raise LLMError(f"LLM request failed after {attempt} attempt(s); HTTP status {status if isinstance(status, int) else 'unknown'}") from None
                 delay = min(self.backoff_cap, self.backoff_base * 2 ** (attempt - 1))
                 self.sleep(delay * (1 + 0.3 * self.jitter()))
-        raise LLMError(
-            f"LLM request failed after {attempts} attempt(s): {type(last_exc).__name__}: {last_exc}"
-        ) from last_exc
+                continue
+            usage = _field(raw, "usage")
+            raw_usage = usage if isinstance(usage, dict) else (usage.model_dump() if hasattr(usage, "model_dump") else {})
+            known = all(isinstance(raw_usage.get(k), int) and raw_usage[k] >= 0 for k in ("prompt_tokens", "completion_tokens"))
+            self.usage_log.append(UsageRecord(
+                timestamp=utc_now(), tag=tag, model=request["model"], thinking=thinking,
+                prompt_tokens=raw_usage.get("prompt_tokens", 0) if known else 0,
+                completion_tokens=raw_usage.get("completion_tokens", 0) if known else 0,
+                latency_ms=(time.monotonic() - attempt_started) * 1000, cached=False, usage_known=known, raw_usage=raw_usage,
+            ))
+            self._pending_path.unlink()
+            return raw
+        raise LLMError("request attempts exhausted")
 
     def _parse(self, raw: Any, *, model: str, thinking: bool, latency_ms: float, tag: str) -> LLMResult:
         choices = _field(raw, "choices", []) or []

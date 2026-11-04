@@ -1,61 +1,37 @@
-"""Guard against committing credentials.
-
-Scans every git-tracked file (falling back to a directory walk when git is not
-available) for provider-looking keys, and asserts that ``.env`` is ignored.
-"""
+"""Credential checks cover both the Git index and working files."""
 
 from __future__ import annotations
 
-import re
 import subprocess
 from pathlib import Path
 
-import pytest
+from trajjudge.secrets import scan_repository
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-KEY_PATTERN = re.compile(r"sk-[A-Za-z0-9_\-]{16,}")
-SKIP_DIRS = {".git", ".venvs", ".venv", ".cache", "outputs", "__pycache__", ".pytest_cache"}
-
-
-def _tracked_files() -> list[Path]:
-    try:
-        output = subprocess.run(
-            ["git", "ls-files", "-z"],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            check=True,
-            text=True,
-        ).stdout
-    except (OSError, subprocess.CalledProcessError):
-        return [
-            path
-            for path in REPO_ROOT.rglob("*")
-            if path.is_file() and not SKIP_DIRS.intersection(path.parts)
-        ]
-    return [REPO_ROOT / name for name in output.split("\0") if name]
 
 
 def test_no_provider_keys_in_tracked_files() -> None:
-    offenders: list[str] = []
-    for path in _tracked_files():
-        if path.name == ".env.example":
-            continue
-        try:
-            text = path.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
-            continue
-        if KEY_PATTERN.search(text):
-            offenders.append(str(path.relative_to(REPO_ROOT)))
-
-    assert offenders == [], f"possible API keys committed in: {offenders}"
+    assert scan_repository(REPO_ROOT) == [], "possible credentials found (values suppressed)"
 
 
 def test_dotenv_is_ignored() -> None:
-    result = subprocess.run(
-        ["git", "check-ignore", "-q", ".env"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-    )
-    if result.returncode not in (0, 1):
-        pytest.skip("git not available in this environment")
+    result = subprocess.run(["git", "check-ignore", "-q", ".env"], cwd=REPO_ROOT, capture_output=True)
     assert result.returncode == 0, ".env must be git-ignored"
+
+
+def test_scanner_checks_index_and_env_example(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    secret = "sk" + "-" + "x" * 24
+    example = tmp_path / ".env.example"
+    example.write_text("KEY=" + secret)
+    subprocess.run(["git", "add", ".env.example"], cwd=tmp_path, check=True)
+    example.write_text("KEY=placeholder")
+    assert scan_repository(tmp_path) == ["index:.env.example"]
+    example.write_text("KEY=" + secret)
+    assert scan_repository(tmp_path) == ["index:.env.example", "worktree:.env.example"]
+
+
+def test_scanner_checks_new_files_before_staging(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    (tmp_path / "new.txt").write_text("sk" + "-" + "x" * 24)
+    assert scan_repository(tmp_path) == ["worktree:new.txt"]

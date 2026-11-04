@@ -14,7 +14,7 @@ this module and never included in an exception message.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -33,7 +33,7 @@ class ConfigError(RuntimeError):
 class Settings:
     """Resolved runtime settings for every LLM call in this project."""
 
-    api_key: str
+    api_key: str = field(repr=False)
     base_url: str
     judge_model: str
     agent_model: str
@@ -42,6 +42,7 @@ class Settings:
     cache_dir: Path
     usage_log: Path
     pricing_file: Path
+    budget_usd: float = 3.0
 
     def model_for(self, role: str) -> str:
         """Return the configured model id for ``role`` (``judge`` or ``agent``)."""
