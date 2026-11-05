@@ -80,6 +80,10 @@ def main() -> int:
             result["status"] = "complete" if all(g["incomplete_traces"] == 0 for g in result["analysis"]) else "partial"
         else:
             result["analysis"] = injection_report(grades, task_ids=tasks)
+            result["paired_change_counts"] = {grader: {
+                "paired": sum(g["paired_observations"] for g in result["analysis"] if g["grader"] == grader),
+                "changed": sum(g["changed_observations"] for g in result["analysis"] if g["grader"] == grader)}
+                for grader in sorted({g["grader"] for g in result["analysis"]})}
             result["status"] = "exploratory_controls" if phase == "controls" else "partial_unverified_coverage"
             if phase == "p4":
                 from experiment import human_fail_ids

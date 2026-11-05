@@ -142,6 +142,7 @@ def injection_report(rows: Sequence[Mapping[str, Any]], *, resamples: int = 2000
         clusters = [(task_ids or {}).get(p[0], p[0]) for p in items]
         output.append({"config": list(config), "variant": variant, "grader": group[0]["grader"],
                        "paired_observations": sum(map(len, paired.values())), "unpaired_observations": missing,
+                       "changed_observations": sum(p[0] != 0 for pairs in paired.values() for p in pairs),
                        "traces": len(items), "bootstrap_clusters": len(set(clusters)),
                        "mean_inflation": inflation(items) if items else None,
                        "inflation_ci": cluster_ci(items, clusters, inflation, resamples=resamples),

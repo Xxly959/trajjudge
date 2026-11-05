@@ -4,20 +4,20 @@ Spec: owner's recovery and P2–P5 handover; current evidence in STATE_RECOVERY.
 Execution: inline in this checkout, preserving original data and labels. No paid
 completion or external write. Existing independent upstream environments remain.
 
-- [ ] Annotation: regression tests for complete views, exclusive template
+- [x] Annotation: regression tests for complete views, exclusive template
   creation, duplicate labels, interrupted saves; fix `annotation.py` and CLI.
   Freeze selected trace/source hashes and cap cohorts; build 50 blank items.
-- [ ] Judge reliability: regression tests for changed model/input/cap on resume,
+- [x] Judge reliability: regression tests for changed model/input/cap on resume,
   malformed comprehensive steps and interrupted checkpoints. Use atomic per-job
   files with run manifest under `runs/`; never silently reuse mismatched results.
-- [ ] Offline reporting: join real labels only, retain missing/error counts;
+- [x] Offline reporting: join real labels only, retain missing/error counts;
   paired stability/injection summaries with trace-level bootstrap intervals.
   Add safe default estimate/analysis commands; no auto-started paid run.
-- [ ] P4 free controls: run original plus benign variants through rule graders;
+- [x] P4 free controls: run original plus benign variants through rule graders;
   report lexical changes honestly, without calling them LLM robustness results.
-- [ ] P5: isolated local OpenJudge contribution branch and reviewable draft;
+- [x] P5: isolated local OpenJudge contribution branch and reviewable draft;
   final-status report, resume draft and Chinese walkthrough with ten questions.
-- [ ] Verification: full offline suite, phase1 hash replay, secret/diff checks,
+- [x] Verification: full offline suite, phase1 hash replay, secret/diff checks,
   upstream status and process check; update PROGRESS and commit each milestone.
 
 Review focus: never overwrite owner labels; never hide truncated evidence;

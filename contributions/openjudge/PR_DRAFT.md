@@ -22,9 +22,12 @@ in grading quality. Empty-input handling remains a separate question.
 ## Local validation
 
 The two out-of-range cases failed before the change; all six pass afterward.
-Model grading is mocked. No new grader, prompt, model request or trajectory
-fixture is introduced; existing quality tests were not run (they require paid
-models). Original upstream working trees remain untouched.
+Model grading is mocked. A follow-up run with the existing trajectory-accuracy
+unit file passed **12 unit tests**, with two quality tests deselected, under
+socket denial and without credentials. The declared pytest-asyncio dev plugin
+was temporarily installed in the judge environment for that check. No new
+grader, prompt, model request or trajectory fixture is introduced. Original
+upstream trees remain untouched; paid quality tests were not run.
 
 ```sh
 PYTHONPATH="$PWD/.cache/openjudge-contribution" .venvs/judge/bin/python -m pytest \
@@ -41,8 +44,8 @@ PYTHONPATH="$PWD/.cache/openjudge-contribution" .venvs/judge/bin/python -m pytes
 - [ ] Owner reviews scope and authorizes external action.
 - [ ] Refresh read-only upstream status against agentscope-ai/OpenJudge; rebase in
   the isolated contribution clone only if needed, preserving existing commits.
-- [ ] Run relevant upstream existing unit suite with its declared dev environment;
-  only the new six cases have been run here. Discuss quality-test expectations
+- [x] Relevant existing accuracy and new unit cases: 12 passed, two quality deselected.
+- [ ] Run wider upstream suite if requested. Discuss quality-test expectations
   for this metadata-only fix; no paid quality run is authorized.
 - [ ] Follow maintainer feedback; acceptance is an external outcome, not promised.
 

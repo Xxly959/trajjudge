@@ -1172,3 +1172,15 @@ make phase1：4 缓存命中，报告 SHA-256 不变。扫描 1074 JSON / 236 JS
 单独存 pricing_p3.yaml，保持阶段一报告 hash。新付费 $0。
 独立副本准备 OpenJudge raw_score 元数据修复，6个 mock 测试通过，未对外操作。
 
+# 2026-11-05 最终验收与交接
+
+独立审查发现并复现两项报告缺陷：重复次数默认3会吞掉第4/5次；旧去重键会吞掉
+不同模型/cap/commit。修复后从manifest读重复面板，核对job_id，保留跨配置来源。
+全套170 passed；新源码克隆在无.env、无outputs/响应缓存时170 passed，复用已安装依赖。
+首轮因我尚未设置必要的相邻上游目录出现23项失败，补只读链接后通过，无改断言。
+恢复S5/usage/cache，在sitecustomize禁socket下phase1报告hash相同。1461文件实际密钥
+扫描与全Git历史扫描均0泄漏。贡献副本相关12 unit passed、2 quality deselected，
+其pytest-asyncio仅为验证临时安装。上游原目录干净，无运行中项目进程或容器。
+900次规则对照变更计数已写入可复现JSON；人工一致性/真实稳定性/正式LLM注入仍pending。
+新付费$0、累计保守$2.700680。完整后续命令、未批准预算、草稿文档与本地贡献均已交付。
+

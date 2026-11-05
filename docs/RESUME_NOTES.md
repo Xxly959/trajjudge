@@ -13,6 +13,7 @@ rule behavior and completed research are kept distinct.
   36 on/off task pairs. Counts come from the latest per-task records in
   `outputs/claw_eval/p2/{flash-think-off,flash-think-on}/manifest.jsonl`, checked
   against native trace grading events and request sidecars.
+  These use benchmark sandbox/mock services, not production user tasks.
 - Prepared 50 blank blind annotation items across 36 tasks, with immutable source
   hashes and owner-only labels. Source: `outputs/p2/annotation_meta.json`,
   `outputs/p2/annotation_set.json`, `annotation/labels.csv`. These are selected

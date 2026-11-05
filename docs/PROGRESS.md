@@ -2,15 +2,16 @@
 
 ## Handover — 2026-11-05 CST
 
-- Current: offline stage drivers and free P4 rule controls implemented; review underway.
-- Last result: 900 free rule evaluations; loop changes 0/400, information-gain changes 177/400. P2/P3/P4 reports explicitly pending.
-- Next: verify review fixes and delivery docs, fresh source-clone tests, final evidence checks.
+- Current: free continuation delivered; formal research awaits owner gates. No paid run or automation scheduled.
+- Last result: 170 project tests; fresh source-only clone also 170; guarded phase1 replay identical. Contribution: 12 unit passed, 2 quality deselected.
+- Next owner actions: label 50 blind traces; review EXPERIMENT_RUNBOOK budgets (P2 $0.80 and probe $0.20 proposed, unapproved).
+- Next agent command after budget approval: re-estimate, then use experiment.py p2/probe with approved --run --cap-usd and unique --run-id, off-peak only. Preserve the original budget.json ceiling on resume.
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
 - Blockers: human labels, new phase budgets, external submission and final-claim approval. Pro pricing verified in separate pricing_p3.yaml; no pro call made.
 - Spend: conservative cumulative $2.700680 (P2 $2.681012; phase1 $0.019668), includes one estimated unknown call; new paid spend $0.
 - Balance: read-only API CNY 10.74; no opening balance/invoice, cannot fully reconcile.
 - Preservation: full backup `../my-project-backup-20261105-091258`; inherited edits committed as `10abb5e`.
-- Uncommitted: annotation safety code/tests/guide and this checkpoint, committed together immediately after suite verification.
+- Working tree: code, tests and delivery docs committed at handover; raw artifacts and owner labels remain ignored local assets, untouched by the agent after blank-kit creation.
 
 ## Checkpoints
 
@@ -43,3 +44,8 @@
 9. Draft delivery docs: runbook/budgets, incomplete research report, resume evidence,
    Chinese walkthrough and ten interview answers, third-party release boundary,
    local upstream PR draft. No final scientific claim has been approved.
+10. Final validation: fresh clone without env/outputs/cache passed 170, using
+    existing dependencies and pinned sibling links. Initial setup failure (23
+    missing-upstream tests) is disclosed in STATE_RECOVERY. Guarded phase1 replay
+    retained the same hash. Actual-key/history scan found no leak; no running
+    containers/project workers. Contribution: 12 unit passed, two quality deselected.

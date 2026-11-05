@@ -25,6 +25,7 @@ def test_injection_pairs_repeat_and_keeps_missing_baselines() -> None:
     assert result["paired_observations"] == 2 and result["unpaired_observations"] == 1
     assert result["traces"] == 1 and result["mean_inflation"] == 1
     assert result["baseline_fail_flip_rate"] == .5
+    assert result["changed_observations"] == 1
 
 
 def test_join_uses_only_owner_labels_and_reports_missing() -> None:

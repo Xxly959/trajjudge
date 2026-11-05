@@ -107,3 +107,25 @@ repeat_id 的一部分问题后来已修，旧文档不能代表现状。
 5. 准备本地 OpenJudge 贡献草稿及证据受限的交付文档；对外动作和最终结论待确认。
 
 Subsequent work and commands are checkpointed in `docs/PROGRESS.md`.
+
+## Follow-up verification (after recovery)
+
+At source commit `6088ebf`, a new `--no-hardlinks` source clone was tested with
+no `.env`, outputs or response cache: **170 passed in 5.40s**. It reused installed
+judge dependencies, not a newly provisioned virtual environment. The first
+attempt preceded the documented sibling-source setup and had 23 missing-upstream
+failures (Claw provider bindings, OpenJudge commit/sample lookups and grader
+runners). After adding pinned read-only sibling links, tests passed; neither
+assertions nor upstream source were changed for these setup failures.
+
+Restoring only S5 evidence, usage and response cache then running phase1 with a
+`sitecustomize` socket-deny guard and no key regenerated the identical historical
+report hash. Logs: `outputs/verification/recovery-source-only-tests.log`,
+`recovery-clone-tests.log`, `recovery-clone-phase1.log`.
+An actual-key scan over 1,461 code/evidence/cache files found zero leaks;
+`git log -p --all` contained neither the actual key nor key-like strings.
+
+The independent review found two report defects (repeat truncation and
+provenance-erasing deduplication); regression failures were observed and fixed.
+Contribution checks include existing accuracy cases: 12 unit passed, two paid
+quality tests deselected. No paid completion or external write occurred.
