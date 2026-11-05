@@ -34,9 +34,25 @@ python scripts/annotate.py relabel --count 10
 python scripts/annotate.py label --round 2
 ```
 
-- Order is random (blind ids). Traces show the task criteria and conversation only; long blocks are clipped in the view.
+- Order is random (blind ids). The CLI's generated Markdown shows complete task
+  criteria, arguments and conversation, including long blocks. Open the current
+  `annotation/traces/<blind_id>.md` in your editor if terminal scrollback is too short.
 - Labels are saved after every trace in `annotation/labels.csv` (`blind_id, label, reason, annotated_at, round`).
 - Round 2 re-presents ~10 random traces without showing your earlier label; we report your self-agreement (Cohen's kappa and raw agreement). Low self-agreement is a finding about the task definition, not something to hide.
+- Round 2 requires completed round 1 and at least two elapsed days. It assigns new
+  blind ids, with the correspondence saved privately outside the annotation folder.
+- CSV saves are atomic. Build refuses to overwrite an existing CSV or private key;
+  `annotation/labels.csv` is ignored by Git. Back up the CSV and private keys together.
+
+## Frozen selection (2026-11-05)
+
+50 traces were selected from 87 completed trajectories: 27 thinking-off, 23
+thinking-on. Source SHA-256 values and private strata are frozen in
+`outputs/p2/annotation_set.json` and `annotation_meta.json`; do not open the latter
+while annotating. Labels and reasons are blank. The private mapping permits later
+export to `trace_id,pass/fail,one_line_reason`; it is never shown during annotation.
+No new model calls are needed for labeling. Complete round 1 before discussing
+individual labels with the assistant; only you may provide labels.
 
 ## Known limits
 

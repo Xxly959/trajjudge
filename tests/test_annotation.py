@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from trajjudge import annotation as kit
 
 
@@ -42,3 +44,34 @@ def test_template_is_blank_and_validation(tmp_path: Path) -> None:
 def test_relabel_sample_subset() -> None:
     pick = kit.relabel_sample([f"B{i}" for i in range(30)], 10, seed=3)
     assert len(pick) == 10 and len(set(pick)) == 10
+
+
+def test_full_view_keeps_decisive_tail() -> None:
+    text = kit.render_trace([{"role": "tool", "content": "x" * 5000 + "DECISIVE_TAIL"}],
+                            blind_id="B1", max_block_chars=None)
+    assert "DECISIVE_TAIL" in text and "omitted" not in text
+
+
+def test_template_never_overwrites_owner_labels(tmp_path: Path) -> None:
+    path = tmp_path / "labels.csv"
+    path.write_text("owner data")
+    with pytest.raises(FileExistsError):
+        kit.write_template(path, ["B1"])
+    assert path.read_text() == "owner data"
+
+
+def test_duplicate_label_rows_are_rejected() -> None:
+    row = {"blind_id": "B1", "round": "1", "label": "", "reason": ""}
+    assert any("duplicate" in p for p in kit.validate_labels([row, row], ["B1"]))
+
+
+def test_interrupted_save_preserves_labels(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    path = tmp_path / "labels.csv"
+    kit.write_template(path, ["B1"])
+    before = path.read_bytes()
+    def fail(*args: object) -> None:
+        raise OSError("simulated crash before replace")
+    monkeypatch.setattr("os.replace", fail)
+    with pytest.raises(OSError):
+        kit.save_labels(path, [{"blind_id": "B1", "label": "pass", "reason": "owner-entered"}])
+    assert path.read_bytes() == before

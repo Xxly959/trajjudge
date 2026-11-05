@@ -16,3 +16,5 @@ __pycache__/
 .ruff_cache/
 traces/
 annotation/traces/
+annotation/labels.csv
+runs/

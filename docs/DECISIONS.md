@@ -303,3 +303,14 @@
 - LLMClient 改为线程安全（锁、飞行中预算预留、引用计数式 pending 标记），为 P3 并发；仍不支持多个进程同时写同一账本（pending 标记会互相阻塞——保守行为，已确认）。
 - 账本对账：一次 agent 请求失败（15.7 秒无响应、状态未知）使累计成本变为“未知”并按设计阻止后续请求。已将该行以保守上界（重试请求的 prompt token + 4096 输出）改为 `unknown_reconciled` 并保留原行于 outputs/usage/reconciliation.jsonl；供应商控制台为准。
 - 上游发现（供 P5）：OpenJudge `TrajectoryAccuracyGrader` 将模型输出分数钳制到 [1,3]（99 变 3），空消息返回 0.0（超出量表）；我们在 `judging.check_raw` 里重新解析原始输出，把钳制视为无效行而非有效分。
+# D26 Recovery and annotation freeze (2026-11-05)
+
+The current owner authorizes free continuation, not paid historical roadmap
+caps. No batch will run until a new explicit stage budget is approved.
+Request sidecars override stale D25 prose: four cap cohorts exist (off2048=4,
+off4096=47, on4096=27, on16384=9). Preserve them and treat thinking comparisons
+as confounded. Freeze 50 blind traces before human labels, retaining all six
+framework failures; the failure-enriched sample is not population-representative.
+Use complete annotation text, atomic CSV saves, no overwrites, and fresh blind
+repeat ids after >=2 days. Never infer, suggest or fill owner labels.
+

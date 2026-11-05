@@ -14,9 +14,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
@@ -33,13 +34,16 @@ CSV_PATH = ANN / "labels.csv"
 def build(set_path: Path) -> None:
     """Render every selected trace under a blind id and create the empty label CSV."""
     items = json.loads(set_path.read_text())
-    if CSV_PATH.exists():
-        sys.exit("annotation/labels.csv already exists; refusing to overwrite your labels")
+    if CSV_PATH.exists() or KEY.exists():
+        sys.exit("annotation labels or private key already exist; refusing to overwrite")
     mapping = kit.blind_ids([i["trace_id"] for i in items], seed=kit.new_seed())
     (ANN / "traces").mkdir(parents=True, exist_ok=True)
     for item in items:
+        for key in ("trace", "sidecar"):
+            if item.get(f"{key}_sha256") and hashlib.sha256(Path(item[key]).read_bytes()).hexdigest() != item[f"{key}_sha256"]:
+                sys.exit("frozen annotation evidence changed; refusing to build")
         trace = adapt_trace(Path(item["trace"]), sidecar_path=Path(item["sidecar"]) if item.get("sidecar") else None)
-        text = kit.render_trace(trace.messages, prompt_criteria=item.get("criteria"), blind_id=mapping[item["trace_id"]])
+        text = kit.render_trace(trace.messages, prompt_criteria=item.get("criteria"), blind_id=mapping[item["trace_id"]], max_block_chars=None)
         (ANN / "traces" / f"{mapping[item['trace_id']]}.md").write_text(text, encoding="utf-8")
     kit.write_template(CSV_PATH, sorted(mapping.values()))
     KEY.parent.mkdir(parents=True, exist_ok=True)
@@ -48,10 +52,7 @@ def build(set_path: Path) -> None:
 
 
 def _save(rows: list[dict[str, str]]) -> None:
-    with CSV_PATH.open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=kit.FIELDS)
-        writer.writeheader()
-        writer.writerows(rows)
+    kit.save_labels(CSV_PATH, rows)
 
 
 def label(round_id: str) -> None:
@@ -82,9 +83,28 @@ def relabel(count: int) -> None:
     rows = kit.read_labels(CSV_PATH)
     if any(r["round"] == "2" for r in rows):
         sys.exit("round 2 already exists")
-    first = [r["blind_id"] for r in rows if r["round"] == "1" and r["label"]]
+    first_rows = [r for r in rows if r["round"] == "1" and r["label"]]
+    if not first_rows:
+        sys.exit("finish round 1 before scheduling a re-label round")
+    if any(not r["label"] for r in rows if r["round"] == "1"):
+        sys.exit("round 1 is incomplete; finish or explicitly exclude unresolved items first")
+    last = max(datetime.fromisoformat(r["annotated_at"]) for r in first_rows)
+    if datetime.now(timezone.utc) < last + timedelta(days=2):
+        sys.exit("wait at least two days after round 1 before re-labeling")
+    first = [r["blind_id"] for r in first_rows]
+    second_key = KEY.with_name("round2_key.json")
+    if second_key.exists():
+        sys.exit("round 2 key already exists; inspect recovery state without overwriting labels")
+    private = {}
     for blind_id in kit.relabel_sample(first, count, seed=kit.new_seed()):
-        rows.append({"blind_id": blind_id, "label": "", "reason": "", "annotated_at": "", "round": "2"})
+        fresh = f"R{kit.new_seed():08x}"
+        while fresh in private or fresh in first:
+            fresh = f"R{kit.new_seed():08x}"
+        private[fresh] = blind_id
+        text = (ANN / "traces" / f"{blind_id}.md").read_text()
+        (ANN / "traces" / f"{fresh}.md").write_text(text.replace(f"# Trace {blind_id}\n", f"# Trace {fresh}\n", 1))
+        rows.append({"blind_id": fresh, "label": "", "reason": "", "annotated_at": "", "round": "2"})
+    second_key.write_text(json.dumps(private, indent=2))
     _save(rows)
     print(f"added {min(count, len(first))} round-2 rows; run `label --round 2` after a few days")
 
@@ -92,8 +112,13 @@ def relabel(count: int) -> None:
 def check() -> None:
     """Print validation problems and progress."""
     rows = kit.read_labels(CSV_PATH)
-    expected = sorted({r["blind_id"] for r in rows})
-    problems = kit.validate_labels(rows, expected)
+    expected = sorted(json.loads(KEY.read_text()).values())
+    round2_key = KEY.with_name("round2_key.json")
+    if round2_key.exists():
+        expected += sorted(json.loads(round2_key.read_text()))
+    problems = kit.validate_labels(rows, sorted(json.loads(KEY.read_text()).values()))
+    known = set(expected)
+    problems = [p for p in problems if not (p.startswith("unknown blind_id ") and p.split()[-1] in known)]
     done = sum(bool(r["label"]) for r in rows)
     print(f"{done}/{len(rows)} rows labeled; problems: {problems or 'none'}")
 
