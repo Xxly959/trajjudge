@@ -1145,3 +1145,13 @@ $ rtk proxy git -C ../claw-eval status --short
 - agent 批量：flash 关 thinking 已完成约 29/39 任务，官方失败极少（约 2/29）——标注集失败样本偏少风险成立；已启动剩余任务及 thinking 开配置。
 - 一次账本“状态未知”事件及其对账见 DECISIONS D25。
 - P3.1 探针被另一进程的 pending 标记阻塞（已写入的 30 条错误行已删除，未花费）；等 agent 批量结束后再跑。
+# 2026-11-05 状态恢复
+
+完整备份到 ../my-project-backup-20261105-091258 后，将前任三项未提交变更保存为
+10abb5e。无项目后台任务、无运行中容器、无已有人工标签。亲跑 make test：147 passed；
+make phase1：4 缓存命中，报告 SHA-256 不变。扫描 1074 JSON / 236 JSONL / 6496 行，
+无解析错误。87 完成轨迹仅 6 个框架失败；sidecar 证明存在四种 token cap 队列，
+不能称为受控 thinking 对照。账本保守累计 $2.700680，含 unknown_reconciled。
+只读余额 CNY 10.74；无期初余额/账单，不能完成真实扣费对账。新付费调用 0。
+详情与后续顺序见 docs/STATE_RECOVERY.md、docs/PROGRESS.md。
+
