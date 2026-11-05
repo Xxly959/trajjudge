@@ -24,7 +24,7 @@ from .usage import load_pricing, summarize, utc_now
 
 CONFIGS = {
     "flash-think-off": ("configs/claw_p2_off.yaml", {"thinking": {"type": "disabled"}, "max_tokens": 4096}, False, 4096),
-    "flash-think-on": ("configs/claw_p2_on.yaml", {"thinking": {"type": "enabled"}, "max_tokens": 4096}, True, 4096),
+    "flash-think-on": ("configs/claw_p2_on.yaml", {"thinking": {"type": "enabled"}, "max_tokens": 16384}, True, 16384),
 }
 OUTPUT = PROJECT_ROOT / "outputs" / "claw_eval" / "p2"
 INPUT_CAP_BYTES = 200_000

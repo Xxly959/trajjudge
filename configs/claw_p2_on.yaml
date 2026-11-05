@@ -10,7 +10,7 @@ model:
   extra_body:
     thinking:
       type: enabled
-    max_tokens: 4096
+    max_tokens: 16384
 judge:
   api_key: ${DEEPSEEK_API_KEY}
   base_url: https://api.deepseek.com
