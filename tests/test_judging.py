@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import threading
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -104,3 +105,47 @@ def test_defended_config_changes_prompt_and_cache_identity(settings: Settings, t
     texts = ["".join(str(m["content"]) for m in r["messages"]) for r in transport.requests]
     assert sum("untrusted data" in t for t in texts) == 1
     assert {r["defended"] for r in load_rows(out)} == {False, True}
+
+
+@pytest.mark.parametrize("change", ["model", "messages", "cap"])
+def test_resume_rejects_changed_experiment(change, settings, tmp_path, messages) -> None:
+    transport = Transport([3])
+    cfg = JudgeConfig("trajectory_accuracy", False)
+    output = tmp_path / "rows.jsonl"
+    run_jobs([("t", messages, cfg, 0, "original")], LLMClient(settings, transport=transport), output, workers=1)
+    if change == "model":
+        settings = replace(settings, judge_model="other-model")
+    elif change == "cap":
+        cfg = replace(cfg, max_tokens=2048)
+    else:
+        messages = [*messages, {"role": "assistant", "content": "changed evidence"}]
+    with pytest.raises(ValueError, match="manifest|identity|changed"):
+        run_jobs([("t", messages, cfg, 0, "original")], LLMClient(settings, transport=transport), output, workers=1)
+    assert len(transport.requests) == 1
+
+
+def test_comprehensive_requires_complete_step_coverage() -> None:
+    from trajjudge.judging import check_raw
+    step = {"step_index": 0, "step_reason": "synthetic", **{k: 5 for k in
+            ("contribution_score", "relevance_score", "accuracy_score", "efficiency_score")}}
+    with pytest.raises(ValueError, match="step"):
+        check_raw("trajectory_comprehensive", {"step_evaluations": [step]}, expected_steps=2)
+
+
+def test_resume_reconstructs_projection_from_atomic_rows(settings, tmp_path, messages) -> None:
+    transport = Transport([3])
+    output = tmp_path / "rows.jsonl"
+    jobs = [("t", messages, JudgeConfig("trajectory_accuracy", False), 0, "original")]
+    client = LLMClient(settings, transport=transport)
+    run_jobs(jobs, client, output, workers=1)
+    output.write_text('{"truncated":')
+    assert run_jobs(jobs, client, output, workers=1)["skipped"] == 1
+    assert load_rows(output)[0]["score"] == 3 and len(transport.requests) == 1
+
+
+def test_duplicate_jobs_rejected_before_calls(settings, tmp_path, messages) -> None:
+    transport = Transport([3])
+    job = ("t", messages, JudgeConfig("trajectory_accuracy", False), 0, "original")
+    with pytest.raises(ValueError, match="duplicate"):
+        run_jobs([job, job], LLMClient(settings, transport=transport), tmp_path / "rows.jsonl", workers=2)
+    assert not transport.requests

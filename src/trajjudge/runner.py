@@ -39,12 +39,14 @@ class GradeRecord:
     usage: dict[str, int] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
     status: str = "ok"
+    repeat_id: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {"trace_id": self.trace_id, "grader": self.grader, "score": self.score,
                 "reason": self.reason, "judge_model": self.judge_model, "thinking": self.thinking,
                 "openjudge_commit": self.openjudge_commit, "timestamp": self.timestamp,
-                "usage": self.usage, "metadata": self.metadata, "status": self.status}
+                "usage": self.usage, "metadata": self.metadata, "status": self.status,
+                "repeat_id": self.repeat_id}
 
 
 def usage_for(records: Sequence[UsageRecord]) -> dict[str, int]:

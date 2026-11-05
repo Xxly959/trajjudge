@@ -82,4 +82,4 @@ if __name__ == "__main__":
         pricing = load_pricing(settings.pricing_file)
         before = summarize(LLMClient(settings).usage_log.read(), pricing).cost_usd
         client = LLMClient(replace(settings, budget_usd=before + args.cap_usd), max_attempts=4, timeout=180)
-        print(run_jobs(jobs, client, OUT, workers=args.workers))
+        print(run_jobs(jobs, client, OUT, workers=args.workers, run_dir=root / "runs/p3-stability"))

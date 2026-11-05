@@ -10,10 +10,11 @@ from __future__ import annotations
 import asyncio
 import json
 import math
+import os
 import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
@@ -23,6 +24,8 @@ from openjudge.graders.agent import (ActionLoopDetectionGrader, ObservationInfor
 from openjudge.graders.schema import GraderScore
 
 from .config import PROJECT_ROOT
+from .artifacts import atomic_text
+from .cache import make_key
 from .llm import LLMClient, LLMError
 from .openjudge_bridge import openjudge_model
 from .perturb import defended_template
@@ -90,7 +93,7 @@ def base_row(trace_id: str, config: JudgeConfig, judge_model: str | None, repeat
             "timestamp": utc_now(), "usage": {}, "status": "ok", **extra}
 
 
-def check_raw(grader: str, raw: dict[str, Any]) -> None:
+def check_raw(grader: str, raw: dict[str, Any], *, expected_steps: int | None = None) -> None:
     """Reject raw model output the upstream grader would silently clamp or default."""
     if grader == "trajectory_accuracy":
         if type(raw.get("score")) not in (int, float) or raw["score"] not in (1, 2, 3):
@@ -99,7 +102,13 @@ def check_raw(grader: str, raw: dict[str, Any]) -> None:
     steps = raw.get("step_evaluations")
     if not isinstance(steps, list) or not steps:
         raise ValueError("step_evaluations missing")
+    if expected_steps is not None:
+        indices = [s.get("step_index") for s in steps]
+        if len(steps) != expected_steps or any(type(i) is not int for i in indices) or sorted(indices) != list(range(expected_steps)):
+            raise ValueError("step evaluations must cover every assistant tool batch once")
     for step in steps:
+        if not isinstance(step.get("step_reason"), str) or not step["step_reason"].strip():
+            raise ValueError("step reason is missing")
         for key in ("contribution_score", "relevance_score", "accuracy_score", "efficiency_score"):
             if type(step.get(key)) is not int or not 1 <= step[key] <= 5:
                 raise ValueError("step scores must be integers 1-5")
@@ -111,6 +120,8 @@ async def _grade(messages: list[dict[str, Any]], config: JudgeConfig, client: LL
         cls = TrajectoryAccuracyGrader if config.grader == "trajectory_accuracy" else TrajectoryComprehensiveGrader
         template = defended_template(cls.DEFAULT_TEMPLATE) if config.defended else None
         result = await cls(model=model, strategy=_strategy(config), template=template).aevaluate(messages=messages)
+        if bridge.failure:
+            raise LLMError(bridge.failure)
         return result, bridge
 
 
@@ -130,14 +141,15 @@ def judge_once(trace_id: str, messages: list[dict[str, Any]], config: JudgeConfi
                     "prompt_tokens": sum(r.prompt_tokens for r in results),
                     "completion_tokens": sum(r.completion_tokens for r in results)}
     low, high = SCALES[config.grader]
-    if not isinstance(result, GraderScore) or not math.isfinite(result.score) or not low <= result.score <= high:
+    if not isinstance(result, GraderScore) or not math.isfinite(result.score) or not low <= result.score <= high or not result.reason.strip():
         return {**row, "status": "error", "reason": f"no valid score: {getattr(result, 'error', result)!s}"[:300]}
     if len(results) != config.num_evaluations or any(
             not r.raw_response.get("choices") or r.raw_response["choices"][0].get("finish_reason") != "stop" for r in results):
         return {**row, "status": "error", "reason": "incomplete completions or wrong number of evaluations"}
     try:
         for completion in results:
-            check_raw(config.grader, json.loads(completion.text))
+            check_raw(config.grader, json.loads(completion.text), expected_steps=sum(
+                bool(m.get("tool_calls")) for m in messages if m.get("role") == "assistant"))
     except (ValueError, TypeError, KeyError, AttributeError) as exc:
         return {**row, "status": "error", "reason": f"raw verdict invalid (upstream may have clamped it): {exc}"[:300]}
     row.update(score=float(result.score), reason=result.reason)
@@ -173,37 +185,88 @@ def latest_rows(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def run_jobs(jobs: Sequence[tuple[str, list[dict[str, Any]], JudgeConfig, int, str]], client: LLMClient, output: Path,
-             *, workers: int = 8) -> dict[str, int]:
+             *, workers: int = 8, run_dir: Path | None = None) -> dict[str, int]:
     """Run (trace_id, messages, config, repeat_id, variant) jobs concurrently, appending rows to ``output``.
 
     Existing ok rows are skipped (error rows are retried; use ``latest_rows`` to read). A fatal (budget) error stops scheduling new jobs.
     """
-    output.parent.mkdir(parents=True, exist_ok=True)
-    done = {row_key(r) for r in load_rows(output) if r["status"] == "ok"}
     commit = openjudge_commit()
+    descriptors = [{"trace_id": j[0], "input_sha256": make_key({"messages": j[1]}),
+                    "config": asdict(j[2]), "max_tokens": j[2].effective_max_tokens,
+                    "repeat_id": j[3], "variant": j[4]} for j in jobs]
+    keys = [make_key(d) for d in descriptors]
+    logical_keys = [(j[0], j[4], j[2].name, j[3]) for j in jobs]
+    if len(set(logical_keys)) != len(jobs):
+        raise ValueError("duplicate experiment jobs")
+    plan = {"schema": 1, "model": client.settings.judge_model, "base_url": client.settings.base_url,
+            "openjudge_commit": commit, "jobs": sorted(descriptors, key=make_key)}
+    identity = make_key(plan)
+    run_dir = run_dir or output.parent / "runs" / output.stem
+    run_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = run_dir / "manifest.json"
+    active = run_dir / "active.lock"
+    try:
+        lock_fd = os.open(active, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        raise ValueError("run is active or interrupted; inspect active.lock and process state before resuming") from None
+    os.close(lock_fd)
+    try:
+        if manifest_path.exists():
+            manifest = json.loads(manifest_path.read_text())
+            if manifest["identity"] != identity:
+                raise ValueError("run manifest identity changed; use a new run directory and output")
+        elif output.exists():
+            raise ValueError("existing output has no identity manifest; preserve and migrate explicitly")
+        stored = {}
+        for key in keys:
+            path = run_dir / "rows" / f"{key}.json"
+            if path.exists():
+                row = json.loads(path.read_text())
+                if row.get("job_id") != key:
+                    raise ValueError("atomic row identity mismatch")
+                stored[key] = row
+        return _run_checkpointed(jobs, client, output, workers, run_dir, plan, identity, keys, stored, commit)
+    finally:
+        active.unlink(missing_ok=True)
+
+
+def _run_checkpointed(jobs: Sequence[Any], client: LLMClient, output: Path, workers: int,
+                      run_dir: Path, plan: dict[str, Any], identity: str, keys: list[str],
+                      stored: dict[str, Any], commit: str) -> dict[str, int]:
+    """Run under the exclusive run lock; per-job files are authoritative on recovery."""
+    def checkpoint() -> None:
+        atomic_text(output, "".join(json.dumps(stored[k], ensure_ascii=False, allow_nan=False) + "\n"
+                                   for k in keys if k in stored))
+        completed = [k for k in keys if k in stored and stored[k]["status"] == "ok"]
+        atomic_text(run_dir / "manifest.json", json.dumps({"identity": identity, "plan": plan,
+            "total_jobs": len(jobs), "completed": completed, "updated_at": utc_now()}, indent=2))
+
+    checkpoint()
     lock, stop = threading.Lock(), threading.Event()
     counts = {"run": 0, "skipped": 0, "error": 0}
 
-    def work(job: tuple[str, list[dict[str, Any]], JudgeConfig, int, str]) -> None:
+    def work(item: tuple[str, Any]) -> None:
+        key, job = item
         trace_id, messages, config, repeat_id, variant = job
         if stop.is_set():
             return
         row = judge_once(trace_id, messages, config, client, repeat_id, commit, variant)
+        row["job_id"] = key
         with lock:
-            with output.open("a", encoding="utf-8") as stream:
-                stream.write(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n")
+            atomic_text(run_dir / "rows" / f"{key}.json", json.dumps(row, ensure_ascii=False, allow_nan=False))
+            stored[key] = row
+            checkpoint()
             counts["run"] += 1
             counts["error"] += row["status"] != "ok"
         if row.get("fatal"):
             stop.set()
 
     todo = []
-    for job in jobs:
-        probe = {"trace_id": job[0], "variant": job[4], "config": job[2].name, "repeat_id": job[3]}
-        if row_key(probe) in done:
+    for key, job in zip(keys, jobs):
+        if key in stored and stored[key]["status"] == "ok":
             counts["skipped"] += 1
         else:
-            todo.append(job)
+            todo.append((key, job))
     with ThreadPoolExecutor(workers) as pool:
         list(pool.map(work, todo))
     counts["stopped_early"] = int(stop.is_set())

@@ -3,6 +3,22 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+import tempfile
+
+
+def atomic_text(path: Path, text: str) -> None:
+    """Replace a text artifact atomically, preserving its old value on failure."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def artifact_path(value: str, project_root: Path) -> Path:

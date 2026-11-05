@@ -43,7 +43,7 @@ def test_four_graders_write_required_schema_and_replay_without_network(settings:
     assert [row.grader for row in records]==["trajectory_accuracy","trajectory_comprehensive","action_loop_detection","observation_information_gain"]
     assert all(row.status=="ok" for row in records)
     assert records[0].score==2 and records[1].score==1
-    required={"trace_id","grader","score","reason","judge_model","thinking","openjudge_commit","timestamp","usage"}
+    required={"trace_id","grader","score","reason","judge_model","thinking","openjudge_commit","timestamp","usage","repeat_id"}
     assert all(required <= set(row.to_dict()) for row in records)
     assert all(row.judge_model is None and row.thinking is None and row.usage["api_calls"]==0 for row in records[2:])
     assert len(requests)==2
