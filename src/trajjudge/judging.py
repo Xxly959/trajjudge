@@ -126,14 +126,14 @@ async def _grade(messages: list[dict[str, Any]], config: JudgeConfig, client: LL
 
 
 def judge_once(trace_id: str, messages: list[dict[str, Any]], config: JudgeConfig, client: LLMClient,
-               repeat_id: int, commit: str, variant: str = "original") -> dict[str, Any]:
+               repeat_id: int, commit: str, variant: str = "original", phase: str = "p3") -> dict[str, Any]:
     """Grade one trajectory once; failures become error rows with a null score, never zeros."""
     row = base_row(trace_id, config, client.settings.judge_model, repeat_id, commit, variant=variant)
-    tag = f"p3/{trace_id}/{variant}/{config.name}/{repeat_id}"
+    tag = f"{phase}/{trace_id}/{variant}/{config.name}/{repeat_id}"
     try:
         result, bridge = asyncio.run(_grade(messages, config, client, repeat_id, tag))
     except LLMError as exc:
-        return {**row, "status": "error", "reason": str(exc), "fatal": "budget" in str(exc).lower()}
+        return {**row, "status": "error", "reason": str(exc), "fatal": True}
     except Exception as exc:  # grader/parse failure: keep the row explicit
         return {**row, "status": "error", "reason": f"{type(exc).__name__}: {str(exc)[:200]}"}
     results = bridge.results
@@ -185,7 +185,7 @@ def latest_rows(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def run_jobs(jobs: Sequence[tuple[str, list[dict[str, Any]], JudgeConfig, int, str]], client: LLMClient, output: Path,
-             *, workers: int = 8, run_dir: Path | None = None) -> dict[str, int]:
+             *, workers: int = 8, run_dir: Path | None = None, phase: str = "p3") -> dict[str, int]:
     """Run (trace_id, messages, config, repeat_id, variant) jobs concurrently, appending rows to ``output``.
 
     Existing ok rows are skipped (error rows are retried; use ``latest_rows`` to read). A fatal (budget) error stops scheduling new jobs.
@@ -198,7 +198,7 @@ def run_jobs(jobs: Sequence[tuple[str, list[dict[str, Any]], JudgeConfig, int, s
     logical_keys = [(j[0], j[4], j[2].name, j[3]) for j in jobs]
     if len(set(logical_keys)) != len(jobs):
         raise ValueError("duplicate experiment jobs")
-    plan = {"schema": 1, "model": client.settings.judge_model, "base_url": client.settings.base_url,
+    plan = {"schema": 1, "phase": phase, "model": client.settings.judge_model, "base_url": client.settings.base_url,
             "openjudge_commit": commit, "jobs": sorted(descriptors, key=make_key)}
     identity = make_key(plan)
     run_dir = run_dir or output.parent / "runs" / output.stem
@@ -225,14 +225,14 @@ def run_jobs(jobs: Sequence[tuple[str, list[dict[str, Any]], JudgeConfig, int, s
                 if row.get("job_id") != key:
                     raise ValueError("atomic row identity mismatch")
                 stored[key] = row
-        return _run_checkpointed(jobs, client, output, workers, run_dir, plan, identity, keys, stored, commit)
+        return _run_checkpointed(jobs, client, output, workers, run_dir, plan, identity, keys, stored, commit, phase)
     finally:
         active.unlink(missing_ok=True)
 
 
 def _run_checkpointed(jobs: Sequence[Any], client: LLMClient, output: Path, workers: int,
                       run_dir: Path, plan: dict[str, Any], identity: str, keys: list[str],
-                      stored: dict[str, Any], commit: str) -> dict[str, int]:
+                      stored: dict[str, Any], commit: str, phase: str) -> dict[str, int]:
     """Run under the exclusive run lock; per-job files are authoritative on recovery."""
     def checkpoint() -> None:
         atomic_text(output, "".join(json.dumps(stored[k], ensure_ascii=False, allow_nan=False) + "\n"
@@ -250,7 +250,7 @@ def _run_checkpointed(jobs: Sequence[Any], client: LLMClient, output: Path, work
         trace_id, messages, config, repeat_id, variant = job
         if stop.is_set():
             return
-        row = judge_once(trace_id, messages, config, client, repeat_id, commit, variant)
+        row = judge_once(trace_id, messages, config, client, repeat_id, commit, variant, phase)
         row["job_id"] = key
         with lock:
             atomic_text(run_dir / "rows" / f"{key}.json", json.dumps(row, ensure_ascii=False, allow_nan=False))

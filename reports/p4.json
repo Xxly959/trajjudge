@@ -1,0 +1,21 @@
+{
+  "phase": "p4",
+  "status": "pending",
+  "source": "outputs/p4/p4-deepseek-flash.jsonl",
+  "score_rows": 0,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "limitations": [
+    "Single provider and annotator; official scores partly LLM-derived, not truth.",
+    "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
+    "No significance claim; missing/error rows retained in coverage; task-cluster bootstrap CIs."
+  ],
+  "phase_usage": {
+    "calls": 0,
+    "cached_calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "cost_usd": 0.0,
+    "unpriced_models": []
+  }
+}

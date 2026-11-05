@@ -60,3 +60,15 @@ score-trajectories:
 
 phase1:
 	$(PY) scripts/run_phase1.py
+
+# These report targets read local artifacts only and never call a model.
+.PHONY: phase2 phase3 phase4 rule-controls
+phase2:
+	$(PY) scripts/report_experiments.py p2
+phase3:
+	$(PY) scripts/report_experiments.py p3
+phase4:
+	$(PY) scripts/report_experiments.py p4
+rule-controls:
+	$(PY) scripts/experiment.py controls
+	$(PY) scripts/report_experiments.py controls

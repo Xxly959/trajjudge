@@ -2,11 +2,11 @@
 
 ## Handover — 2026-11-05 CST
 
-- Current: judge resume/validation fixes implemented; verifying milestone.
-- Last result: six failing judge regressions now pass; model/input/cap drift rejected before requests; corrupt JSONL reconstructs from atomic rows.
-- Next: offline P2/P3/P4 report drivers and free P4 rule controls; no paid runs.
+- Current: offline stage drivers and free P4 rule controls implemented; review underway.
+- Last result: 900 free rule evaluations; loop changes 0/400, information-gain changes 177/400. P2/P3/P4 reports explicitly pending.
+- Next: independent review fixes, final draft docs, fresh source-clone tests, final evidence checks.
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
-- Blockers: human labels, new phase budgets, pro pricing, external submission authorization; no research conclusions yet.
+- Blockers: human labels, new phase budgets, external submission and final-claim approval. Pro pricing verified in separate pricing_p3.yaml; no pro call made.
 - Spend: conservative cumulative $2.700680 (P2 $2.681012; phase1 $0.019668), includes one estimated unknown call; new paid spend $0.
 - Balance: read-only API CNY 10.74; no opening balance/invoice, cannot fully reconcile.
 - Preservation: full backup `../my-project-backup-20261105-091258`; inherited edits committed as `10abb5e`.
@@ -24,3 +24,14 @@
    successful jobs, reject duplicate jobs and legacy unverified outputs. Stale lock
    after process death requires process inspection before removal. Comprehensive
    output must cover all tool batches exactly once; swallowed budget errors propagate.
+5. Offline analysis/driver: task-cluster bootstrap; paired repeat/variant joins;
+   phase2/3/4 Make targets return pending when no evidence. Canonical experiment.py
+   defaults to estimates, --offline forbids endpoint fallback, paid mode needs a
+   positive cap and reuses a saved cumulative ceiling (no renewed cap on resume).
+6. Free controls: original+8 variants ×50 traces ×2 rules =900 scores. Raw rows at
+   outputs/controls/controls-deepseek-flash.jsonl; reports/controls.json derives CIs.
+   This is all-selected exploratory rule behavior, not formal human-fail RQ3.
+7. Contribution: local isolated clone `.cache/openjudge-contribution`, branch
+   fix/trajectory-accuracy-raw-score, commit 8c7490e. Six mock tests pass, with two
+   upstream pytest config warnings (pytest-asyncio absent). Portable patch prepared;
+   original upstream checkouts untouched. Full upstream unit/quality suites not run.

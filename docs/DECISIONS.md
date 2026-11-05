@@ -314,3 +314,24 @@ framework failures; the failure-enriched sample is not population-representative
 Use complete annotation text, atomic CSV saves, no overwrites, and fresh blind
 repeat ids after >=2 days. Never infer, suggest or fill owner labels.
 
+# D27 Reproducible stage runs and lexical controls (2026-11-05)
+
+Use `scripts/experiment.py` as the canonical P2 judge/P3/P4/probe entry point.
+Historical stability/probe scripts delegate to it. Run manifests bind exact
+messages, model, generation configuration and OpenJudge commit; per-job atomic
+records are authoritative, JSONL is a recoverable projection. Resume preserves
+the original absolute spend ceiling rather than adding a new cap each invocation.
+Error rows remain null and retry through the same completion cache. A stale
+exclusive run lock requires inspecting processes, not blind deletion.
+
+Bootstrap by task id, keeping on/off trajectories and paired repeats together.
+Output variation alone cannot establish whether temperature was honored. Official
+scores never substitute for owner labels. Information-gain's lexical score can
+change under benign text insertion; report changes rather than demanding an
+unaffected rule control. Formal P4 is gated on complete owner labels and budget.
+
+Verified pro pricing is kept in `configs/pricing_p3.yaml` to preserve the historical
+phase1 pricing checksum. Source: https://api-docs.deepseek.com/quick_start/pricing/ .
+Verified 2026-11-05; pro peak input miss/output $1.32/$3.96 per million, off-peak
+$0.66/$1.98. This is planning support, not authorization for pro calls.
+
