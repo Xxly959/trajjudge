@@ -50,3 +50,16 @@ def test_agreement_reports_task_clusters_and_category_intervals() -> None:
     result = agreement_with_clusters(rows, resamples=40)
     assert result["bootstrap_clusters"] == 2
     assert result["graders"]["trajectory_accuracy"]["per_category"]["c"]["accuracy_ci"] == (1., 1.)
+
+
+def test_extra_repeats_are_not_silently_truncated() -> None:
+    rows = [row("a", i, score) for i, score in enumerate([1, 1, 1, 3, 3])]
+    with pytest.raises(ValueError, match="repeat"):
+        stability_report(rows, repeats=3)
+
+
+def test_retry_dedup_preserves_model_and_cap_identity() -> None:
+    from trajjudge.judging import latest_rows
+    original = row("a", 0, 1)
+    other = {**original, "judge_model": "another", "score": 3}
+    assert len(latest_rows([original, other])) == 2

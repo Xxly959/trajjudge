@@ -82,6 +82,8 @@ def stability_report(rows: Sequence[Mapping[str, Any]], *, repeats: int = 3, res
     """Summarize complete repeat panels; report incomplete panels separately."""
     if repeats < 3:
         raise ValueError("formal stability analysis needs at least three repeats")
+    if any(type(r["repeat_id"]) is not int or r["repeat_id"] not in range(repeats) for r in rows):
+        raise ValueError("observed repeat ids conflict with expected repeat panel; do not truncate")
     _check_unique(rows)
     groups: dict[tuple[Any, ...], list[Any]] = defaultdict(list)
     for row in rows:

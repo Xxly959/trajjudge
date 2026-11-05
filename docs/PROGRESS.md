@@ -4,7 +4,7 @@
 
 - Current: offline stage drivers and free P4 rule controls implemented; review underway.
 - Last result: 900 free rule evaluations; loop changes 0/400, information-gain changes 177/400. P2/P3/P4 reports explicitly pending.
-- Next: independent review fixes, final draft docs, fresh source-clone tests, final evidence checks.
+- Next: verify review fixes and delivery docs, fresh source-clone tests, final evidence checks.
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
 - Blockers: human labels, new phase budgets, external submission and final-claim approval. Pro pricing verified in separate pricing_p3.yaml; no pro call made.
 - Spend: conservative cumulative $2.700680 (P2 $2.681012; phase1 $0.019668), includes one estimated unknown call; new paid spend $0.
@@ -35,3 +35,11 @@
    fix/trajectory-accuracy-raw-score, commit 8c7490e. Six mock tests pass, with two
    upstream pytest config warnings (pytest-asyncio absent). Portable patch prepared;
    original upstream checkouts untouched. Full upstream unit/quality suites not run.
+8. Review: independent reviewer found extra repeats silently truncated and mixed
+   model/cap rows hidden by deduplication. Both reproduced as failing tests and
+   fixed; added CLI regression for a five-repeat manifest. Report now derives
+   repeats and verifies actual job ids against the manifest. Contribution retest
+   with an isolated pytest config: 6 passed without warnings.
+9. Draft delivery docs: runbook/budgets, incomplete research report, resume evidence,
+   Chinese walkthrough and ten interview answers, third-party release boundary,
+   local upstream PR draft. No final scientific claim has been approved.

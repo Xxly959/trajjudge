@@ -167,9 +167,12 @@ def rule_row(trace_id: str, messages: list[dict[str, Any]], name: str, commit: s
     return row
 
 
-def row_key(row: dict[str, Any]) -> tuple[str, str, str, int]:
+def row_key(row: dict[str, Any]) -> tuple[Any, ...]:
     """Identity of a row for resume logic."""
-    return (row["trace_id"], row.get("variant", "original"), row["config"], row["repeat_id"])
+    if row.get("job_id"):
+        return ("job", row["job_id"])
+    return (row["trace_id"], row.get("variant", "original"), row["config"], row["repeat_id"],
+            row.get("judge_model"), row.get("max_tokens"), row.get("openjudge_commit"))
 
 
 def load_rows(path: Path) -> list[dict[str, Any]]:

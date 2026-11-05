@@ -10,6 +10,27 @@ LLM graders evaluating agent trajectories. It connects
 not establish judge reliability, agreement with humans, stability or injection
 resistance. Human annotation and those experiments remain future work.
 
+**Working status, 2026-11-05:** recovery, a frozen blank blind-annotation kit,
+recoverable stage drivers and offline analysis are available. RQ1, RQ2 and formal
+LLM injection results remain pending owner labels and approved runs. The free
+rule-control report is exploratory. An OpenJudge fix is prepared locally and is
+unsubmitted. These are draft status statements, not approved resume conclusions.
+See [recovery](docs/STATE_RECOVERY.md), [current checkpoint](docs/PROGRESS.md),
+[runbook and proposed budgets](docs/EXPERIMENT_RUNBOOK.md),
+[incomplete research report](reports/FINAL_REPORT.md),
+[resume draft](docs/RESUME_NOTES.md), and [Chinese walkthrough](docs/WALKTHROUGH.md).
+
+```sh
+make test                     # offline, all model requests mocked
+make phase1                   # historical cache replay; needs restored evidence
+make phase2 phase3 phase4      # offline analysis; explicitly pending without data
+make rule-controls            # free deterministic perturbation controls
+.venvs/judge/bin/python scripts/annotate.py label   # owner only
+```
+
+Raw evidence, blank/filled label files and private mappings stay local and ignored.
+See [third-party provenance and release boundaries](docs/THIRD_PARTY.md).
+
 ## Research questions
 
 1. **Agreement:** how do trajectory graders compare with benchmark rubric scores
@@ -221,8 +242,8 @@ They test structure only; paid scoring uses original local traces.
   information gain. Native Accuracy clamping and Comprehensive empty-step fallback
   are guarded by raw score/schema checks, full step coverage and output completion.
 - The shared client owns 429/5xx/timeout backoff, timeout, disk cache and per-attempt
-  usage. SDK retries are disabled. Execution is serial; concurrent experiments
-  must not share a budget ledger. Unknown usage, corrupt ledgers or pending
+  usage. SDK retries are disabled. Stage jobs may share one locked client across
+  threads; separate paid processes must not share a budget ledger. Unknown usage, corrupt ledgers or pending
   accounting blocks new paid calls and prevents a complete-cost report.
 - Cache keys include endpoint, model, messages, tools, thinking, output format and
   supported parameters. Cache is checked first; offline misses fail without an

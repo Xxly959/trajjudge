@@ -14,6 +14,7 @@ from trajjudge.agreement import self_consistency
 from trajjudge.analysis import agreement_with_clusters, injection_report, join_labels, stability_report
 from trajjudge.annotation import read_labels
 from trajjudge.artifacts import atomic_text
+from trajjudge.cache import make_key
 from trajjudge.judging import load_rows, latest_rows
 from trajjudge.usage import UsageLog, load_pricing, summarize
 from dataclasses import asdict
@@ -24,11 +25,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=("p2", "p3", "p4", "probe", "controls"))
     parser.add_argument("--input", type=Path)
-    parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--repeats", type=int, help="must match the run manifest; required for legacy inputs")
     args = parser.parse_args()
     phase = args.phase
     path = args.input or root / "outputs" / phase / f"{phase}-deepseek-flash.jsonl"
     grades = latest_rows(load_rows(path))
+    manifest_path = root / "runs" / path.stem / "manifest.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else None
+    repeats = args.repeats
+    if phase == "p3" and grades:
+        if manifest and manifest.get("plan", {}).get("jobs"):
+            repeat_ids = sorted({d["repeat_id"] for d in manifest["plan"]["jobs"]})
+            if repeat_ids != list(range(len(repeat_ids))) or len(repeat_ids) < 3:
+                raise ValueError("manifest requires a contiguous panel of at least three repeats")
+            if repeats is not None and repeats != len(repeat_ids):
+                raise ValueError("repeat override conflicts with manifest")
+            repeats = len(repeat_ids)
+        elif repeats is None:
+            raise ValueError("legacy stability input requires explicit --repeats")
     meta = json.loads((root / "outputs/p2/annotation_meta.json").read_text())
     tasks = {r["trace_id"]: r["task_id"] for r in meta["chosen"]}
     result = {"phase": phase, "status": "pending", "source": str(path.relative_to(root)) if path.is_relative_to(root) else str(path),
@@ -62,7 +76,7 @@ def main() -> int:
             result["status"] = "descriptive_probe"
             result["limitations"].append("Output variety cannot prove the server honored or ignored temperature; request acceptance and distributions are distinct evidence.")
         elif phase == "p3":
-            result["analysis"] = stability_report(grades, repeats=args.repeats, task_ids=tasks)
+            result["analysis"] = stability_report(grades, repeats=repeats, task_ids=tasks)
             result["status"] = "complete" if all(g["incomplete_traces"] == 0 for g in result["analysis"]) else "partial"
         else:
             result["analysis"] = injection_report(grades, task_ids=tasks)
@@ -73,14 +87,17 @@ def main() -> int:
                 if any(r["trace_id"] not in allowed for r in grades):
                     raise ValueError("formal P4 evidence includes traces without an owner fail label")
             result["limitations"].append("Rule-control changes are lexical behavior, not evidence of LLM manipulation or defense effectiveness.")
-        manifest_path = root / "runs" / path.stem / "manifest.json"
-        if manifest_path.exists():
-            manifest = json.loads(manifest_path.read_text())
+        if manifest:
             planned = len(manifest.get("plan", {}).get("jobs", [])) or manifest.get("total_jobs", 0)
             result["planned_jobs"] = planned
             result["successful_rows"] = sum(r["status"] == "ok" for r in grades)
             if phase in ("p3", "p4") and result["successful_rows"] != planned:
                 result["status"] = "partial"
+            if manifest.get("plan", {}).get("jobs"):
+                planned_ids = {make_key(d) for d in manifest["plan"]["jobs"]}
+                actual_ids = {r.get("job_id") for r in grades}
+                if actual_ids != planned_ids:
+                    result["status"] = "partial_identity_mismatch"
         elif phase != "controls":
             result["status"] = "partial_missing_manifest"
     ledger = UsageLog(root / "outputs/usage/usage.jsonl").read()
