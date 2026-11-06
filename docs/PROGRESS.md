@@ -1,15 +1,16 @@
 # Progress
 
-## Handover — 2026-11-05 CST
+## Execution checkpoint — 2026-11-06 CST
 
-- Current: free continuation delivered; formal research awaits owner gates. No paid run or automation scheduled.
+- Current: owner approved P2 $0.80 and sampling probe $0.20, off-peak. Preflight complete; start P2 then probe sequentially.
+- Pre-batch estimates: P2 100 calls / peak $0.630398; probe 18 calls / peak $0.144169. Approval and exact commands: APPROVED_RUNS.md.
 - Last result: 170 project tests; fresh source-only clone also 170; guarded phase1 replay identical. Contribution: 12 unit passed, 2 quality deselected.
-- Next owner actions: label 50 blind traces; review EXPERIMENT_RUNBOOK budgets (P2 $0.80 and probe $0.20 proposed, unapproved).
-- Next agent command after budget approval: re-estimate, then use experiment.py p2/probe with approved --run --cap-usd and unique --run-id, off-peak only. Preserve the original budget.json ceiling on resume.
+- Next owner action: label 50 blind traces. Other P3/P4 and external-action budgets remain unapproved.
+- Next agent command: experiment.py p2 --run --cap-usd 0.80 --workers 2 --run-id p2-deepseek-flash; preserve original ceiling on resume.
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
 - Blockers: human labels, new phase budgets, external submission and final-claim approval. Pro pricing verified in separate pricing_p3.yaml; no pro call made.
 - Spend: conservative cumulative $2.700680 (P2 $2.681012; phase1 $0.019668), includes one estimated unknown call; new paid spend $0.
-- Balance: read-only API CNY 10.74; no opening balance/invoice, cannot fully reconcile.
+- Balance: 2026-11-06 read-only API CNY 10.60; prior CNY 10.74, unchanged project spend. Difference unattributed; no opening balance/invoice.
 - Preservation: full backup `../my-project-backup-20261105-091258`; inherited edits committed as `10abb5e`.
 - Working tree: code, tests and delivery docs committed at handover; raw artifacts and owner labels remain ignored local assets, untouched by the agent after blank-kit creation.
 
