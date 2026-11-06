@@ -45,3 +45,29 @@ Commands:
 Results and after-run reconciliation will be appended before handover. Raw
 requests/responses and per-trace scores remain ignored local evidence; no scores
 are shown in the blind annotation interface.
+
+### P2 stopped checkpoint, 2026-11-06 14:45 UTC
+
+Runner exit 1: 20/100 successful jobs, 21 result rows (one explicit error),
+`stopped_early=1`. The ledger has 20 successful completions and two additional
+unknown attempts, followed by successful retries. Original usage is unavailable;
+no ledger row was rewritten and no unknown attempt was treated as free.
+
+- Known-response stage usage: 180,465 input / 6,108 output tokens; conservative
+  peak-price subtotal **USD 0.061470**, excluding both unresolved attempts.
+- Overall known-record subtotal **USD 2.762149**. The client total remains
+  **UNKNOWN**, not this subtotal.
+- Planning reserve for unresolved attempts: approximately **USD 0.011710**,
+  using same-tag successful-retry input tokens plus configured output caps
+  (Accuracy 1,024; Comprehensive 3,072), at peak/cache-miss prices. Combined
+  subtotal plus estimated reserve: USD 2.773859. This is not actual recovered
+  usage or a reason to bypass the guard.
+- Read-only post-run balance **CNY 10.41**; no per-request charge reconciliation.
+- No live runner remains. Probe was not started; both original approvals remain
+  valid. Never reset the original P2 ceiling or add a fresh allowance on resume.
+
+Preserved: `runs/p2-deepseek-flash/{budget.json,manifest.json,rows/}`,
+`outputs/p2/p2-deepseek-flash.jsonl`, usage/cache, and
+`outputs/verification/p2-20261106-live.log`. Before another paid request, reconcile
+the unknown usage or document a conservative reservation without calling it
+actual usage; preserve originals. Formal RQ1 still needs owner labels.

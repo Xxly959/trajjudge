@@ -2,7 +2,7 @@
   "phase": "p2",
   "status": "pending",
   "source": "outputs/p2/p2-deepseek-flash.jsonl",
-  "score_rows": 0,
+  "score_rows": 21,
   "selected_traces": 50,
   "resamples": 2000,
   "limitations": [
@@ -17,11 +17,11 @@
     "trajectory_comprehensive": 0
   },
   "phase_usage": {
-    "calls": 877,
+    "calls": 899,
     "cached_calls": 17,
-    "prompt_tokens": 6350682,
-    "completion_tokens": 646506,
-    "cost_usd": 2.681012,
+    "prompt_tokens": 6531147,
+    "completion_tokens": 652614,
+    "cost_usd": null,
     "unpriced_models": []
   }
 }
