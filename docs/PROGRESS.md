@@ -2,11 +2,11 @@
 
 ## Execution checkpoint — 2026-11-07 CST
 
-- Current: unknown-attempt budget reservations implemented and independently reviewed. Apply legacy overlay, resume original P2 ceiling, then approved probe; Saturday off-peak.
+- Current: legacy reservation overlay applied; original P2 run actively resumed (40/100 successful at checkpoint), same absolute ceiling. Probe waits for P2 completion; Saturday off-peak.
 - Pre-batch estimates: P2 100 calls / peak $0.630398; probe 18 calls / peak $0.144169. Approval and exact commands: APPROVED_RUNS.md.
 - Last result: 173 offline tests pass; unknown actual usage stays unknown, conservative reservations are separate, unchanged ceilings still enforced. Earlier clone test: 170; contribution: 12 unit passed.
 - Next owner action: label 50 blind traces. Other P3/P4 and external-action budgets remain unapproved.
-- Next agent action: reserve_unknown.py --apply, then experiment.py p2 --run --cap-usd 0.80 --workers 2 --run-id p2-deepseek-flash. Budget approval persists; original $3.500680 absolute ceiling remains.
+- Next agent action: monitor current runner (do not launch a duplicate), record P2 result/cost and commit, then launch approved probe with cap $0.20.
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
 - Blockers: human labels, other phase budgets, external submission and final-claim approval. Original actual usage of two attempts remains unknown; evidence-backed budget reservations allow bounded continuation.
 - Spend: actual cumulative accounting UNKNOWN. Reservation-inclusive conservative budget cost $2.794060 before resume; known-record subtotal $2.762149. Preserve separation from invoice/actual usage.
