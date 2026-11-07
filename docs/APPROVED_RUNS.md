@@ -94,3 +94,18 @@ directly as budget-only metadata; absent evidence still blocks paid calls.
 Independent review found no blocking defect. Full offline suite: 173 passed.
 Resume exact original P2 manifest/ceiling and cached successes, then run the
 approved 18-call probe. Other P3/P4/pro runs remain unapproved.
+
+### P2 complete; probe pre-batch checkpoint (2026-11-07)
+
+P2 runner returned exit 0: 80 jobs run, 20 skipped from original successes,
+zero errors, no early stop. Authoritative manifest has **100/100 ok**. No new
+unknown attempt arose during continuation; original two remain unknown with
+separate reservations. Cumulative conservative budget accounting: **$3.021982**,
+below unchanged P2 ceiling $3.500680. Increment relative to original $2.700680
+starting guard amount is approximately **$0.321302**, below approved $0.80.
+
+Before probe: same frozen plan, **18 calls**, peak planning estimate **$0.144169**,
+approved cap **$0.20**, no existing probe budget/manifest. New probe ceiling will
+be $3.221982 (current reservation-inclusive guard amount plus its separate cap).
+Saturday remains off-peak. Use `probe-deepseek-flash`, two worker threads, and
+never enlarge the allowance on resume. Human labels and RQ1 conclusions remain pending.
