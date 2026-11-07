@@ -109,3 +109,20 @@ approved cap **$0.20**, no existing probe budget/manifest. New probe ceiling wil
 be $3.221982 (current reservation-inclusive guard amount plus its separate cap).
 Saturday remains off-peak. Use `probe-deepseek-flash`, two worker threads, and
 never enlarge the allowance on resume. Human labels and RQ1 conclusions remain pending.
+
+### Probe reservation stop and safer operational retry policy
+
+First probe invocation: nine paid, known-usage responses; six valid grades and
+three invalid high-temperature outputs (thinking off, temperature 1.5). One
+thinking-on job was blocked before network by the worst-case retry reservation;
+runner exit 1, 10 attempted result rows, stopped_early=1. The three invalid
+responses stay errors, not repaired scores. Successful-response cost subtotal
+was $0.030854, well below the approved $0.20, and no unknown attempt was added.
+
+Resume the exact manifest and saved $3.221982 ceiling with **one worker and one
+transport attempt per completion**. This reduces maximum simultaneous/retry
+liability without changing model prompts, temperature, caps, repeats or budget.
+Already cached invalid completions are revalidated without paying again; do not
+try a new model sample to hide their format failures. New transport failures will
+still stop the runner and record conservative bounds. The new max-attempts CLI
+option is unit tested to preserve the original approved cap.

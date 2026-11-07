@@ -48,3 +48,15 @@ def test_stage_budget_does_not_reset_when_resumed(cli, monkeypatch, tmp_path):
     monkeypatch.setattr("sys.argv", ["experiment", "p2", "--run", "--cap-usd", "2"])
     with pytest.raises(ValueError, match="original stage cap"):
         cli.main()
+
+
+def test_single_attempt_policy_preserves_probe_cap(cli, monkeypatch):
+    observed = []
+    def mocked_run(jobs, client, *args, **kwargs):
+        observed.append((client.max_attempts, client.settings.budget_usd, kwargs["workers"]))
+        return {"error": 0, "stopped_early": 0}
+    monkeypatch.setattr(cli, "run_jobs", mocked_run)
+    monkeypatch.setattr("sys.argv", ["experiment", "probe", "--run", "--cap-usd", ".2",
+                                   "--max-attempts", "1", "--workers", "1"])
+    assert cli.main() == 0
+    assert observed == [(1, .2, 1)]

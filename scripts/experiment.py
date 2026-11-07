@@ -73,10 +73,11 @@ def main() -> int:
     parser.add_argument("--grid-traces", type=int, default=10)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--max-attempts", type=int, default=3, help="transport attempts per completion; does not change sampling parameters")
     parser.add_argument("--run-id")
     parser.add_argument("--limit", type=int, default=0, help="fixed trace-id ordered pilot subset; 0 means all")
     args = parser.parse_args()
-    if args.repeats < 3 or args.grid_traces < 0 or args.workers < 1:
+    if args.repeats < 3 or args.grid_traces < 0 or args.workers < 1 or args.max_attempts < 1:
         parser.error("need repeats>=3, grid-traces>=0 and workers>=1")
     if args.run and (args.cap_usd is None or not math.isfinite(args.cap_usd) or args.cap_usd <= 0):
         parser.error("paid execution needs an explicitly approved positive --cap-usd")
@@ -163,7 +164,7 @@ def main() -> int:
                       "basis": "known conservative costs plus unknown-attempt reservations; not actual billing"}
             atomic_text(budget_path, json.dumps(budget, indent=2))
         settings = replace(settings, budget_usd=budget["ceiling_usd"])
-    client = LLMClient(settings, offline=args.offline)
+    client = LLMClient(settings, offline=args.offline, max_attempts=args.max_attempts)
     counts = run_jobs(jobs, client, output, workers=args.workers, run_dir=run_dir, phase=args.phase)
     print(json.dumps(counts))
     return int(bool(counts["error"] or counts["stopped_early"]))

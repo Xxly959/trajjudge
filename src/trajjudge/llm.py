@@ -393,7 +393,7 @@ class LLMClient:
         ) / 1_000_000
         budget = self.settings.budget_usd
         if not math.isfinite(budget) or budget <= 0 or accounted + self._reserved + reserve > budget:
-            raise LLMError("phase-1 budget would be exceeded; request blocked")
+            raise LLMError("approved budget would be exceeded; request blocked")
         return reserve
 
     def _mark_pending(self) -> None:
