@@ -2,15 +2,15 @@
 
 ## Execution checkpoint — 2026-11-07 CST
 
-- Current: P2 complete 100/100. Probe stopped at six valid +three invalid responses and one pre-network reservation error; resume unchanged ceiling with one worker/one transport attempt.
+- Current: approved execution finished. P2 100/100 valid; probe 18 observations, 15 valid/3 errors, 17 new calls +1 P2 cache reuse. Both cache replays match; no live runner remains.
 - Pre-batch estimates: P2 100 calls / peak $0.630398; probe 18 calls / peak $0.144169. Approval and exact commands: APPROVED_RUNS.md.
-- Last result: 173 offline tests pass; unknown actual usage stays unknown, conservative reservations are separate, unchanged ceilings still enforced. Earlier clone test: 170; contribution: 12 unit passed.
+- Last result: 175 offline tests pass. P2/probe cache replays match all verdicts; historical phase1 replay is byte-identical after fixing offline-vs-later-live-accounting coupling. Earlier clone test: 170; contribution: 12 unit passed.
 - Next owner action: label 50 blind traces. Other P3/P4 and external-action budgets remain unapproved.
-- Next agent action: experiment.py probe --run --cap-usd 0.20 --workers 1 --max-attempts 1 --run-id probe-deepseek-flash. Keep existing $3.221982 ceiling, preserve format errors, then offline replay/report.
+- Next: owner completes blind annotation; agent then runs make phase2 (offline). P3 full/P4 require new explicit budgets. No additional paid calls are scheduled; current authorized execution is finished.
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
 - Blockers: human labels, other phase budgets, external submission and final-claim approval. Original actual usage of two attempts remains unknown; evidence-backed budget reservations allow bounded continuation.
-- Spend: actual cumulative accounting UNKNOWN (two original attempts). Reservation-inclusive conservative budget cost $3.021982 after P2; P2 increment approximately $0.321302/$0.80. No new unknown attempts during resume.
-- Balance: 2026-11-06 post-run CNY 10.41 (pre-run 10.60); no per-request invoice. Full stopped checkpoint: APPROVED_RUNS.md.
+- Spend: actual accounting UNKNOWN for two original attempts. Conservative run costs P2 $0.321302 +probe $0.065370 =$0.386672/$1.00; cumulative with reservations $3.087352. No new unknown attempts during continuation.
+- Balance: 2026-11-07 post-run CNY 9.70 (continuation pre-run 10.41); no per-request invoice. Full record: APPROVED_RUNS.md.
 - Preservation: full backup `../my-project-backup-20261105-091258`; inherited edits committed as `10abb5e`.
 - Working tree: code, tests and delivery docs committed at handover; raw artifacts and owner labels remain ignored local assets, untouched by the agent after blank-kit creation.
 

@@ -10,11 +10,15 @@ LLM graders evaluating agent trajectories. It connects
 not establish judge reliability, agreement with humans, stability or injection
 resistance. Human annotation and those experiments remain future work.
 
-**Working status, 2026-11-05:** recovery, a frozen blank blind-annotation kit,
+**Working status, 2026-11-07:** recovery, a frozen blind-annotation kit,
 recoverable stage drivers and offline analysis are available. RQ1, RQ2 and formal
 LLM injection results remain pending owner labels and approved runs. The free
 rule-control report is exploratory. An OpenJudge fix is prepared locally and is
 unsubmitted. These are draft status statements, not approved resume conclusions.
+P2's main judge run now has 100/100 valid verdicts. The single-case sampling probe
+has 18 observations (17 new calls plus one cache reuse), 15 valid and three genuine
+format errors. Both runs replay from cache. Coverage does not establish correctness;
+the probe does not establish general stability. See [execution record](docs/APPROVED_RUNS.md).
 See [recovery](docs/STATE_RECOVERY.md), [current checkpoint](docs/PROGRESS.md),
 [runbook and proposed budgets](docs/EXPERIMENT_RUNBOOK.md),
 [incomplete research report](reports/FINAL_REPORT.md),

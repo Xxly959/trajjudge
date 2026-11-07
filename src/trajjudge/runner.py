@@ -144,7 +144,9 @@ async def _one(trace: AdaptedTrace, name: str, client: LLMClient, commit: str, a
         metadata["transport_failure"] = bridge.failure
         row.status, row.score = "error", None
     budget = summarize(client.usage_log.read(), load_pricing(client.settings.pricing_file))
-    if llm and (budget.cost_usd is None or budget.cost_usd > client.settings.budget_usd or client._pending_path.exists()):
+    # A strictly offline cache replay creates no new liability. Keep global live
+    # spend protections without invalidating historical verdicts for later runs.
+    if llm and not client.offline and (budget.cost_usd is None or budget.cost_usd > client.settings.budget_usd or client._pending_path.exists()):
         metadata["fatal"] = True
         row.status, row.score = "error", None
     return row

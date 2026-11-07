@@ -51,6 +51,16 @@ cache-hit ledger records and error/null rows; they do not add paid cost.
 
 ## Proposed budgets — not approved
 
+Update 2026-11-07: the owner approved P2 $0.80 and probe $0.20; execution is in
+`APPROVED_RUNS.md`. Other rows remain proposals. P2 completed 100/100; probe has
+18 observations, 15 valid/3 preserved errors, 17 new calls and one P2 cache reuse.
+Do not restart paid jobs to make invalid rows pass. Original manifests/caches
+reproduce the same outcomes offline.
+
+Unknown actual usage stays unknown. Budget-only reservations use request byte
+bounds and output caps, not measured tokens or exact charges. Overlays fingerprint
+original records without rewriting them; unmatched evidence still blocks work.
+
 Measured planning inputs are the complete frozen messages; input tokens use a
 character approximation plus prompt overhead and outputs use configured caps.
 Peak/cache-miss prices are conservative relative to time/cache discounts, but

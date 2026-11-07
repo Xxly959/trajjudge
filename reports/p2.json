@@ -2,9 +2,13 @@
   "phase": "p2",
   "status": "pending",
   "source": "outputs/p2/p2-deepseek-flash.jsonl",
-  "score_rows": 21,
+  "score_rows": 100,
   "selected_traces": 50,
   "resamples": 2000,
+  "latest_row_usage": {
+    "api_calls": 100,
+    "cached_calls": 0
+  },
   "limitations": [
     "Single provider and annotator; official scores partly LLM-derived, not truth.",
     "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
@@ -17,11 +21,16 @@
     "trajectory_comprehensive": 0
   },
   "phase_usage": {
-    "calls": 899,
-    "cached_calls": 17,
-    "prompt_tokens": 6531147,
-    "completion_tokens": 652614,
+    "calls": 1083,
+    "cached_calls": 121,
+    "prompt_tokens": 7199942,
+    "completion_tokens": 675350,
     "cost_usd": null,
     "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 3.002314,
+    "unknown_attempts": 2,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
   }
 }

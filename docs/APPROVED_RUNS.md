@@ -112,7 +112,8 @@ never enlarge the allowance on resume. Human labels and RQ1 conclusions remain p
 
 ### Probe reservation stop and safer operational retry policy
 
-First probe invocation: nine paid, known-usage responses; six valid grades and
+First probe invocation: nine response observations (eight new API calls and one
+P2 cache reuse); six valid grades and
 three invalid high-temperature outputs (thinking off, temperature 1.5). One
 thinking-on job was blocked before network by the worst-case retry reservation;
 runner exit 1, 10 attempted result rows, stopped_early=1. The three invalid
@@ -126,3 +127,33 @@ Already cached invalid completions are revalidated without paying again; do not
 try a new model sample to hide their format failures. New transport failures will
 still stop the runner and record conservative bounds. The new max-attempts CLI
 option is unit tested to preserve the original approved cap.
+
+### Completed approved execution (2026-11-07)
+
+| Run | Original observations | Valid / error | New completion responses | Conservative run budget cost USD | Cap USD |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| P2 main | 100 | 100 / 0 | 100, plus two original unknown attempts | 0.321302 including unknown reservations | 0.80 |
+| Probe | 18 | 15 / 3 | 17, plus one reused P2 cache entry | 0.065370 | 0.20 |
+
+Probe continuation returned exit 1 because three genuine invalid outputs remain
+errors; stopped_early=0 and all 18 planned rows are present. Errors are thinking-off,
+temperature 1.5: one length cap and two missing-schema-field outputs. Other five
+groups have 3/3 valid scores. No parameter-rejection HTTP result was observed.
+No output was repaired or resampled to hide failures.
+
+Valid scores happen to be 3 throughout this one-case probe. This does not prove
+temperature is ignored or honored, or establish judge stability. Thinking-off/on
+caps differ (1,024 /4,096); off/default/repeat-0 is an earlier P2 sample, not a
+fresh probe call. Preserve that cross-phase reuse in later analysis.
+
+Cache replays: P2 **100 cached, 0 API**; probe **18 cached, 0 API**. Every job's
+score/status/model/thinking/temperature/cap/repeat matched, including errors.
+Replay exits P2=0, probe=1 (expected error preservation). Use `--offline` with
+separate `*-replay` run ids.
+
+Combined approved-run conservative budget cost **$0.386672 / $1.00**. Cumulative
+reservation-inclusive guard amount **$3.087352**; reported-usage-only conservative
+subtotal **$3.055441**. Actual cumulative accounting stays UNKNOWN for two original
+attempts, separately reserved. Post-run balance **CNY 9.70**; no exact invoice or
+currency reconciliation claimed. No pro/P3 full/P4 calls, external writes or
+owner-label edits were performed.

@@ -1,6 +1,6 @@
 # Audit delivery report — incomplete research draft
 
-Date: 2026-11-05 CST. Owner review is required before publishing conclusions or
+Updated: 2026-11-07 CST. Owner review is required before publishing conclusions or
 resume wording. This report distinguishes verified engineering and free lexical
 controls from experiments that still require human work and approved API spend.
 
@@ -50,10 +50,25 @@ templates: `src/trajjudge/perturb.py` at the project commit in Git history.
 
 ## Pending research
 
+Approved execution update: the P2 main judge now has **100/100 valid verdicts**
+(50 traces ×two graders). Human annotation remains absent, so this is scoring
+coverage, not evidence of correctness. The one-case sampling probe has 18
+observations, **15 valid /3 errors**, from 17 new API completions plus one P2
+cache reuse. All three errors are thinking-off/temperature=1.5: two schema-field
+failures and one capped completion. Other groups have three valid scores each.
+
+All valid probe scores are 3. Temperature requests received model responses,
+but this does not prove server parameter semantics. Thinking caps differ
+(off1,024/on4,096), the sample is one trajectory, and a baseline observation was
+reused from P2. No significance or general stability/quality conclusion follows.
+Raw source: `outputs/probe/probe-deepseek-flash.jsonl`; aggregate:
+[probe.json](probe.json). Cache replays reproduce all 100 P2 and 18 probe outcomes,
+including errors, with zero API calls. Run details: [APPROVED_RUNS](../docs/APPROVED_RUNS.md).
+
 | Question | Current state | Required evidence |
 | --- | --- | --- |
-| RQ1 agreement | P2 report pending | Owner labels, delayed re-label round, approved fixed-configuration judge run |
-| RQ2 stability | P3 report pending | Sampling probe and >=3 real repeats, flash/pro, thinking and strategy factors |
+| RQ1 agreement | Judge scoring complete; human comparison pending | Owner labels and delayed re-label round |
+| RQ2 stability | Single-case probe only; formal P3 pending | Multiple trajectories, >=3 repeats, flash/pro, thinking and strategy factors |
 | RQ3 LLM injection | P4 report pending | Actual owner-fail set, budget, matched original/variant/defense repeats |
 | Upstream contribution | Local branch + portable patch + draft | Owner authorization, maintainer review; acceptance is not established |
 
@@ -68,12 +83,17 @@ can yield undefined or degenerate intervals; none establishes significance.
 
 ## Cost and provenance
 
-Historical conservative cumulative spend: **$2.700680**, including one
-`unknown_reconciled` estimated request. P2 accounts for $2.681012; phase1 for
-$0.019668. The continuation made **zero paid completions**. Read-only balance
-returned CNY10.74; no opening balance/invoice is available, so there is no complete
-provider charge reconciliation. Discounts and exchange rates prevent treating
-the peak USD estimate as exact deductions.
+At recovery, the historical conservative subtotal was **$2.700680**, including
+one `unknown_reconciled` estimate (P2 $2.681012, phase1 $0.019668). Approved execution
+added conservative budget costs P2 **$0.321302 /$0.80** and probe
+**$0.065370 /$0.20**, combined **$0.386672 /$1.00**. This includes request-bound
+reservations for two unknown attempts, not fabricated measured tokens.
+
+Current cumulative reservation-inclusive guard amount: **$3.087352**. Original
+actual usage for two attempts remains UNKNOWN; reported-usage-only conservative
+subtotal is $3.055441. Post-run balance CNY9.70 is not a per-request invoice.
+Discounts, other account activity and exchange rates prevent exact reconciliation.
+See APPROVED_RUNS for unchanged ceilings, evidence and the separate budget policy.
 
 Pinned read-only dependencies: Claw-Eval
 `5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7`, MIT; OpenJudge

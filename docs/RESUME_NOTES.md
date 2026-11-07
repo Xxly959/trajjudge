@@ -14,6 +14,12 @@ rule behavior and completed research are kept distinct.
   `outputs/claw_eval/p2/{flash-think-off,flash-think-on}/manifest.jsonl`, checked
   against native trace grading events and request sidecars.
   These use benchmark sandbox/mock services, not production user tasks.
+- Scored 50 frozen traces with two native LLM graders: 100 valid verdicts;
+  source `outputs/p2/p2-deepseek-flash.jsonl`, reproducible from response cache.
+  Valid schema/scale checks do not mean human agreement or correct grading.
+- Single-case sampling probe: 18 observations, 15 valid/3 errors; 17 new
+  completion calls plus one inherited P2 cache sample. Source `reports/probe.json`
+  and `outputs/probe/probe-deepseek-flash.jsonl`. This is not a formal stability result.
 - Prepared 50 blank blind annotation items across 36 tasks, with immutable source
   hashes and owner-only labels. Source: `outputs/p2/annotation_meta.json`,
   `outputs/p2/annotation_set.json`, `annotation/labels.csv`. These are selected
@@ -35,7 +41,9 @@ defensive perturbation experiments with task-cluster confidence intervals.”
 
 Only add completed human agreement, stability or LLM injection numbers after
 the owner labels data, approves real runs and reviews the final report. Current
-conservative historical cost is $2.700680, not an exact invoice; see STATE_RECOVERY.
+recovery subtotal was $2.700680. Current actual accounting remains unknown for two
+attempts; reservation-inclusive conservative guard amount is $3.087352, not an
+invoice. See APPROVED_RUNS for the completed $0.80/$0.20 authorized execution.
 
 ## Unsupported claims
 

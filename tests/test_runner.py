@@ -16,6 +16,27 @@ from trajjudge.llm import LLMClient
 FIXTURES = Path(__file__).parent / "fixtures" / "claw_s5"
 
 
+def test_offline_replay_survives_unrelated_later_unknown_cost(settings: Settings, tmp_path: Path) -> None:
+    from dataclasses import replace
+    from trajjudge.runner import run_graders
+    from trajjudge.usage import UsageRecord, utc_now
+    responses = [reply({"score": 2, "reason": "Synthetic mock"}), reply(evaluations())]
+    requests = []
+    def transport(request):
+        requests.append(request)
+        return responses.pop(0)
+    client = LLMClient(settings, transport=transport)
+    assert all(r.status == "ok" for r in run_graders([trace()], client))
+    client.usage_log.append(UsageRecord(timestamp=utc_now(), tag="unrelated/later-stage", model="judge-test",
+        thinking=False, prompt_tokens=0, completion_tokens=0, latency_ms=1, cached=False,
+        status="unknown", usage_known=False))
+    replay = run_graders([trace()], LLMClient(replace(settings, budget_usd=.00000001), offline=True))
+    assert len(replay) == 4 and all(r.status == "ok" for r in replay)
+    assert sum(r.usage["api_calls"] for r in replay) == 0
+    assert sum(r.usage["cached_calls"] for r in replay) == 2
+    assert len(requests) == 2
+
+
 def reply(body: dict[str, Any]) -> dict[str, Any]:
     return {"id":"mock", "object":"chat.completion", "created":1, "model":"judge-test",
             "choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":json.dumps(body)}}],
