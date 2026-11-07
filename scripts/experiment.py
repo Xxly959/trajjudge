@@ -21,7 +21,7 @@ from trajjudge.config import load_settings
 from trajjudge.judging import JudgeConfig, LLM_GRADERS, RULE_GRADERS, openjudge_commit, rule_row, run_jobs
 from trajjudge.llm import LLMClient
 from trajjudge.perturb import TEMPLATES, LOCATIONS, inject
-from trajjudge.usage import load_pricing, summarize
+from trajjudge.usage import load_pricing, summarize, budget_cost, load_reservations
 
 
 def frozen_traces() -> dict[str, list[dict]]:
@@ -156,10 +156,11 @@ def main() -> int:
             if budget["stage_cap_usd"] != args.cap_usd:
                 raise ValueError("resume must preserve original stage cap")
         else:
-            before = summarize(LLMClient(settings).usage_log.read(), load_pricing(settings.pricing_file)).cost_usd
+            before = budget_cost(LLMClient(settings).usage_log.read(), load_pricing(settings.pricing_file), load_reservations(settings.usage_log))
             if before is None:
                 raise ValueError("historical spend unknown; reconcile first")
-            budget = {"stage_cap_usd": args.cap_usd, "spent_before_usd": before, "ceiling_usd": before + args.cap_usd}
+            budget = {"stage_cap_usd": args.cap_usd, "spent_before_usd": before, "ceiling_usd": before + args.cap_usd,
+                      "basis": "known conservative costs plus unknown-attempt reservations; not actual billing"}
             atomic_text(budget_path, json.dumps(budget, indent=2))
         settings = replace(settings, budget_usd=budget["ceiling_usd"])
     client = LLMClient(settings, offline=args.offline)

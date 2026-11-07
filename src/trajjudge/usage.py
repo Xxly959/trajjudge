@@ -12,6 +12,7 @@ import json
 import threading
 import math
 import os
+from .cache import make_key
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_CEILING
@@ -199,3 +200,62 @@ def summarize(records: Iterable[UsageRecord], pricing: Mapping[str, Price]) -> U
     elif summary.cost_usd is not None:
         summary.cost_usd = float(cost.quantize(Decimal("0.000001"), rounding=ROUND_CEILING))
     return summary
+
+
+def record_id(record: UsageRecord) -> str:
+    """Fingerprint an unchanged ledger record for an external budget reservation."""
+    return make_key(record.to_dict())
+
+
+def load_reservations(usage_path: Path) -> dict[str, Any]:
+    """Read the optional reservation overlay; malformed evidence blocks paid work."""
+    path = usage_path.with_suffix(".reservations.json")
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text())
+    if data.get("schema") != 1 or not isinstance(data.get("entries"), dict):
+        raise ValueError("invalid budget reservation overlay")
+    return data["entries"]
+
+
+def request_reservation(request: Mapping[str, Any], price: Price) -> dict[str, Any]:
+    """Record the same conservative bound as the request guard, never actual usage."""
+    from .cache import canonical_json
+    return {"basis": "request_byte_bound_v1", "request_sha256": make_key(request),
+            "input_token_bound": len(canonical_json(request).encode("utf-8")) + 4096,
+            "max_output_tokens": request["max_tokens"], "input_per_mtok": price.input_per_mtok,
+            "output_per_mtok": price.output_per_mtok}
+
+
+def budget_cost(records: Iterable[UsageRecord], pricing: Mapping[str, Price],
+                reservations: Mapping[str, Any] | None = None) -> float | None:
+    """Return known conservative cost plus documented unknown-attempt reservations.
+
+    This is a spending guard, not an invoice or recovered token usage. ``summarize``
+    continues to report actual accounting unknown. Uncovered or invalid unknowns
+    still return ``None``. Stored/current prices use the larger rate.
+    """
+    records = list(records)
+    known = summarize([r for r in records if r.usage_known], pricing).cost_usd
+    if known is None:
+        return None
+    total = Decimal(str(known))
+    for row in records:
+        if row.cached or row.endpoint == "models" or row.usage_known:
+            continue
+        spec = row.raw_usage.get("budget_reservation", (reservations or {}).get(record_id(row)))
+        if not isinstance(spec, dict) or spec.get("basis") != "request_byte_bound_v1" or row.model not in pricing:
+            return None
+        digest = spec.get("request_sha256", "")
+        if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+            return None
+        inputs, outputs = spec.get("input_token_bound"), spec.get("max_output_tokens")
+        if any(type(v) is not int or v <= 0 for v in (inputs, outputs)):
+            return None
+        rates = [spec.get("input_per_mtok"), spec.get("output_per_mtok")]
+        if any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in rates):
+            return None
+        price = pricing[row.model]
+        total += (Decimal(inputs) * Decimal(str(max(price.input_per_mtok, rates[0])))
+                  + Decimal(outputs) * Decimal(str(max(price.output_per_mtok, rates[1])))) / Decimal(1_000_000)
+    return float(total.quantize(Decimal("0.000001"), rounding=ROUND_CEILING))

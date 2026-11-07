@@ -16,7 +16,7 @@ from trajjudge.annotation import read_labels
 from trajjudge.artifacts import atomic_text
 from trajjudge.cache import make_key
 from trajjudge.judging import load_rows, latest_rows
-from trajjudge.usage import UsageLog, load_pricing, summarize
+from trajjudge.usage import UsageLog, load_pricing, summarize, budget_cost, load_reservations
 from dataclasses import asdict
 
 
@@ -106,6 +106,11 @@ def main() -> int:
             result["status"] = "partial_missing_manifest"
     ledger = UsageLog(root / "outputs/usage/usage.jsonl").read()
     result["phase_usage"] = asdict(summarize([r for r in ledger if r.tag.startswith(phase + "/")], load_pricing(root / "configs/pricing_p3.yaml")))
+    phase_records = [r for r in ledger if r.tag.startswith(phase + "/")]
+    result["budget_accounting"] = {"conservative_cost_with_reservations_usd": budget_cost(
+        phase_records, load_pricing(root / "configs/pricing_p3.yaml"), load_reservations(root / "outputs/usage/usage.jsonl")),
+        "unknown_attempts": sum(not r.cached and not r.usage_known for r in phase_records),
+        "basis": "budget-only bounds; unknown original token usage remains unknown"}
     atomic_text(root / "reports" / f"{phase}.json", json.dumps(result, indent=2, allow_nan=False) + "\n")
     print(json.dumps({"phase": phase, "status": result["status"], "score_rows": len(grades)}))
     return 0

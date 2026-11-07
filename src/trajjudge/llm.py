@@ -25,7 +25,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from .cache import DiskCache, canonical_json, make_key
 from .config import Settings
-from .usage import UsageLog, UsageRecord, load_pricing, summarize, utc_now
+from .usage import UsageLog, UsageRecord, load_pricing, summarize, utc_now, budget_cost, load_reservations, request_reservation
 
 Message = dict[str, Any]
 Transport = Callable[[dict[str, Any]], Any]
@@ -383,8 +383,8 @@ class LLMClient:
         price = prices.get(request["model"])
         if price is None:
             raise LLMError("verified pricing required before paid requests")
-        summary = summarize(self.usage_log.read(), prices)
-        if summary.cost_usd is None:
+        accounted = budget_cost(self.usage_log.read(), prices, load_reservations(self.usage_log.path))
+        if accounted is None:
             raise LLMError("budget accounting unknown; reconcile usage and pricing first")
         input_bound = len(canonical_json(request).encode("utf-8")) + 4096
         reserve = self.max_attempts * (
@@ -392,7 +392,7 @@ class LLMClient:
             + request["max_tokens"] * price.output_per_mtok
         ) / 1_000_000
         budget = self.settings.budget_usd
-        if not math.isfinite(budget) or budget <= 0 or summary.cost_usd + self._reserved + reserve > budget:
+        if not math.isfinite(budget) or budget <= 0 or accounted + self._reserved + reserve > budget:
             raise LLMError("phase-1 budget would be exceeded; request blocked")
         return reserve
 
@@ -419,10 +419,13 @@ class LLMClient:
             except Exception as exc:
                 status = _field(exc, "status_code")
                 known_rejection = isinstance(status, int) and 400 <= status < 500 and status != 408
+                price = load_pricing(self.settings.pricing_file).get(request["model"])
+                evidence = {} if known_rejection or price is None else {"budget_reservation": request_reservation(request, price)}
                 self.usage_log.append(UsageRecord(
                     timestamp=utc_now(), tag=tag, model=request["model"], thinking=thinking,
                     prompt_tokens=0, completion_tokens=0, latency_ms=(time.monotonic() - attempt_started) * 1000, cached=False,
                     status="rejected" if known_rejection else "unknown", usage_known=known_rejection,
+                    raw_usage=evidence,
                 ))
                 self._clear_pending()
                 if attempt >= self.max_attempts or not _is_retryable(exc):

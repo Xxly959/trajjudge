@@ -71,3 +71,26 @@ Preserved: `runs/p2-deepseek-flash/{budget.json,manifest.json,rows/}`,
 `outputs/verification/p2-20261106-live.log`. Before another paid request, reconcile
 the unknown usage or document a conservative reservation without calling it
 actual usage; preserve originals. Formal RQ1 still needs owner labels.
+
+### 2026-11-07 continuation preparation
+
+Owner requested continuation; existing caps remain approved. Saturday is
+off-peak throughout the day; models, flash prices and CNY10.41 balance were
+rechecked before paid execution. No new spend during repair.
+
+Implemented separate conservative budget accounting while original unknown usage
+remains unknown. Offline exact-request reconstruction gives input byte bounds
+38,246 / 51,737 and output caps 3,072 / 1,024, more conservative than the previous
+retry-token-only planning reserve. Reservation-inclusive cumulative guard amount
+is **$2.794060**, below unchanged P2 ceiling **$3.500680**.
+
+`scripts/reserve_unknown.py --apply` preserves all original ledger entries,
+stores audit evidence under `runs/p2-deepseek-flash/accounting/` and overlay at
+`outputs/usage/usage.reservations.json`. Planning/reconstruction uses cache only;
+it appends cache-hit records but never sends a model request. It does not recover
+the provider's actual usage. New transport errors record the same request bound
+directly as budget-only metadata; absent evidence still blocks paid calls.
+
+Independent review found no blocking defect. Full offline suite: 173 passed.
+Resume exact original P2 manifest/ceiling and cached successes, then run the
+approved 18-call probe. Other P3/P4/pro runs remain unapproved.

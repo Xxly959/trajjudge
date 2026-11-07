@@ -1,15 +1,15 @@
 # Progress
 
-## Execution checkpoint — 2026-11-06 CST
+## Execution checkpoint — 2026-11-07 CST
 
-- Current: P2 stopped on unknown accounting; 20/100 successful jobs preserved. Probe not started. No live runner remains.
+- Current: unknown-attempt budget reservations implemented and independently reviewed. Apply legacy overlay, resume original P2 ceiling, then approved probe; Saturday off-peak.
 - Pre-batch estimates: P2 100 calls / peak $0.630398; probe 18 calls / peak $0.144169. Approval and exact commands: APPROVED_RUNS.md.
-- Last result: 170 project tests; fresh source-only clone also 170; guarded phase1 replay identical. Contribution: 12 unit passed, 2 quality deselected.
+- Last result: 173 offline tests pass; unknown actual usage stays unknown, conservative reservations are separate, unchanged ceilings still enforced. Earlier clone test: 170; contribution: 12 unit passed.
 - Next owner action: label 50 blind traces. Other P3/P4 and external-action budgets remain unapproved.
-- Next agent action: reconcile two unknown attempts before any paid call; then resume the same P2 run and ceiling. Budget approval persists; do not create a fresh allowance.
+- Next agent action: reserve_unknown.py --apply, then experiment.py p2 --run --cap-usd 0.80 --workers 2 --run-id p2-deepseek-flash. Budget approval persists; original $3.500680 absolute ceiling remains.
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
-- Blockers: two unresolved P2 attempts, human labels, other phase budgets, external submission and final-claim approval. No pro call made.
-- Spend: cumulative total UNKNOWN. Known-record conservative subtotal $2.762149; new successful-response subtotal $0.061470. Estimated unresolved reserve $0.011710 is not actual usage and has not unblocked the guard.
+- Blockers: human labels, other phase budgets, external submission and final-claim approval. Original actual usage of two attempts remains unknown; evidence-backed budget reservations allow bounded continuation.
+- Spend: actual cumulative accounting UNKNOWN. Reservation-inclusive conservative budget cost $2.794060 before resume; known-record subtotal $2.762149. Preserve separation from invoice/actual usage.
 - Balance: 2026-11-06 post-run CNY 10.41 (pre-run 10.60); no per-request invoice. Full stopped checkpoint: APPROVED_RUNS.md.
 - Preservation: full backup `../my-project-backup-20261105-091258`; inherited edits committed as `10abb5e`.
 - Working tree: code, tests and delivery docs committed at handover; raw artifacts and owner labels remain ignored local assets, untouched by the agent after blank-kit creation.

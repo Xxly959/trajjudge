@@ -335,3 +335,26 @@ phase1 pricing checksum. Source: https://api-docs.deepseek.com/quick_start/prici
 Verified 2026-11-05; pro peak input miss/output $1.32/$3.96 per million, off-peak
 $0.66/$1.98. This is planning support, not authorization for pro calls.
 
+# D28 Unknown billing remains unknown; budget reservations are separate (2026-11-07)
+
+Two legacy P2 transient attempts have no provider usage but have successful
+same-request retries in cache. Do not rewrite those original ledger rows or set
+usage_known=true. Reconstruct the exact request offline from the frozen run plan
+and cached retry; attach an external overlay keyed by the entire ledger record's
+fingerprint. Use request UTF-8 byte count +4096 and the full output cap, priced at
+the larger recorded/current rate, as a conservative budget reservation.
+
+`summarize.cost_usd` remains null for unknown actual accounting. `budget_cost`
+is a separate, explicitly labeled spending guard that includes every reserved
+attempt. Unmatched/malformed reservations and missing successful-response usage
+remain fail-closed. Future transport-uncertain attempts record their request bound
+at failure, never invented token usage. This follows the existing request guard's
+bound, not the smaller successful-retry token estimate.
+
+The original P2 absolute ceiling stays $3.500680. Probe has its own approved
+$0.20 cap, starting only after P2, using reservation-inclusive budget accounting.
+No original approval is renewed or enlarged. Independently reviewed; 173 offline
+tests pass, including unknown accounting staying unknown and budget exhaustion
+still blocking requests. Offline reconstruction appends cache-hit ledger entries;
+original ledger bytes remain an unchanged prefix. No labels/upstream edited.
+

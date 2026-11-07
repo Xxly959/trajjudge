@@ -332,3 +332,21 @@ def test_concurrent_calls_keep_ledger_and_pending_marker_consistent(settings: Se
     assert len(transport.requests) == 24 and not any(r.cached for r in results)
     assert len(client.usage_log.read()) == 24
     assert not client._pending_path.exists()
+
+
+def test_transient_unknown_is_reserved_but_remains_unknown(settings: Settings) -> None:
+    from trajjudge.usage import budget_cost, load_pricing
+    transport = Recorder([RetryableError(501), _response(), _response()])
+    client = _client(settings, transport)
+    client.complete([{"role": "user", "content": "hi"}])
+    records = client.usage_log.read()
+    assert records[0].usage_known is False and records[0].status == "unknown"
+    assert "budget_reservation" in records[0].raw_usage
+    assert budget_cost(records, load_pricing(settings.pricing_file)) is not None
+    client.complete([{"role": "user", "content": "different"}])
+    assert len(transport.requests) == 3
+    from dataclasses import replace
+    client.settings = replace(settings, budget_usd=.0000001)
+    with pytest.raises(LLMError, match="budget"):
+        client.complete([{"role": "user", "content": "another request"}])
+    assert len(transport.requests) == 3

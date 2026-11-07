@@ -84,3 +84,29 @@ def test_conservative_cost_rounding_never_rounds_down() -> None:
     pricing = {"m": Price(input_per_mtok=0.3, output_per_mtok=1.2)}
     result = summarize([_record(prompt=493, completion=69), _record(prompt=504, completion=38)], pricing)
     assert result.cost_usd == 0.000428
+
+
+def test_unknown_reservation_does_not_fabricate_actual_usage() -> None:
+    from dataclasses import replace
+    from trajjudge.usage import budget_cost, record_id
+    record = replace(_record(prompt=0, completion=0), usage_known=False, status="unknown")
+    price = {"m": Price(1., 2.)}
+    reservation = {"basis": "request_byte_bound_v1", "request_sha256": "a" * 64,
+                   "input_token_bound": 10000, "max_output_tokens": 1000,
+                   "input_per_mtok": 1., "output_per_mtok": 2.}
+    assert budget_cost([record], price) is None
+    assert budget_cost([record], price, {record_id(record): reservation}) == .012
+    assert summarize([record], price).cost_usd is None and record.usage_known is False
+
+
+def test_reservation_rejects_understated_or_mismatched_evidence() -> None:
+    from dataclasses import replace
+    from trajjudge.usage import budget_cost, record_id
+    record = replace(_record(prompt=0, completion=0), usage_known=False)
+    reserve = {"basis": "request_byte_bound_v1", "request_sha256": "a" * 64,
+               "input_token_bound": 10000, "max_output_tokens": 1000,
+               "input_per_mtok": 0., "output_per_mtok": 0.}
+    assert budget_cost([record], {"m": Price(1., 2.)}, {"wrong": reserve}) is None
+    assert budget_cost([record], {"m": Price(1., 2.)}, {record_id(record): reserve}) == .012
+    reserve["max_output_tokens"] = -1
+    assert budget_cost([record], {"m": Price(1., 2.)}, {record_id(record): reserve}) is None
