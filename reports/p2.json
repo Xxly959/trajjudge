@@ -5,6 +5,7 @@
   "score_rows": 100,
   "selected_traces": 50,
   "resamples": 2000,
+  "evaluated_traces": 50,
   "latest_row_usage": {
     "api_calls": 100,
     "cached_calls": 0

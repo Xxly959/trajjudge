@@ -152,8 +152,9 @@ Replay exits P2=0, probe=1 (expected error preservation). Use `--offline` with
 separate `*-replay` run ids.
 
 Combined approved-run conservative budget cost **$0.386672 / $1.00**. Cumulative
-reservation-inclusive guard amount **$3.087352**; reported-usage-only conservative
-subtotal **$3.055441**. Actual cumulative accounting stays UNKNOWN for two original
+reservation-inclusive guard amount **$3.087352**; ledger subtotal excluding the
+two new unknown attempts **$3.055441** (still includes the older recorded
+reconciliation estimate). Actual cumulative accounting stays UNKNOWN for two original
 attempts, separately reserved. Post-run balance **CNY 9.70**; no exact invoice or
 currency reconciliation claimed. No pro/P3 full/P4 calls, external writes or
 owner-label edits were performed.

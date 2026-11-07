@@ -29,6 +29,7 @@ def test_five_repeat_manifest_is_used_and_conflicting_override_rejected(tmp_path
     monkeypatch.setattr("sys.argv", ["report", "p3"])
     assert module.main() == 0
     result = json.loads((tmp_path / "reports/p3.json").read_text())
+    assert result["evaluated_traces"] == 1
     assert result["analysis"][0]["expected_repeats"] == 5
     assert result["analysis"][0]["summary"]["flip_rate"] == 1
     monkeypatch.setattr("sys.argv", ["report", "p3", "--repeats", "3"])

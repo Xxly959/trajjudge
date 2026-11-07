@@ -49,7 +49,7 @@ cache miss. Preserve the exact model/thinking/repeat/grid/limit/run-id arguments
 It cannot reproduce a live run that has never occurred. Offline commands can add
 cache-hit ledger records and error/null rows; they do not add paid cost.
 
-## Proposed budgets — not approved
+## Budget plan and approval status
 
 Update 2026-11-07: the owner approved P2 $0.80 and probe $0.20; execution is in
 `APPROVED_RUNS.md`. Other rows remain proposals. P2 completed 100/100; probe has

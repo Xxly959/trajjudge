@@ -90,8 +90,9 @@ added conservative budget costs P2 **$0.321302 /$0.80** and probe
 reservations for two unknown attempts, not fabricated measured tokens.
 
 Current cumulative reservation-inclusive guard amount: **$3.087352**. Original
-actual usage for two attempts remains UNKNOWN; reported-usage-only conservative
-subtotal is $3.055441. Post-run balance CNY9.70 is not a per-request invoice.
+actual usage for two attempts remains UNKNOWN; the ledger subtotal excluding
+these attempts is $3.055441, still including an older reconciliation estimate.
+Post-run balance CNY9.70 is not a per-request invoice.
 Discounts, other account activity and exchange rates prevent exact reconciliation.
 See APPROVED_RUNS for unchanged ceilings, evidence and the separate budget policy.
 

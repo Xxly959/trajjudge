@@ -47,6 +47,7 @@ def main() -> int:
     tasks = {r["trace_id"]: r["task_id"] for r in meta["chosen"]}
     result = {"phase": phase, "status": "pending", "source": str(path.relative_to(root)) if path.is_relative_to(root) else str(path),
               "score_rows": len(grades), "selected_traces": len(tasks), "resamples": 2000,
+              "evaluated_traces": len({r["trace_id"] for r in grades}),
               "latest_row_usage": {"api_calls": sum(r.get("usage", {}).get("api_calls", 0) for r in grades),
                             "cached_calls": sum(r.get("usage", {}).get("cached_calls", 0) for r in grades)},
               "limitations": ["Single provider and annotator; official scores partly LLM-derived, not truth.",
