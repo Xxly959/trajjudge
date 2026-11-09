@@ -158,3 +158,37 @@ reconciliation estimate). Actual cumulative accounting stays UNKNOWN for two ori
 attempts, separately reserved. Post-run balance **CNY 9.70**; no exact invoice or
 currency reconciliation claimed. No pro/P3 full/P4 calls, external writes or
 owner-label edits were performed.
+
+## 2026-11-09: P3 Flash Direct pilot
+
+The owner approved the proposed pilot in chat with a **$1.50** new-spend cap.
+The pilot uses the first ten frozen traces by trace ID, both LLM graders, both
+thinking modes and three Direct repeats. The pre-batch request audit found 25
+reusable completions (20 P2, five probe) and 95 distinct new requests. The new
+requests were estimated at $0.380543 off-peak, $0.761087 at peak, or $1.429950
+using the summed conservative peak request bounds. Model listing confirmed
+`deepseek-flash` before the off-peak launch.
+
+```bash
+.venvs/judge/bin/python scripts/experiment.py p3 --model deepseek-flash --thinking both --limit 10 --grid-traces 0 --repeats 3 --workers 2 --max-attempts 1 --run-id p3-flash-direct-pilot --run --cap-usd 1.50
+```
+
+The command saved 120/120 planned rows, 119 valid and one error. The
+thinking-on Comprehensive completion failed raw validation because its step
+evaluations did not cover each assistant tool batch exactly once. Exit 1
+records that error. The runner did not stop early. A separate offline replay
+with a temporary ledger matched status, score and reason for all 120 jobs
+from cache, including the invalid completion, with zero API requests.
+
+- Raw results: `outputs/p3/p3-flash-direct-pilot.jsonl`, SHA-256
+  `b59114369f67dc12d0483c35788a69911af1eb54a4b89a88c10cee3d5a7967f5`.
+- Run manifest, original ceiling and atomic rows: `runs/p3-flash-direct-pilot/`.
+- Numeric report and task-cluster intervals: [p3-flash-direct-pilot.json](../reports/p3-flash-direct-pilot.json).
+  Regenerate the analysis locally with
+  `.venvs/judge/bin/python scripts/report_experiments.py p3 --input outputs/p3/p3-flash-direct-pilot.jsonl`
+  (writes the default `reports/p3.json`).
+- Usage: 95 new completions, 845,353 input tokens and 73,978 output tokens;
+  25 cache reuses. Conservative cost $0.342380 / $1.50, with no new unknown
+  attempt and no pending accounting marker. Cumulative guard accounting
+  $3.429732 includes historical reservations. Post-run balance CNY 2.44 is
+  a separate read-only snapshot.

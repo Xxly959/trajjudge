@@ -1,5 +1,13 @@
 # Progress
 
+## P3 Flash Direct pilot — results, 2026-11-09 CST
+
+- All 120 planned rows are present: 119 valid and one rejected step-coverage result. The run used 95 new completions and 25 cached results. Offline replay matched all 120, including the error, with zero API calls.
+- Across 39 complete three-repeat panels, no pass/fail verdict flipped. Accuracy scores stayed fixed in both thinking modes. Comprehensive scores varied on 8/10 complete panels with thinking off and 8/9 with thinking on; all 59 valid Comprehensive results passed.
+- Pilot summary: `reports/p3-flash-direct-pilot.json`. Run details and reproduction command: `docs/APPROVED_RUNS.md`. The paid runner exited with no early stop and its lock is clear.
+- Conservative pilot accounting: $0.342380 / $1.50; cumulative guard ledger $3.429732 including historical reservations. Read-only post-run balance was CNY 2.44, a balance snapshot with no invoice reconciliation.
+- Next: interpret the pilot with the 48-label partial P2 comparison. A wider P3 grid needs a new approved budget; formal P4 still requires an eligible human-fail cohort under the annotation protocol and an approved budget.
+
 ## P3 Flash Direct pilot — pre-batch checkpoint, 2026-11-09 CST
 
 - Scope approved in chat: 10 frozen traces, two graders, thinking on/off, three repeats, Direct. Reuse 25 matching cached completions (20 P2, five probe); preflight identified 95 distinct new requests. Zero completion calls in preflight.

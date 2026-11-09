@@ -1,6 +1,6 @@
 # Audit delivery report — incomplete research draft
 
-Updated: 2026-11-07 CST. Owner review is required before publishing conclusions or
+Updated: 2026-11-09 CST. Owner review is required before publishing conclusions or
 resume wording. This report distinguishes verified engineering and free lexical
 controls from experiments that still require human work and approved API spend.
 
@@ -18,10 +18,11 @@ unmapped content and matches its native grading event. Actual request sidecars
 show four output-cap cohorts; task and cap confounding preclude a causal thinking
 comparison. See STATE_RECOVERY for exact counts and file paths.
 
-50 blank blind annotation items are frozen across 36 tasks. The selection contains
+50 blind annotation items are frozen across 36 tasks. The selection contains
 all six framework failures and 44 framework passes; this enrichment, category
-imbalance and the single annotator limit external validity. Owner labels have
-not been generated or suggested. Formal RQ1 cannot yet be calculated.
+imbalance and the single annotator limit external validity. The owner submitted
+48 first-round labels. The local partial RQ1 report excludes the two blank items,
+and the delayed human re-label round remains pending.
 
 ## Free rule-control experiment
 
@@ -51,8 +52,8 @@ templates: `src/trajjudge/perturb.py` at the project commit in Git history.
 ## Pending research
 
 Approved execution update: the P2 main judge now has **100/100 valid verdicts**
-(50 traces ×two graders). Human annotation remains absent, so this is scoring
-coverage, not evidence of correctness. The one-case sampling probe has 18
+(50 traces × two graders). Human agreement is assessed separately on the 48
+submitted labels. The one-case sampling probe has 18
 observations, **15 valid /3 errors**, from 17 new API completions plus one P2
 cache reuse. All three errors are thinking-off/temperature=1.5: two schema-field
 failures and one capped completion. Other groups have three valid scores each.
@@ -65,10 +66,31 @@ Raw source: `outputs/probe/probe-deepseek-flash.jsonl`; aggregate:
 [probe.json](probe.json). Cache replays reproduce all 100 P2 and 18 probe outcomes,
 including errors, with zero API calls. Run details: [APPROVED_RUNS](../docs/APPROVED_RUNS.md).
 
+### P3 Flash Direct pilot
+
+Ten fixed traces × two graders × two thinking modes × three repeats produced
+120 rows. Of those, 119 were valid and one was rejected for incomplete tool-batch
+coverage in the returned step evaluations. The pilot reused 25 earlier
+completions and obtained 95 new ones.
+
+| Grader | Thinking | Complete three-repeat panels | Panels with score variation | Panels with verdict flips |
+| --- | --- | ---: | ---: | ---: |
+| Trajectory Accuracy | Off | 10/10 | 0/10 | 0/10 |
+| Trajectory Accuracy | On | 10/10 | 0/10 | 0/10 |
+| Trajectory Comprehensive | Off | 10/10 | 8/10 | 0/10 |
+| Trajectory Comprehensive | On | 9/10 | 8/9 | 0/9 |
+
+All 59 valid Comprehensive results were above the pass threshold. Its
+zero-flip count therefore describes stable decisions on this sample alongside
+score variation. The small fixed sample, shared provider and different
+output caps limit inference about thinking and general stability. The
+[pilot report](p3-flash-direct-pilot.json) preserves coverage and task-cluster
+intervals. Source: `outputs/p3/p3-flash-direct-pilot.jsonl`.
+
 | Question | Current state | Required evidence |
 | --- | --- | --- |
-| RQ1 agreement | Judge scoring complete; human comparison pending | Owner labels and delayed re-label round |
-| RQ2 stability | Single-case probe only; formal P3 pending | Multiple trajectories, >=3 repeats, flash/pro, thinking and strategy factors |
+| RQ1 agreement | Partial comparison on 48 human labels | Two blank items and delayed re-label round remain pending |
+| RQ2 stability | Ten-trace Flash Direct pilot completed; wider P3 pending | Broader sample and strategy comparisons within separately approved scope |
 | RQ3 LLM injection | P4 report pending | Actual owner-fail set, budget, matched original/variant/defense repeats |
 | Upstream contribution | Local branch + portable patch + draft | Owner authorization, maintainer review; acceptance is not established |
 

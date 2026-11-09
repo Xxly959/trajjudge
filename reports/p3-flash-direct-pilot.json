@@ -1,0 +1,234 @@
+{
+  "phase": "p3",
+  "status": "partial",
+  "source": "outputs/p3/p3-flash-direct-pilot.jsonl",
+  "score_rows": 120,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "evaluated_traces": 10,
+  "latest_row_usage": {
+    "api_calls": 95,
+    "cached_calls": 25
+  },
+  "limitations": [
+    "Single DeepSeek model and vendor; agent and judge share a provider.",
+    "Ten trace IDs selected in fixed sort order; this is a pilot, not a representative cohort.",
+    "Thinking-on and thinking-off configurations have different output caps.",
+    "Complete repeat panels only for stability metrics; error rows and incomplete panels are counted.",
+    "Bootstrap intervals describe this small pilot; no significance claim."
+  ],
+  "analysis": [
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 10,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 10,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.0
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.9999999999999997,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 9
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=on|direct1",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 10,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 10,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.0
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.9999999999999997,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 9
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 10,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 10,
+        "repeats": 3,
+        "mean_sd": 0.021838888456949753,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.8445807770961146,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.012721790331932544,
+          0.030210333071061937
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.4100294985250737,
+          0.9816091954022986
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 9
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=on|direct1",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 9,
+      "incomplete_traces": 1,
+      "error_rows": 1,
+      "summary": {
+        "traces": 9,
+        "repeats": 3,
+        "mean_sd": 0.022389567952355357,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.9130325189342963,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.01396992588557916,
+          0.02912528160577637
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.45504184409174675,
+          1.0
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 8
+    }
+  ],
+  "planned_jobs": 120,
+  "successful_rows": 119,
+  "phase_usage": {
+    "calls": 120,
+    "cached_calls": 25,
+    "prompt_tokens": 845353,
+    "completion_tokens": 73978,
+    "cost_usd": 0.34238,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 0.34238,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  },
+  "scope": "Flash Direct pilot on a deterministic ten-trace subset",
+  "pilot_coverage": {
+    "trajectory_accuracy|think=off|direct1": {
+      "score_varied_traces": 0,
+      "valid_score_rows": 30,
+      "complete_traces": 10
+    },
+    "trajectory_accuracy|think=on|direct1": {
+      "score_varied_traces": 0,
+      "valid_score_rows": 30,
+      "complete_traces": 10
+    },
+    "trajectory_comprehensive|think=off|direct1": {
+      "score_varied_traces": 8,
+      "valid_score_rows": 30,
+      "complete_traces": 10
+    },
+    "trajectory_comprehensive|think=on|direct1": {
+      "score_varied_traces": 8,
+      "valid_score_rows": 29,
+      "complete_traces": 9
+    }
+  }
+}
