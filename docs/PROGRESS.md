@@ -1,5 +1,16 @@
 # Progress
 
+## P3 Flash Direct pilot — pre-batch checkpoint, 2026-11-09 CST
+
+- Scope approved in chat: 10 frozen traces, two graders, thinking on/off, three repeats, Direct. Reuse 25 matching cached completions (20 P2, five probe); preflight identified 95 distinct new requests. Zero completion calls in preflight.
+- New-spend cap: $1.50. Estimated new completions $0.380543 off-peak or $0.761087 at peak, with $1.429950 summed peak request bounds at one attempt per completion. Starting guard ledger $3.087352, including historical reservations; absolute ceiling $4.587352.
+- Live preflight confirmed `deepseek-flash` in a fresh model listing, off-peak time, a free run ID, and no unreconciled pending request. Latest previously recorded balance was CNY 9.70 on 2026-11-07.
+- Next: launch the approved command below, monitor atomic checkpoints, then report coverage, verdict flips, replay and accounted cost. Formal P3 grid and P4 remain pending. P2 has 48 human labels and a separate partial offline analysis; two records remain unlabeled.
+
+```bash
+.venvs/judge/bin/python scripts/experiment.py p3 --model deepseek-flash --thinking both --limit 10 --grid-traces 0 --repeats 3 --workers 2 --max-attempts 1 --run-id p3-flash-direct-pilot --run --cap-usd 1.50
+```
+
 ## Execution checkpoint — 2026-11-07 CST
 
 - Current: approved execution finished. P2 100/100 valid; probe 18 observations, 15 valid/3 errors, 17 new calls +1 P2 cache reuse. Both cache replays match; no live runner remains.
