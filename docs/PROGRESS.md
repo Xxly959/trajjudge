@@ -1,5 +1,12 @@
 # Progress
 
+## P3 Flash verified and Pro pre-batch — 2026-11-10 CST
+
+- Flash strategies saved all 144 rows: 139 valid and five invalid. The 336 logical completions used 96 new API responses and 240 local cache reads. Offline replay matched every row from cache, including all errors.
+- Flash conservative guard cost: $0.274548 / $1.35. Current guard ledger: $3.704280. No pending accounting marker. The read-only balance after Flash was CNY 1.98.
+- The approved Pro Direct batch uses the same four traces, both graders and thinking modes, with three repeats. Plan: 48 new requests, peak estimate $1.314720, one-attempt guard sum $2.600176. Stage cap $2.65 and absolute ledger ceiling $6.354280. Still off-peak.
+- Next: run the exact Pro command in the runbook, preserve errors and verify both cohorts together.
+
 ## Approved P3 follow-up — preflight, 2026-11-10 CST
 
 - Owner approved the proposed two P3 batches in chat. Caps: Flash strategies $1.35 and Pro Direct $2.65. Both model IDs were confirmed through a fresh model-list request.
