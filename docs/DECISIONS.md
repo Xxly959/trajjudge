@@ -358,3 +358,12 @@ tests pass, including unknown accounting staying unknown and budget exhaustion
 still blocking requests. Offline reconstruction appends cache-hit ledger entries;
 original ledger bytes remain an unchanged prefix. No labels/upstream edited.
 
+# D29 P4 cohort from submitted labels (2026-11-10)
+
+The owner stopped the first annotation round at 48/50. P4 can explicitly
+require two blanks with `--expected-unlabeled 2`. The default requires zero
+blanks. The planner and report both reject a count mismatch and use the
+actual owner failure labels. Two blank items remain outside the cohort.
+The current cohort has 16 human failures. The rule-only subset report
+uses existing rows for the same cohort. The paid P4 run awaits approval.
+

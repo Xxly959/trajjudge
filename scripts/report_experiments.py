@@ -26,8 +26,12 @@ def main() -> int:
     parser.add_argument("phase", choices=("p2", "p3", "p4", "probe", "controls"))
     parser.add_argument("--input", type=Path)
     parser.add_argument("--repeats", type=int, help="must match the run manifest; required for legacy inputs")
+    parser.add_argument("--expected-unlabeled", type=int, default=0,
+                        help="P4 only: require this exact number of unlabeled traces and exclude them")
     args = parser.parse_args()
     phase = args.phase
+    if args.expected_unlabeled < 0 or (args.expected_unlabeled and phase != "p4"):
+        parser.error("--expected-unlabeled requires a nonnegative count and P4")
     path = args.input or root / "outputs" / phase / f"{phase}-deepseek-flash.jsonl"
     grades = latest_rows(load_rows(path))
     manifest_path = root / "runs" / path.stem / "manifest.json"
@@ -90,9 +94,11 @@ def main() -> int:
             result["status"] = "exploratory_controls" if phase == "controls" else "partial_unverified_coverage"
             if phase == "p4":
                 from experiment import human_fail_ids
-                allowed = human_fail_ids()
+                allowed = human_fail_ids(expected_unlabeled=args.expected_unlabeled)
                 if any(r["trace_id"] not in allowed for r in grades):
                     raise ValueError("formal P4 evidence includes traces without an owner fail label")
+                result["annotation_coverage"] = {"unlabeled": args.expected_unlabeled,
+                                                 "eligible_human_fail_traces": len(allowed)}
             result["limitations"].append("Rule-control changes are lexical behavior, not evidence of LLM manipulation or defense effectiveness.")
         if manifest:
             planned = len(manifest.get("plan", {}).get("jobs", [])) or manifest.get("total_jobs", 0)

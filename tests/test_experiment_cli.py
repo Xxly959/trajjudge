@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from trajjudge.annotation import save_labels
 from trajjudge.usage import Price
 
 
@@ -60,3 +61,32 @@ def test_single_attempt_policy_preserves_probe_cap(cli, monkeypatch):
                                    "--max-attempts", "1", "--workers", "1"])
     assert cli.main() == 0
     assert observed == [(1, .2, 1)]
+
+
+def test_p4_requires_exact_unlabeled_count_and_only_plans_owner_failures(cli, monkeypatch, tmp_path, capsys):
+    candidates = [{"trace_id": tid, "task_id": tid, "passed": tid != "blank", "category": "test"}
+                  for tid in ("fail", "pass", "blank")]
+    meta = tmp_path / "outputs/p2/annotation_meta.json"
+    meta.parent.mkdir(parents=True)
+    meta.write_text(json.dumps({"chosen": candidates}))
+    key = tmp_path / "outputs/annotation/key.json"
+    key.parent.mkdir()
+    key.write_text(json.dumps({"fail": "B1", "pass": "B2", "blank": "B3"}))
+    labels = tmp_path / "annotation/labels.csv"
+    labels.parent.mkdir()
+    save_labels(labels, [{"blind_id": blind, "label": label, "reason": "fixture" if label else "", "round": "1"}
+                         for blind, label in (("B1", "fail"), ("B2", "pass"), ("B3", ""))])
+    before = labels.read_bytes()
+    messages = [{"role": "tool", "content": "fixture"}, {"role": "assistant", "content": "done"}]
+    monkeypatch.setattr(cli, "frozen_traces", lambda: {item["trace_id"]: messages for item in candidates})
+    for args in ([], ["--expected-unlabeled", "2"]):
+        monkeypatch.setattr("sys.argv", ["experiment", "p4", *args])
+        with pytest.raises(ValueError, match="annotation|unlabeled"):
+            cli.main()
+    monkeypatch.setattr("sys.argv", ["experiment", "p4", "--expected-unlabeled", "1"])
+    assert cli.main() == 0
+    plan = json.loads(capsys.readouterr().out)
+    assert (plan["traces"], plan["completions"]) == (1, 108)
+    assert cli.human_fail_ids(expected_unlabeled=1) == {"fail"}
+    assert labels.read_bytes() == before
+    assert not (tmp_path / "runs").exists()

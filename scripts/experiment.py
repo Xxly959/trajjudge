@@ -38,13 +38,14 @@ def frozen_traces() -> dict[str, list[dict]]:
     return traces
 
 
-def human_fail_ids() -> set[str]:
+def human_fail_ids(*, expected_unlabeled: int = 0) -> set[str]:
     """Read actual owner labels; never substitute framework labels for human labels."""
     meta = json.loads((root / "outputs/p2/annotation_meta.json").read_text())
     key = json.loads((root / "outputs/annotation/key.json").read_text())
     joined = join_labels(meta["chosen"], key, read_labels(root / "annotation/labels.csv"), [])
-    if joined["labeled"] != joined["selected"]:
-        raise ValueError("complete owner annotation before formal P4 execution")
+    unlabeled = joined["selected"] - joined["labeled"]
+    if unlabeled != expected_unlabeled:
+        raise ValueError(f"expected {expected_unlabeled} unlabeled traces for P4, found {unlabeled}")
     return {r["trace_id"] for r in joined["rows"] if not r["human"]}
 
 
@@ -76,7 +77,11 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=3, help="transport attempts per completion; does not change sampling parameters")
     parser.add_argument("--run-id")
     parser.add_argument("--limit", type=int, default=0, help="fixed trace-id ordered pilot subset; 0 means all")
+    parser.add_argument("--expected-unlabeled", type=int, default=0,
+                        help="P4 only: require this exact number of unlabeled traces and exclude them")
     args = parser.parse_args()
+    if args.expected_unlabeled < 0 or (args.expected_unlabeled and args.phase != "p4"):
+        parser.error("--expected-unlabeled requires a nonnegative count and P4")
     if args.repeats < 3 or args.grid_traces < 0 or args.workers < 1 or args.max_attempts < 1:
         parser.error("need repeats>=3, grid-traces>=0 and workers>=1")
     if args.run and (args.cap_usd is None or not math.isfinite(args.cap_usd) or args.cap_usd <= 0):
@@ -111,7 +116,7 @@ def main() -> int:
         print(json.dumps({"rule_evaluations": len(rows), "new_paid_cost_usd": 0, "output": str(output)}))
         return 0
     if args.phase == "p4":
-        allowed = human_fail_ids()
+        allowed = human_fail_ids(expected_unlabeled=args.expected_unlabeled)
         traces = {k: v for k, v in traces.items() if k in allowed}
         if not traces:
             raise ValueError("no human-fail traces; no formal injection experiment can be run")

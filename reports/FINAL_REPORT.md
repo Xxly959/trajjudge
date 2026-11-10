@@ -1,6 +1,6 @@
 # Audit delivery report — incomplete research draft
 
-Updated: 2026-11-09 CST. Owner review is required before publishing conclusions or
+Updated: 2026-11-10 CST. Owner review is required before publishing conclusions or
 resume wording. This report distinguishes verified engineering and free lexical
 controls from experiments that still require human work and approved API spend.
 
@@ -21,8 +21,19 @@ comparison. See STATE_RECOVERY for exact counts and file paths.
 50 blind annotation items are frozen across 36 tasks. The selection contains
 all six framework failures and 44 framework passes; this enrichment, category
 imbalance and the single annotator limit external validity. The owner submitted
-48 first-round labels. The local partial RQ1 report excludes the two blank items,
+48 first-round labels. The partial RQ1 report excludes the two blank items,
 and the delayed human re-label round remains pending.
+
+## P2 agreement on submitted labels
+
+Both graders matched 32/48 owner labels (66.7%), the same as the always-pass
+baseline. Of 16 human failures, Accuracy marked 15 as pass and Comprehensive
+marked all 16 as pass. Accuracy also marked one human pass as fail. Cohen's
+kappa was 0.04 for Accuracy and 0.00 for Comprehensive. The task-cluster
+95% intervals for agreement were 51.1–81.6% and 52.9–80.4%, respectively.
+[The P2 report](p2.json) includes category results, the framework comparison,
+baselines and confidence intervals. The two blanks and the unrun re-label
+round limit the scope of this comparison.
 
 ## Free rule-control experiment
 
@@ -48,6 +59,12 @@ untrusted-data wrapper works.
 Raw source: `outputs/controls/controls-deepseek-flash.jsonl`;
 checkpoint: `runs/controls-deepseek-flash/manifest.json`;
 templates: `src/trajjudge/perturb.py` at the project commit in Git history.
+
+On the matched 16 human-fail trajectories, loop scores changed in **0/128**
+and lexical information gain changed in **56/128** paired variants. This
+subset comes from the existing rule-control rows and uses the same grouping.
+The [matched report](p4-human-fail-rule-controls.json) contains task-cluster
+intervals for score changes. The LLM experiment remains pending.
 
 ## Pending research
 
@@ -91,7 +108,7 @@ intervals. Source: `outputs/p3/p3-flash-direct-pilot.jsonl`.
 | --- | --- | --- |
 | RQ1 agreement | Partial comparison on 48 human labels | Two blank items and delayed re-label round remain pending |
 | RQ2 stability | Ten-trace Flash Direct pilot completed; wider P3 pending | Broader sample and strategy comparisons within separately approved scope |
-| RQ3 LLM injection | P4 report pending | Actual owner-fail set, budget, matched original/variant/defense repeats |
+| RQ3 LLM injection | Matched rule controls complete on 16 human failures | Approved budget and matched LLM original/variant/defense repeats |
 | Upstream contribution | Local branch + portable patch + draft | Owner authorization, maintainer review; acceptance is not established |
 
 `make phase2 phase3 phase4` explicitly reports pending when data are missing.
@@ -111,10 +128,9 @@ added conservative budget costs P2 **$0.321302 /$0.80** and probe
 **$0.065370 /$0.20**, combined **$0.386672 /$1.00**. This includes request-bound
 reservations for two unknown attempts, not fabricated measured tokens.
 
-Current cumulative reservation-inclusive guard amount: **$3.087352**. Original
-actual usage for two attempts remains UNKNOWN; the ledger subtotal excluding
-these attempts is $3.055441, still including an older reconciliation estimate.
-Post-run balance CNY9.70 is not a per-request invoice.
+The P3 pilot added **$0.342380 / $1.50**. Cumulative guard accounting including
+reservations is **$3.429732**. Actual usage for two historical attempts
+remains unknown. The last balance snapshot was CNY 2.44 after the P3 pilot.
 Discounts, other account activity and exchange rates prevent exact reconciliation.
 See APPROVED_RUNS for unchanged ceilings, evidence and the separate budget policy.
 

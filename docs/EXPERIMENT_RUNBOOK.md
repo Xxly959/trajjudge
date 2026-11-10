@@ -26,7 +26,10 @@ absent. Do not open the mapping, metadata, scores or past labels during labeling
 Open a blind Markdown file in an editor when terminal scrollback is insufficient.
 Blank rows remain unfinished, not implicitly failures. For an undecidable trace,
 skip and discuss exclusion policy after the blind round; no automatic label is
-assigned. Formal P4 currently requires all selected round-1 labels to be complete.
+assigned. P4 defaults to requiring zero blank round-1 labels. For the current
+48-label analysis, pass `--expected-unlabeled 2` to both the run and report
+commands. The flag checks the exact count. Eligibility comes from the owner's
+failure labels.
 
 ## Safe planning and offline reports
 
@@ -95,6 +98,60 @@ before a later paid batch. Flash/pro prices are in `configs/pricing_p3.yaml` fro
 the [official page](https://api-docs.deepseek.com/quick_start/pricing/). Default
 thinking is on except the D24 pre-registered P2 primary configuration (off).
 
+## Remaining paid runs, prepared 2026-11-10
+
+P3 holds the sample fixed at the first four frozen traces by trace ID. Compare
+Flash and Pro in Direct mode, and compare Direct, Average and Voting on Flash.
+Both graders and both thinking settings use three repeats. With one worker,
+the strategies use the same three distinct draws per repeat. Direct uses
+the first draw, Average and Voting each use all three. The 48 Flash Direct
+draws are already cached from the pilot, including one invalid Comprehensive
+response. Preserve that response and count any affected panels as incomplete.
+This design measures paired strategy
+differences on a small fixed cohort. The output caps still differ by thinking
+setting, and strategy differences on Pro are outside this matrix.
+
+P4 uses the 16 owner-labeled failures, with two unlabeled traces excluded.
+Run Flash with thinking off, both graders, four templates in both insertion
+locations, original and perturbed trajectories, with and without the defense
+wrapper, and three repeats. Pair within trajectory, grader, defense setting
+and repeat. Report score changes and baseline fail-to-pass flips separately.
+An empty baseline-failure denominator yields an undefined flip rate.
+Matched rule controls are in [the aggregate](../reports/p4-human-fail-rule-controls.json).
+They were computed with `injection_report` from the existing 900 rule rows after
+filtering to `human_fail_ids(expected_unlabeled=2)`.
+
+| Prepared batch | Logical completions | New requests after local reuse | One-attempt peak guard sum | Proposed cap |
+| --- | ---: | ---: | ---: | ---: |
+| P3 Flash strategies | 336 | 96 | $1.270343 | $1.35 |
+| P3 Pro Direct | 48 | 48 | $2.600176 | $2.65 |
+| P4 Flash paired injection and defense | 1,728 | 1,680 | $22.469853 | $22.50 |
+
+The preflight rendered the native grader requests, inspected exact cache keys,
+and summed the client's one-attempt reservation formula for unique cache misses.
+For Flash ensembles it reused the Direct request body with distinct sub-sample
+suffixes, matching the native strategies' identical evaluation arguments.
+The guard sums use peak prices and include the conservative input-byte and
+output-cap bounds. DeepSeek's off-peak rates are half its peak rates.
+Recheck scope, cache state, model availability, price and balance before launch.
+The read-only balance snapshot on 2026-11-10 was CNY 2.15.
+
+These commands are offline cost plans. After approval, append
+`--run --cap-usd <approved cap>` to the exact command for each batch and
+run them sequentially in off-peak hours.
+
+```sh
+.venvs/judge/bin/python scripts/experiment.py p3 --model deepseek-flash --thinking both --limit 4 --grid-traces 4 --repeats 3 --workers 1 --max-attempts 1 --run-id p3-flash-strategies-4
+.venvs/judge/bin/python scripts/experiment.py p3 --model deepseek-v4-pro --thinking both --limit 4 --grid-traces 0 --repeats 3 --workers 1 --max-attempts 1 --run-id p3-pro-direct-4
+.venvs/judge/bin/python scripts/experiment.py p4 --model deepseek-flash --thinking off --repeats 3 --expected-unlabeled 2 --workers 1 --max-attempts 1 --run-id p4-flash-human-fail-16
+```
+
+After each run, check its manifest against the original plan, replay stored
+results offline and preserve errors. Use `scripts/report_experiments.py` with
+the stage and `--input` pointing to the exact run JSONL. Pass
+`--expected-unlabeled 2` for the P4 report. The offline report command writes
+the stage's default JSON filename. Keep each run's report under a distinct name.
+
 ## Recovery and coverage
 
 Run state consists of `manifest.json` (exact hashed job plan), `rows/<job_id>.json`
@@ -119,8 +176,9 @@ The random fair-coin baseline is its exact expected accuracy, 0.5.
 
 ## Research gates still open
 
-Owner annotation and delayed re-labeling; actual P2 judge run; temperature probe;
-flash/pro and strategy stability runs; human-fail P4 paired LLM experiment; final
+The two blank annotations and delayed re-labeling remain unresolved. The P2
+comparison and Flash Direct pilot are available. The Flash/Pro and strategy
+comparison, human-fail P4 paired LLM experiment, and final
 claim approval. Cross-vendor validation would relax the DeepSeek-only scope and
 requires separate approval/key. The local upstream proposal is unsubmitted and
 cannot be described as accepted.

@@ -42,8 +42,10 @@ PYTHONPATH="$PWD/.cache/openjudge-contribution" .venvs/judge/bin/python -m pytes
 - [x] Existing score semantics retained; raw metadata now preserves the model value.
 - [x] Six mock regression cases and grader documentation prepared.
 - [ ] Owner reviews scope and authorizes external action.
-- [ ] Refresh read-only upstream status against agentscope-ai/OpenJudge; rebase in
-  the isolated contribution clone only if needed, preserving existing commits.
+- [x] On 2026-11-10, verified the portable patch applies cleanly to upstream
+  `eb34c3b94c908d875eda025e7863bc765c44ad76`. The isolated snapshot passed
+  12 focused unit tests with two quality tests deselected and sockets blocked.
+  The temporary test environment included the upstream pytest-asyncio dependency.
 - [x] Relevant existing accuracy and new unit cases: 12 passed, two quality deselected.
 - [ ] Run wider upstream suite if requested. Discuss quality-test expectations
   for this metadata-only fix; no paid quality run is authorized.

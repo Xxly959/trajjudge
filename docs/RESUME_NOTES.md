@@ -20,10 +20,15 @@ rule behavior and completed research are kept distinct.
 - Single-case sampling probe: 18 observations, 15 valid/3 errors; 17 new
   completion calls plus one inherited P2 cache sample. Source `reports/probe.json`
   and `outputs/probe/probe-deepseek-flash.jsonl`. This is not a formal stability result.
-- Prepared 50 blank blind annotation items across 36 tasks, with immutable source
-  hashes and owner-only labels. Source: `outputs/p2/annotation_meta.json`,
-  `outputs/p2/annotation_set.json`, `annotation/labels.csv`. These are selected
-  traces, not 50 human annotations. Do not put human-label totals on a resume yet.
+- Froze 50 blind annotation items across 36 tasks. On the 48 owner-labeled
+  items, both graders matched 32 judgments (66.7%), equal to always-pass.
+  They missed 15/16 and 16/16 human failures, respectively. The two blank items
+  and the unrun re-label round are recorded in [the P2 report](../reports/p2.json).
+- Ran a ten-trace Flash Direct stability pilot. Of 120 planned results, 119
+  were valid and one failed step coverage validation. No verdict flipped
+  across the 39 complete repeat panels, while Comprehensive scores varied in
+  16 of its 19 complete panels. The [pilot report](../reports/p3-flash-direct-pilot.json)
+  includes group denominators and intervals.
 - Ran 900 deterministic, free rule evaluations (100 originals and 800 variants).
   Among 400 variants per grader: loop score changed in 0, lexical information
   gain in 177. Source: `outputs/controls/controls-deepseek-flash.jsonl` and
@@ -34,16 +39,17 @@ rule behavior and completed research are kept distinct.
 
 ## Candidate wording, pending owner approval
 
-“Implemented a reproducible audit pipeline connecting Claw-Eval trajectories to
-OpenJudge, with budget-aware model IO, independent repeat sampling, recoverable
-run manifests and offline analysis. Prepared blinded human annotation and
-defensive perturbation experiments with task-cluster confidence intervals.”
+“Built a reproducible audit pipeline connecting Claw-Eval trajectories to
+OpenJudge, with budget guards, recoverable runs and offline replay. Compared
+two LLM graders with 48 blind human labels and found that both matched an
+always-pass baseline, with 15/16 and 16/16 human failures missed.”
 
-Only add completed human agreement, stability or LLM injection numbers after
-the owner labels data, approves real runs and reviews the final report. Current
-recovery subtotal was $2.700680. Current actual accounting remains unknown for two
-attempts; reservation-inclusive conservative guard amount is $3.087352, not an
-invoice. See APPROVED_RUNS for the completed $0.80/$0.20 authorized execution.
+“Ran a ten-trajectory stability pilot with 120 planned scores. Reproduced
+119 valid scores and one validation error from cache. Observed zero
+pass/fail flips across 39 complete three-repeat panels.”
+
+The owner reviews the wording and aggregate figures before public use. The
+[run record](APPROVED_RUNS.md) preserves costs, coverage and execution details.
 
 ## Unsupported claims
 
