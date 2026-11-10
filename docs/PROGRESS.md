@@ -1,5 +1,11 @@
 # Progress
 
+## Approved P4 run — waiting for off-peak, 2026-11-10 CST
+
+- Owner confirmed the previously proposed $22.50 stage cap in chat. The run remains scoped to 16 owner-labeled failures, with two blank records excluded, 1,728 planned jobs and 48 reusable results.
+- Read-only available balance increased to CNY 5.74. Starting guard accounting is $4.331591 with no pending marker. The run ID is free. The provider may stop requests if the account balance is exhausted.
+- The weekday peak window started at 14:00 CST. Recheck balance, pricing and model availability before the 18:00 CST off-peak launch. Use the exact P4 command in the runbook with `--run --cap-usd 22.50`.
+
 ## P4 preflight — 2026-11-10 CST
 
 - The plan verifies 16 human-fail trajectories and two unlabeled records. There are 1,728 logical completions, including 192 original-baseline slots. An offline replay found 48 reusable valid original results. No P4 completion requests were sent.
