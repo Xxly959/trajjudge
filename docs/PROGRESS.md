@@ -1,5 +1,12 @@
 # Progress
 
+## Public review snapshot published — 2026-11-10 CST
+
+- GitHub repository [Xxly959/trajjudge](https://github.com/Xxly959/trajjudge) is public. Remote main matches snapshot `9b62bd523537097f94991abd9869f881d522365a`, and its review guide is accessible without authentication.
+- The snapshot derives from local source `5c3dbe38c63c406ba6d2d59b0a4efe68c8d3ad90`. It includes code, tests with synthetic fixture content, aggregate reports, reproducibility docs, and the OpenJudge contribution draft. The research Git history, original traces, owner labels, provider cache, and local operation log stay in this workspace.
+- Snapshot checks passed: 180 offline tests, the four credential checks, and staged whitespace validation. No model requests or new experiment spend. The public snapshot uses an independent Git history.
+- Next: independent review via the public `REVIEW.md`. P4 paid execution remains paused. P2 delayed re-labeling and upstream submission are separate from this publication.
+
 ## P4 paused before launch — offline rehearsal, 2026-11-10 CST
 
 - The owner deferred API calls. The previously approved P4 cap is $22.50. Wait for the owner's request to resume, then recheck balance, model and off-peak time.
