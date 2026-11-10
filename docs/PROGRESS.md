@@ -5,7 +5,7 @@
 - `make phase2` generated the aggregate report on 48 human labels. Both judges matched 32/48, equal to always-pass. Two blanks and delayed re-labeling remain outside this result.
 - P4 now accepts an explicit exact blank count. With two blanks, the plan uses 16 owner failures. The matched rule report records 0/128 loop changes and 56/128 lexical changes.
 - Updated the research report, resume draft and Chinese walkthrough. The OpenJudge patch applies to upstream `eb34c3b94c90`. Its focused offline unit run passed 12 tests with two quality cases deselected.
-- Verification: 176 project tests passed, and `make phase1` reproduced the existing report hash from cache. No new completion calls. Guard accounting remains $3.429732 including historical reservations. Read-only balance snapshot: CNY 2.15.
+- Verification: 176 project tests passed locally and in a fresh source clone with pinned sibling links and existing dependencies. `make phase1` reproduced the existing report hash from cache. No new completion calls. Guard accounting remains $3.429732 including historical reservations. Read-only balance snapshot: CNY 2.15.
 - Next runs and proposed caps: Flash strategies $1.35, Pro Direct $2.65, P4 $22.50. See `docs/EXPERIMENT_RUNBOOK.md` for the exact offline plans and launch steps. Paid runs, upstream submission and public wording await owner approval.
 
 ## P3 Flash Direct pilot — results, 2026-11-09 CST
