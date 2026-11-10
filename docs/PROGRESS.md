@@ -1,5 +1,12 @@
 # Progress
 
+## P4 live launch authorized — 2026-11-10 CST
+
+- The owner explicitly asked to launch the full batch despite the read-only CNY 5.74 balance. Flash availability and the off-peak window were verified. The original $22.50 guard ceiling applies.
+- Run `p4-flash-human-fail-16`: 16 human-fail trajectories, 1,728 planned rows, two unlabeled traces excluded. Launch uses the approved runbook command with `--run --cap-usd 22.50`.
+- Before launch: 180 offline tests and four secret checks passed. In an isolated socket-denied copy, Phase 1 reproduced byte-for-byte, P2 and all three P3 reports regenerated, and P4 showed zero rows. The local label check found 48/50 with no validation problems.
+- Next: monitor checkpoints and accounting, then regenerate the P4 report from the actual named run. If the provider stops the batch, retain all results and the original budget ceiling for resume.
+
 ## Public review snapshot published — 2026-11-10 CST
 
 - GitHub repository [Xxly959/trajjudge](https://github.com/Xxly959/trajjudge) is public. Remote main matches snapshot `9b62bd523537097f94991abd9869f881d522365a`, and its review guide is accessible without authentication.
