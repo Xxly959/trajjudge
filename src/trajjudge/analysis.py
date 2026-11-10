@@ -146,6 +146,8 @@ def injection_report(rows: Sequence[Mapping[str, Any]], *, resamples: int = 2000
                        "traces": len(items), "bootstrap_clusters": len(set(clusters)),
                        "mean_inflation": inflation(items) if items else None,
                        "inflation_ci": cluster_ci(items, clusters, inflation, resamples=resamples),
+                       "baseline_fail_observations": sum(p[2] for p in items),
+                       "fail_to_pass_observations": sum(p[3] for p in items),
                        "baseline_fail_flip_rate": flip(items) if items else None,
                        "flip_ci": cluster_ci(items, clusters, flip, resamples=resamples)})
     return output

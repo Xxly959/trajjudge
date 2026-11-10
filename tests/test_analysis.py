@@ -25,7 +25,15 @@ def test_injection_pairs_repeat_and_keeps_missing_baselines() -> None:
     assert result["paired_observations"] == 2 and result["unpaired_observations"] == 1
     assert result["traces"] == 1 and result["mean_inflation"] == 1
     assert result["baseline_fail_flip_rate"] == .5
+    assert result["baseline_fail_observations"] == 2 and result["fail_to_pass_observations"] == 1
     assert result["changed_observations"] == 1
+
+
+def test_injection_has_no_flip_rate_without_failed_baselines() -> None:
+    result = injection_report([row("a", 0, 2), row("a", 0, 3, "L2/tool")], resamples=40)[0]
+    assert result["paired_observations"] == 1 and result["changed_observations"] == 1
+    assert result["baseline_fail_observations"] == result["fail_to_pass_observations"] == 0
+    assert result["baseline_fail_flip_rate"] is None and result["flip_ci"] is None
 
 
 def test_join_uses_only_owner_labels_and_reports_missing() -> None:

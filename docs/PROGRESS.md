@@ -1,5 +1,12 @@
 # Progress
 
+## P4 preflight — 2026-11-10 CST
+
+- The plan verifies 16 human-fail trajectories and two unlabeled records. There are 1,728 logical completions, including 192 original-baseline slots. An offline replay found 48 reusable valid original results. No P4 completion requests were sent.
+- Of the reusable undefended baselines, Accuracy judged three of 24 as fail and Comprehensive judged all 24 as pass. The report now exposes the fail-to-pass count and its eligible baseline-failure denominator. A zero denominator yields a null rate. Both rule reports were regenerated.
+- Using the 32 first-repeat baselines as a token proxy, the estimated 1,680 new requests cost about CNY 16.31 at off-peak cache-miss prices, of which CNY 2.24 is output. Perturbations, caching and actual completion length can change the charge. The proposed stage guard remains $22.50.
+- Current balance snapshot: CNY 0.74, with no pending accounting marker. P4 awaits sufficient balance and explicit approval of the stage cap. The funded run uses the exact P4 command in `docs/EXPERIMENT_RUNBOOK.md`. The project passed 177 offline tests.
+
 ## P3 follow-up verified — 2026-11-10 CST
 
 - Flash strategy comparison: 144 rows, 139 valid and five errors. Pro Direct: 48 rows, 46 valid and two length-limit errors. The 192 rows replayed from cache with zero API calls.

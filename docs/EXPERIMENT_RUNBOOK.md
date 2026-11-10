@@ -120,7 +120,8 @@ Run Flash with thinking off, both graders, four templates in both insertion
 locations, original and perturbed trajectories, with and without the defense
 wrapper, and three repeats. Pair within trajectory, grader, defense setting
 and repeat. Report score changes and baseline fail-to-pass flips separately.
-An empty baseline-failure denominator yields an undefined flip rate.
+The report records the number of eligible paired baseline failures and the
+number of those pairs that flipped. An empty denominator yields a null rate.
 Matched rule controls are in [the aggregate](../reports/p4-human-fail-rule-controls.json).
 They were computed with `injection_report` from the existing 900 rule rows after
 filtering to `human_fail_ids(expected_unlabeled=2)`.

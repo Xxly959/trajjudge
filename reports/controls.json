@@ -5,6 +5,11 @@
   "score_rows": 900,
   "selected_traces": 50,
   "resamples": 2000,
+  "evaluated_traces": 50,
+  "latest_row_usage": {
+    "api_calls": 0,
+    "cached_calls": 0
+  },
   "limitations": [
     "Single provider and annotator; official scores partly LLM-derived, not truth.",
     "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
@@ -31,6 +36,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -53,6 +60,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -75,6 +84,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -97,6 +108,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -119,6 +132,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -141,6 +156,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -163,6 +180,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -185,6 +204,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -207,6 +228,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -229,6 +252,8 @@
         0.0021848204835047897,
         0.007983687420563382
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -251,6 +276,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -273,6 +300,8 @@
         0.0030847482040465344,
         0.010732357993702703
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -295,6 +324,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -317,6 +348,8 @@
         0.003477434837378033,
         0.011384064098576115
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -339,6 +372,8 @@
         0.0,
         0.0
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     },
@@ -361,6 +396,8 @@
         0.0035082405526436424,
         0.012576031864843445
       ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
       "baseline_fail_flip_rate": null,
       "flip_ci": null
     }
@@ -384,5 +421,10 @@
     "completion_tokens": 0,
     "cost_usd": 0.0,
     "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 0.0,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
   }
 }
