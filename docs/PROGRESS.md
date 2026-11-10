@@ -1,5 +1,12 @@
 # Progress
 
+## Approved P3 follow-up — preflight, 2026-11-10 CST
+
+- Owner approved the proposed two P3 batches in chat. Caps: Flash strategies $1.35 and Pro Direct $2.65. Both model IDs were confirmed through a fresh model-list request.
+- Starting guard accounting: $3.429732 with historical reservations and no pending marker. Balance snapshot: CNY 2.15. The Flash and Pro run IDs were free.
+- Runbook plans: Flash 336 logical completions with 96 new requests, Pro 48 new requests. One-attempt peak guard sums are $1.270343 and $2.600176. The Flash cache includes one invalid result from the pilot.
+- Wait for the off-peak window opening at 12:00 CST. Launch Flash first and verify remaining balance before Pro. The P4 and upstream submission approvals remain separate.
+
 ## Local deliverables and remaining runs — 2026-11-10 CST
 
 - `make phase2` generated the aggregate report on 48 human labels. Both judges matched 32/48, equal to always-pass. Two blanks and delayed re-labeling remain outside this result.
