@@ -1,0 +1,20 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Virtual environments (judge + claw-eval runner)
+.venvs/
+.venv/
+
+# Generated artefacts
+outputs/
+.cache/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+traces/
+annotation/traces/
+annotation/labels.csv
+runs/

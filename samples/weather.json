@@ -1,0 +1,35 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "What's the weather like in New York?"
+    },
+    {
+      "role": "assistant",
+      "content": "I'll check the weather for you.",
+      "tool_calls": [
+        {
+          "id": "1",
+          "function": {
+            "name": "get_weather",
+            "arguments": "{\"location\": \"New York\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "1",
+      "content": "Sunny, 72°F"
+    },
+    {
+      "role": "assistant",
+      "content": "The weather in New York is sunny, 72°F."
+    }
+  ],
+  "metadata": {
+    "source": "OpenJudge/docs/built_in_graders/agent_graders.md",
+    "section": "TrajectoryAccuracyGrader",
+    "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+  }
+}

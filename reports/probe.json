@@ -1,0 +1,132 @@
+{
+  "phase": "probe",
+  "status": "descriptive_probe",
+  "source": "outputs/probe/probe-deepseek-flash.jsonl",
+  "score_rows": 18,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "evaluated_traces": 1,
+  "latest_row_usage": {
+    "api_calls": 14,
+    "cached_calls": 4
+  },
+  "limitations": [
+    "Single provider and annotator; official scores partly LLM-derived, not truth.",
+    "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
+    "No significance claim; missing/error rows retained in coverage; task-cluster bootstrap CIs.",
+    "Output variety cannot prove the server honored or ignored temperature; request acceptance and distributions are distinct evidence."
+  ],
+  "analysis": [
+    {
+      "config": "trajectory_accuracy|think=off|direct1",
+      "observations": 3,
+      "errors": 0,
+      "distinct_reasons": 3,
+      "scores": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "completion_tokens": [
+        112,
+        115,
+        127
+      ]
+    },
+    {
+      "config": "trajectory_accuracy|think=off|direct1|t=0.0",
+      "observations": 3,
+      "errors": 0,
+      "distinct_reasons": 2,
+      "scores": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "completion_tokens": [
+        85,
+        85,
+        85
+      ]
+    },
+    {
+      "config": "trajectory_accuracy|think=off|direct1|t=1.5",
+      "observations": 3,
+      "errors": 3,
+      "distinct_reasons": 0,
+      "scores": [
+        null,
+        null,
+        null
+      ],
+      "completion_tokens": [
+        1024,
+        641,
+        214
+      ]
+    },
+    {
+      "config": "trajectory_accuracy|think=on|direct1",
+      "observations": 3,
+      "errors": 0,
+      "distinct_reasons": 3,
+      "scores": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "completion_tokens": [
+        278,
+        240,
+        393
+      ]
+    },
+    {
+      "config": "trajectory_accuracy|think=on|direct1|t=0.0",
+      "observations": 3,
+      "errors": 0,
+      "distinct_reasons": 3,
+      "scores": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "completion_tokens": [
+        364,
+        207,
+        262
+      ]
+    },
+    {
+      "config": "trajectory_accuracy|think=on|direct1|t=1.5",
+      "observations": 3,
+      "errors": 0,
+      "distinct_reasons": 3,
+      "scores": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "completion_tokens": [
+        223,
+        211,
+        278
+      ]
+    }
+  ],
+  "planned_jobs": 18,
+  "successful_rows": 15,
+  "phase_usage": {
+    "calls": 39,
+    "cached_calls": 22,
+    "prompt_tokens": 198572,
+    "completion_tokens": 4832,
+    "cost_usd": 0.06537,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 0.06537,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  }
+}

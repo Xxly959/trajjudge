@@ -1,0 +1,26 @@
+[
+  {
+    "fixture": "contact",
+    "task_id": "T010_contact_lookup",
+    "claw_eval_commit": "5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7",
+    "event_count": 12,
+    "message_count": 7,
+    "tool_call_count": 2,
+    "reference": "Original native message golden with matching synthetic content replacements.",
+    "sidecar_selection": "Synthetic request matching the structure of the first original agent request.",
+    "not_a_label": "structural golden fixture only; no human annotation or recommendation-quality judgment",
+    "publication": "Structural fixture with synthetic prompts, tool inputs and outputs. Scores are regression constants."
+  },
+  {
+    "fixture": "email",
+    "task_id": "T002_email_triage",
+    "claw_eval_commit": "5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7",
+    "event_count": 20,
+    "message_count": 14,
+    "tool_call_count": 8,
+    "reference": "Original native message golden with matching synthetic content replacements.",
+    "sidecar_selection": "Synthetic request matching the structure of the first original agent request.",
+    "not_a_label": "structural golden fixture only; no human annotation or recommendation-quality judgment",
+    "publication": "Structural fixture with synthetic prompts, tool inputs and outputs. Scores are regression constants."
+  }
+]

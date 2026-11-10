@@ -1,0 +1,144 @@
+[
+  {
+    "role": "system",
+    "content": "You are a test assistant in an offline sandbox."
+  },
+  {
+    "role": "user",
+    "content": "Synthetic email user message 1."
+  },
+  {
+    "role": "assistant",
+    "content": "Synthetic email assistant message 2.",
+    "tool_calls": [
+      {
+        "id": "call_001",
+        "type": "function",
+        "function": {
+          "name": "gmail_list_messages",
+          "arguments": "{\"days_back\": 7, \"max_results\": 40}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_001",
+    "content": "{\"result\": \"Synthetic email observation call_001\"}",
+    "name": "gmail_list_messages"
+  },
+  {
+    "role": "assistant",
+    "content": "Synthetic email assistant message 5.",
+    "tool_calls": [
+      {
+        "id": "call_002",
+        "type": "function",
+        "function": {
+          "name": "gmail_get_message",
+          "arguments": "{\"message_id\": \"sample-5-1\"}"
+        }
+      },
+      {
+        "id": "call_003",
+        "type": "function",
+        "function": {
+          "name": "gmail_get_message",
+          "arguments": "{\"message_id\": \"sample-5-1\"}"
+        }
+      },
+      {
+        "id": "call_004",
+        "type": "function",
+        "function": {
+          "name": "gmail_get_message",
+          "arguments": "{\"message_id\": \"sample-5-1\"}"
+        }
+      },
+      {
+        "id": "call_005",
+        "type": "function",
+        "function": {
+          "name": "gmail_get_message",
+          "arguments": "{\"message_id\": \"sample-5-1\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_002",
+    "content": "{\"result\": \"Synthetic email observation call_002\"}",
+    "name": "gmail_get_message"
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_003",
+    "content": "{\"result\": \"Synthetic email observation call_003\"}",
+    "name": "gmail_get_message"
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_004",
+    "content": "{\"result\": \"Synthetic email observation call_004\"}",
+    "name": "gmail_get_message"
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_005",
+    "content": "{\"result\": \"Synthetic email observation call_005\"}",
+    "name": "gmail_get_message"
+  },
+  {
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "call_006",
+        "type": "function",
+        "function": {
+          "name": "gmail_get_message",
+          "arguments": "{\"message_id\": \"sample-11-1\"}"
+        }
+      },
+      {
+        "id": "call_007",
+        "type": "function",
+        "function": {
+          "name": "gmail_get_message",
+          "arguments": "{\"message_id\": \"sample-11-1\"}"
+        }
+      },
+      {
+        "id": "call_008",
+        "type": "function",
+        "function": {
+          "name": "gmail_get_message",
+          "arguments": "{\"message_id\": \"sample-11-1\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_006",
+    "content": "{\"result\": \"Synthetic email observation call_006\"}",
+    "name": "gmail_get_message"
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_007",
+    "content": "{\"result\": \"Synthetic email observation call_007\"}",
+    "name": "gmail_get_message"
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_008",
+    "content": "{\"result\": \"Synthetic email observation call_008\"}",
+    "name": "gmail_get_message"
+  },
+  {
+    "role": "assistant",
+    "content": "Synthetic email assistant message 16."
+  }
+]

@@ -1,0 +1,2 @@
+# Preserve standard Git mail-patch context/signature whitespace in this artifact.
+contributions/openjudge/*.patch -whitespace

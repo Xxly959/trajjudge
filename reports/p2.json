@@ -1,0 +1,1223 @@
+{
+  "phase": "p2",
+  "status": "partial",
+  "source": "outputs/p2/p2-deepseek-flash.jsonl",
+  "score_rows": 100,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "evaluated_traces": 50,
+  "latest_row_usage": {
+    "api_calls": 100,
+    "cached_calls": 0
+  },
+  "limitations": [
+    "Single provider and annotator; official scores partly LLM-derived, not truth.",
+    "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
+    "No significance claim; missing/error rows retained in coverage; task-cluster bootstrap CIs."
+  ],
+  "labeled": 48,
+  "selected": 50,
+  "missing_scores": {
+    "trajectory_accuracy": 0,
+    "trajectory_comprehensive": 0
+  },
+  "agreement": {
+    "n": 48,
+    "labels": {
+      "pass": 32,
+      "fail": 16
+    },
+    "official_vs_human": {
+      "n": 48,
+      "accuracy": 0.7708333333333334,
+      "accuracy_ci": [
+        0.6346153846153846,
+        0.8958333333333334
+      ],
+      "kappa": 0.3773584905660379,
+      "kappa_ci": [
+        0.08917197452229296,
+        0.651851851851852
+      ],
+      "pabak": 0.5416666666666667,
+      "confusion": {
+        "tp": 32,
+        "fp": 11,
+        "fn": 0,
+        "tn": 5
+      },
+      "baselines": {
+        "always_pass": 0.6666666666666666,
+        "majority": 0.6666666666666666,
+        "random": 0.5
+      },
+      "labels": {
+        "pass": 32,
+        "fail": 16
+      },
+      "bootstrap_clusters": 35,
+      "baseline_ci": {
+        "always_pass": [
+          0.5294117647058824,
+          0.8043478260869565
+        ],
+        "majority": [
+          0.5306122448979592,
+          0.8043478260869565
+        ],
+        "random_expected": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "graders": {
+      "trajectory_accuracy": {
+        "n": 48,
+        "accuracy": 0.6666666666666666,
+        "accuracy_ci": [
+          0.5111111111111111,
+          0.8163265306122449
+        ],
+        "kappa": 0.04000000000000017,
+        "kappa_ci": [
+          -0.1085972850678729,
+          0.25203252032520285
+        ],
+        "pabak": 0.33333333333333326,
+        "confusion": {
+          "tp": 31,
+          "fp": 15,
+          "fn": 1,
+          "tn": 1
+        },
+        "baselines": {
+          "always_pass": 0.6666666666666666,
+          "majority": 0.6666666666666666,
+          "random": 0.5
+        },
+        "labels": {
+          "pass": 32,
+          "fail": 16
+        },
+        "threshold": 2.0,
+        "auc": 0.5458984375,
+        "auc_ci": [
+          0.46875,
+          0.6513888888888889
+        ],
+        "vs_official": {
+          "n": 48,
+          "accuracy": 0.8541666666666666,
+          "accuracy_ci": [
+            0.72,
+            0.9583333333333334
+          ],
+          "kappa": -0.06329113924050736,
+          "kappa_ci": [
+            -0.1291512915129154,
+            0.0
+          ],
+          "pabak": 0.7083333333333333,
+          "confusion": {
+            "tp": 41,
+            "fp": 5,
+            "fn": 2,
+            "tn": 0
+          },
+          "baselines": {
+            "always_pass": 0.8958333333333334,
+            "majority": 0.8958333333333334,
+            "random": 0.5
+          },
+          "labels": {
+            "pass": 43,
+            "fail": 5
+          },
+          "bootstrap_clusters": 35,
+          "baseline_ci": {
+            "always_pass": [
+              0.7872340425531915,
+              0.9791666666666666
+            ],
+            "majority": [
+              0.7872340425531915,
+              0.9791666666666666
+            ],
+            "random_expected": [
+              0.5,
+              0.5
+            ]
+          }
+        },
+        "per_category": {
+          "communication": {
+            "n": 4,
+            "accuracy": 0.5,
+            "accuracy_ci": [
+              0.0,
+              1.0
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              -1.0,
+              1.0
+            ],
+            "pabak": 0.0,
+            "confusion": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 1,
+              "tn": 1
+            },
+            "baselines": {
+              "always_pass": 0.5,
+              "majority": 0.5,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 2
+            },
+            "bootstrap_clusters": 2,
+            "baseline_ci": {
+              "always_pass": [
+                0.5,
+                0.5
+              ],
+              "majority": [
+                0.5,
+                0.5
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "knowledge": {
+            "n": 2,
+            "accuracy": 0.0,
+            "accuracy_ci": [
+              0.0,
+              0.0
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": -1.0,
+            "confusion": {
+              "tp": 0,
+              "fp": 2,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 0,
+              "fail": 2
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                0.0,
+                0.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "memory": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "operations": {
+            "n": 1,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 1,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "ops": {
+            "n": 14,
+            "accuracy": 0.8571428571428571,
+            "accuracy_ci": [
+              0.6428571428571429,
+              1.0
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": 0.7142857142857142,
+            "confusion": {
+              "tp": 12,
+              "fp": 2,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.8571428571428571,
+              "majority": 0.8571428571428571,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 12,
+              "fail": 2
+            },
+            "bootstrap_clusters": 14,
+            "baseline_ci": {
+              "always_pass": [
+                0.6428571428571429,
+                1.0
+              ],
+              "majority": [
+                0.6428571428571429,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "organization": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "procurement": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 2,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "research": {
+            "n": 2,
+            "accuracy": 0.5,
+            "accuracy_ci": [
+              0.5,
+              0.5
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": 0.0,
+            "confusion": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.5,
+              "majority": 0.5,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 1,
+              "fail": 1
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                0.5,
+                0.5
+              ],
+              "majority": [
+                0.5,
+                0.5
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "safety": {
+            "n": 2,
+            "accuracy": 0.5,
+            "accuracy_ci": [
+              0.5,
+              0.5
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": 0.0,
+            "confusion": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.5,
+              "majority": 0.5,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 1,
+              "fail": 1
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                0.5,
+                0.5
+              ],
+              "majority": [
+                0.5,
+                0.5
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "synthesis": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "workflow": {
+            "n": 15,
+            "accuracy": 0.4666666666666667,
+            "accuracy_ci": [
+              0.21052631578947367,
+              0.75
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": -0.06666666666666665,
+            "confusion": {
+              "tp": 7,
+              "fp": 8,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.4666666666666667,
+              "majority": 0.5333333333333333,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 7,
+              "fail": 8
+            },
+            "bootstrap_clusters": 10,
+            "baseline_ci": {
+              "always_pass": [
+                0.21052631578947367,
+                0.75
+              ],
+              "majority": [
+                0.5,
+                0.8
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          }
+        },
+        "bootstrap_clusters": 35,
+        "baseline_ci": {
+          "always_pass": [
+            0.5294117647058824,
+            0.8043478260869565
+          ],
+          "majority": [
+            0.5306122448979592,
+            0.8043478260869565
+          ],
+          "random_expected": [
+            0.5,
+            0.5
+          ]
+        }
+      },
+      "trajectory_comprehensive": {
+        "n": 48,
+        "accuracy": 0.6666666666666666,
+        "accuracy_ci": [
+          0.5294117647058824,
+          0.8043478260869565
+        ],
+        "kappa": 0.0,
+        "kappa_ci": [
+          0.0,
+          0.0
+        ],
+        "pabak": 0.33333333333333326,
+        "confusion": {
+          "tp": 32,
+          "fp": 16,
+          "fn": 0,
+          "tn": 0
+        },
+        "baselines": {
+          "always_pass": 0.6666666666666666,
+          "majority": 0.6666666666666666,
+          "random": 0.5
+        },
+        "labels": {
+          "pass": 32,
+          "fail": 16
+        },
+        "threshold": 0.6,
+        "auc": 0.6748046875,
+        "auc_ci": [
+          0.5376344086021505,
+          0.7972222222222223
+        ],
+        "vs_official": {
+          "n": 48,
+          "accuracy": 0.8958333333333334,
+          "accuracy_ci": [
+            0.7872340425531915,
+            0.9791666666666666
+          ],
+          "kappa": 0.0,
+          "kappa_ci": [
+            0.0,
+            0.0
+          ],
+          "pabak": 0.7916666666666667,
+          "confusion": {
+            "tp": 43,
+            "fp": 5,
+            "fn": 0,
+            "tn": 0
+          },
+          "baselines": {
+            "always_pass": 0.8958333333333334,
+            "majority": 0.8958333333333334,
+            "random": 0.5
+          },
+          "labels": {
+            "pass": 43,
+            "fail": 5
+          },
+          "bootstrap_clusters": 35,
+          "baseline_ci": {
+            "always_pass": [
+              0.7872340425531915,
+              0.9791666666666666
+            ],
+            "majority": [
+              0.7872340425531915,
+              0.9791666666666666
+            ],
+            "random_expected": [
+              0.5,
+              0.5
+            ]
+          }
+        },
+        "per_category": {
+          "communication": {
+            "n": 4,
+            "accuracy": 0.5,
+            "accuracy_ci": [
+              0.5,
+              0.5
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": 0.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 2,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.5,
+              "majority": 0.5,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 2
+            },
+            "bootstrap_clusters": 2,
+            "baseline_ci": {
+              "always_pass": [
+                0.5,
+                0.5
+              ],
+              "majority": [
+                0.5,
+                0.5
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "knowledge": {
+            "n": 2,
+            "accuracy": 0.0,
+            "accuracy_ci": [
+              0.0,
+              0.0
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": -1.0,
+            "confusion": {
+              "tp": 0,
+              "fp": 2,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 0,
+              "fail": 2
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                0.0,
+                0.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "memory": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "operations": {
+            "n": 1,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 1,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "ops": {
+            "n": 14,
+            "accuracy": 0.8571428571428571,
+            "accuracy_ci": [
+              0.6428571428571429,
+              1.0
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": 0.7142857142857142,
+            "confusion": {
+              "tp": 12,
+              "fp": 2,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.8571428571428571,
+              "majority": 0.8571428571428571,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 12,
+              "fail": 2
+            },
+            "bootstrap_clusters": 14,
+            "baseline_ci": {
+              "always_pass": [
+                0.6428571428571429,
+                1.0
+              ],
+              "majority": [
+                0.6428571428571429,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "organization": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "procurement": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 2,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "research": {
+            "n": 2,
+            "accuracy": 0.5,
+            "accuracy_ci": [
+              0.5,
+              0.5
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": 0.0,
+            "confusion": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.5,
+              "majority": 0.5,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 1,
+              "fail": 1
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                0.5,
+                0.5
+              ],
+              "majority": [
+                0.5,
+                0.5
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "safety": {
+            "n": 2,
+            "accuracy": 0.5,
+            "accuracy_ci": [
+              0.5,
+              0.5
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": 0.0,
+            "confusion": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.5,
+              "majority": 0.5,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 1,
+              "fail": 1
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                0.5,
+                0.5
+              ],
+              "majority": [
+                0.5,
+                0.5
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "synthesis": {
+            "n": 2,
+            "accuracy": 1.0,
+            "accuracy_ci": [
+              1.0,
+              1.0
+            ],
+            "kappa": null,
+            "kappa_ci": null,
+            "pabak": 1.0,
+            "confusion": {
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 1.0,
+              "majority": 1.0,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 2,
+              "fail": 0
+            },
+            "bootstrap_clusters": 1,
+            "baseline_ci": {
+              "always_pass": [
+                1.0,
+                1.0
+              ],
+              "majority": [
+                1.0,
+                1.0
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          },
+          "workflow": {
+            "n": 15,
+            "accuracy": 0.4666666666666667,
+            "accuracy_ci": [
+              0.21052631578947367,
+              0.75
+            ],
+            "kappa": 0.0,
+            "kappa_ci": [
+              0.0,
+              0.0
+            ],
+            "pabak": -0.06666666666666665,
+            "confusion": {
+              "tp": 7,
+              "fp": 8,
+              "fn": 0,
+              "tn": 0
+            },
+            "baselines": {
+              "always_pass": 0.4666666666666667,
+              "majority": 0.5333333333333333,
+              "random": 0.5
+            },
+            "labels": {
+              "pass": 7,
+              "fail": 8
+            },
+            "bootstrap_clusters": 10,
+            "baseline_ci": {
+              "always_pass": [
+                0.21052631578947367,
+                0.75
+              ],
+              "majority": [
+                0.5,
+                0.8
+              ],
+              "random_expected": [
+                0.5,
+                0.5
+              ]
+            }
+          }
+        },
+        "bootstrap_clusters": 35,
+        "baseline_ci": {
+          "always_pass": [
+            0.5294117647058824,
+            0.8043478260869565
+          ],
+          "majority": [
+            0.5306122448979592,
+            0.8043478260869565
+          ],
+          "random_expected": [
+            0.5,
+            0.5
+          ]
+        }
+      }
+    },
+    "bootstrap_clusters": 35,
+    "bootstrap_unit": "task; both agent configurations stay together",
+    "undefined_ci_policy": "undefined bootstrap draws omitted; CI null when fewer than half are defined"
+  },
+  "phase_usage": {
+    "calls": 1083,
+    "cached_calls": 121,
+    "prompt_tokens": 7199942,
+    "completion_tokens": 675350,
+    "cost_usd": null,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 3.002314,
+    "unknown_attempts": 2,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  }
+}

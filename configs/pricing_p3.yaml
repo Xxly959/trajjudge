@@ -1,0 +1,20 @@
+# Read-only verification: https://api-docs.deepseek.com/quick_start/pricing/
+# Verified 2026-11-05. Conservative peak/cache-miss USD per million tokens.
+# Kept separate so the historical phase1 pricing artifact and report stay fixed.
+currency: USD
+per: 1M_tokens
+source: https://api-docs.deepseek.com/quick_start/pricing/
+verified_on: "2026-11-05"
+models:
+  deepseek-flash:
+    input_per_mtok: 0.30
+    output_per_mtok: 1.20
+    off_peak_input_per_mtok: 0.15
+    off_peak_output_per_mtok: 0.60
+  deepseek-v4-pro:
+    input_per_mtok: 1.32
+    output_per_mtok: 3.96
+    input_cache_hit_per_mtok: 0.044
+    off_peak_input_per_mtok: 0.66
+    off_peak_output_per_mtok: 1.98
+    off_peak_input_cache_hit_per_mtok: 0.022

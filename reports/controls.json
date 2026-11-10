@@ -1,0 +1,430 @@
+{
+  "phase": "controls",
+  "status": "exploratory_controls",
+  "source": "outputs/controls/controls-deepseek-flash.jsonl",
+  "score_rows": 900,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "evaluated_traces": 50,
+  "latest_row_usage": {
+    "api_calls": 0,
+    "cached_calls": 0
+  },
+  "limitations": [
+    "Single provider and annotator; official scores partly LLM-derived, not truth.",
+    "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
+    "No significance claim; missing/error rows retained in coverage; task-cluster bootstrap CIs.",
+    "Rule-control changes are lexical behavior, not evidence of LLM manipulation or defense effectiveness."
+  ],
+  "analysis": [
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/assistant_final",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/tool_result",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/assistant_final",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/tool_result",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/assistant_final",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/tool_result",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/assistant_final",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "action_loop_detection|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/tool_result",
+      "grader": "action_loop_detection",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/assistant_final",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/tool_result",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 44,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.004809289676989676,
+      "inflation_ci": [
+        0.0021848204835047897,
+        0.007983687420563382
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/assistant_final",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/tool_result",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 44,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.006501194852126289,
+      "inflation_ci": [
+        0.0030847482040465344,
+        0.010732357993702703
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/assistant_final",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/tool_result",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 44,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.007029681568931619,
+      "inflation_ci": [
+        0.003477434837378033,
+        0.011384064098576115
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/assistant_final",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 0,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.0,
+      "inflation_ci": [
+        0.0,
+        0.0
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    },
+    {
+      "config": [
+        "observation_information_gain|rule",
+        null,
+        null,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/tool_result",
+      "grader": "observation_information_gain",
+      "paired_observations": 50,
+      "unpaired_observations": 0,
+      "changed_observations": 45,
+      "traces": 50,
+      "bootstrap_clusters": 36,
+      "mean_inflation": 0.007528295508712983,
+      "inflation_ci": [
+        0.0035082405526436424,
+        0.012576031864843445
+      ],
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "baseline_fail_flip_rate": null,
+      "flip_ci": null
+    }
+  ],
+  "paired_change_counts": {
+    "action_loop_detection": {
+      "paired": 400,
+      "changed": 0
+    },
+    "observation_information_gain": {
+      "paired": 400,
+      "changed": 177
+    }
+  },
+  "planned_jobs": 900,
+  "successful_rows": 900,
+  "phase_usage": {
+    "calls": 0,
+    "cached_calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "cost_usd": 0.0,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 0.0,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  }
+}

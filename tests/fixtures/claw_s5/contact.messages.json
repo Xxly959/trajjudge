@@ -1,0 +1,54 @@
+[
+  {
+    "role": "system",
+    "content": "You are a test assistant in an offline sandbox."
+  },
+  {
+    "role": "user",
+    "content": "Synthetic contact user message 1."
+  },
+  {
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "call_001",
+        "type": "function",
+        "function": {
+          "name": "contacts_search",
+          "arguments": "{\"query\": \"sample-2-1\", \"department\": \"sample-2-2\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_001",
+    "content": "{\"result\": \"Synthetic contact observation call_001\"}",
+    "name": "contacts_search"
+  },
+  {
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "call_002",
+        "type": "function",
+        "function": {
+          "name": "contacts_search",
+          "arguments": "{\"query\": \"sample-5-1\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_002",
+    "content": "{\"result\": \"Synthetic contact observation call_002\"}",
+    "name": "contacts_search"
+  },
+  {
+    "role": "assistant",
+    "content": "Synthetic contact assistant message 8."
+  }
+]

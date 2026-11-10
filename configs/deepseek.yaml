@@ -1,0 +1,20 @@
+# Single source of truth for every DeepSeek call made by this project.
+#
+# Model identifiers were verified on 2026-11-04 against the
+# provider's /models endpoint during the S2 smoke probe and copied here
+# verbatim. Do not fill them from memory — stale aliases are a known trap.
+base_url: https://api.deepseek.com
+
+models:
+  judge: deepseek-flash        # grading model used by OpenJudge runners in this project
+  agent: deepseek-flash        # model under test inside Claw-Eval
+
+# DeepSeek enables thinking by default. The wrapper sends
+# extra_body={"thinking": {"type": "disabled"}} when this is false.
+thinking:
+  judge: false
+  agent: false
+
+paths:
+  cache_dir: .cache/llm
+  usage_log: outputs/usage/usage.jsonl

@@ -1,0 +1,86 @@
+[
+ {
+  "task_id": "T036_vendor_procurement",
+  "category": "procurement",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T163zh_quarterly_customer_review",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T033zh_ops_review_dashboard",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T035zh_vendor_procurement",
+  "category": "procurement",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T031zh_escalation_budget_triage",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T034_ops_review_dashboard",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T150_project_progress_report",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 35
+ },
+ {
+  "task_id": "T037zh_incident_postmortem",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T153zh_market_research_report",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T038_incident_postmortem",
+  "category": "ops",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T154_market_research_report",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T149zh_project_progress_report",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 35
+ },
+ {
+  "task_id": "T040_onboarding_coordinator",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 40
+ },
+ {
+  "task_id": "T032_escalation_budget_triage",
+  "category": "workflow",
+  "difficulty": "hard",
+  "max_turns": 40
+ }
+]

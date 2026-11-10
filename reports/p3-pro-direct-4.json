@@ -1,0 +1,242 @@
+{
+  "phase": "p3",
+  "status": "partial",
+  "source": "outputs/p3/p3-pro-direct-4.jsonl",
+  "score_rows": 48,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "evaluated_traces": 4,
+  "latest_row_usage": {
+    "api_calls": 48,
+    "cached_calls": 0
+  },
+  "limitations": [
+    "Fixed four-trace cohort and a single provider.",
+    "Output caps differ across thinking modes.",
+    "On Flash, Direct uses the first draw and Average and Voting share all three draws within each repeat.",
+    "Complete repeat panels determine stability metrics. Reported intervals reflect this small cohort."
+  ],
+  "analysis": [
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-v4-pro",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.14433756729740643,
+        "flip_rate": 0.25,
+        "pairwise_disagreement": 0.16666666666666666,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 0.3333333333333333
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.4330127018922193
+        ],
+        "flip_rate": [
+          0.0,
+          0.75
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.5
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          0.3333333333333333,
+          0.3333333333333333
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=on|direct1",
+        "deepseek-v4-pro",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.0
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-v4-pro",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.03290137149930947,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.8465921827399078,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.012028130608117225,
+          0.053774612390501714
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.8164965809277261,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=on|direct1",
+        "deepseek-v4-pro",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 3,
+      "incomplete_traces": 1,
+      "error_rows": 2,
+      "summary": {
+        "traces": 3,
+        "repeats": 3,
+        "mean_sd": 0.014963198183189273,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.16666666666666663,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.01202813060811716,
+          0.02083333333333337
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          -0.3333333333333334,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 3
+    }
+  ],
+  "planned_jobs": 48,
+  "successful_rows": 46,
+  "phase_usage": {
+    "calls": 504,
+    "cached_calls": 265,
+    "prompt_tokens": 1862533,
+    "completion_tokens": 178566,
+    "cost_usd": 1.24424,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 1.24424,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  },
+  "scope": "Paired four-trace P3 follow-up with the same fixed cohort for both models",
+  "run_coverage": {
+    "trajectory_accuracy|think=off|direct1": {
+      "valid_rows": 12,
+      "pass_rows": 10,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 1
+    },
+    "trajectory_accuracy|think=on|direct1": {
+      "valid_rows": 12,
+      "pass_rows": 9,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 0
+    },
+    "trajectory_comprehensive|think=off|direct1": {
+      "valid_rows": 12,
+      "pass_rows": 12,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 3
+    },
+    "trajectory_comprehensive|think=on|direct1": {
+      "valid_rows": 10,
+      "pass_rows": 10,
+      "error_rows": 2,
+      "complete_traces": 3,
+      "score_varied_traces": 3
+    }
+  },
+  "usage_scope": "latest_row_usage is per run. phase_usage and budget_accounting cover all local P3 runs at report time."
+}

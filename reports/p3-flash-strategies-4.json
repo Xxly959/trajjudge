@@ -1,0 +1,646 @@
+{
+  "phase": "p3",
+  "status": "partial",
+  "source": "outputs/p3/p3-flash-strategies-4.jsonl",
+  "score_rows": 144,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "evaluated_traces": 4,
+  "latest_row_usage": {
+    "api_calls": 96,
+    "cached_calls": 240
+  },
+  "limitations": [
+    "Fixed four-trace cohort and a single provider.",
+    "Output caps differ across thinking modes.",
+    "On Flash, Direct uses the first draw and Average and Voting share all three draws within each repeat.",
+    "Complete repeat panels determine stability metrics. Reported intervals reflect this small cohort."
+  ],
+  "analysis": [
+    {
+      "config": [
+        "trajectory_accuracy|think=off|average3",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.048112522432468836,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.14433756729740652
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.0
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|voting3",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.14433756729740643,
+        "flip_rate": 0.25,
+        "pairwise_disagreement": 0.16666666666666666,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 0.3333333333333333
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.4330127018922193
+        ],
+        "flip_rate": [
+          0.0,
+          0.75
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.5
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          0.3333333333333333,
+          0.3333333333333333
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=on|average3",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.0481125224324688,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.1443375672974064
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=on|direct1",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.0
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=on|voting3",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.0
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": [
+          1.0,
+          1.0
+        ]
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|average3",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 3,
+      "incomplete_traces": 1,
+      "error_rows": 1,
+      "summary": {
+        "traces": 3,
+        "repeats": 3,
+        "mean_sd": 0.010480382480675845,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.6666666666666665,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.006944444444444475,
+          0.01388888888888895
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          -0.3333333333333334,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 3
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 4,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 4,
+        "repeats": 3,
+        "mean_sd": 0.018372527248187227,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0000000000000002,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.036745054496374455
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          1.0,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 4
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|voting3",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 3,
+      "incomplete_traces": 1,
+      "error_rows": 1,
+      "summary": {
+        "traces": 3,
+        "repeats": 3,
+        "mean_sd": 0.008018753738744774,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.9106836025229592,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.01202813060811716
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.9106836025229592,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 3
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=on|average3",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 3,
+      "incomplete_traces": 1,
+      "error_rows": 1,
+      "summary": {
+        "traces": 3,
+        "repeats": 3,
+        "mean_sd": 0.01862656784743884,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.9999999999999997,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.0318234423260822
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.9999999999999997,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 3
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=on|direct1",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 3,
+      "incomplete_traces": 1,
+      "error_rows": 1,
+      "summary": {
+        "traces": 3,
+        "repeats": 3,
+        "mean_sd": 0.025225005086760507,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.9106836025229592,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.01202813060811716,
+          0.03182344232608225
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.9106836025229592,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 3
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=on|voting3",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 3,
+      "incomplete_traces": 1,
+      "error_rows": 1,
+      "summary": {
+        "traces": 3,
+        "repeats": 3,
+        "mean_sd": 0.028981087102198145,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.9999999999999997,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.0,
+          0.055119818980512235
+        ],
+        "flip_rate": [
+          0.0,
+          0.0
+        ],
+        "pairwise_disagreement": [
+          0.0,
+          0.0
+        ],
+        "mean_spearman": [
+          0.9999999999999997,
+          1.0000000000000002
+        ],
+        "mean_kappa": null
+      },
+      "bootstrap_clusters": 3
+    }
+  ],
+  "planned_jobs": 144,
+  "successful_rows": 139,
+  "phase_usage": {
+    "calls": 456,
+    "cached_calls": 265,
+    "prompt_tokens": 1522705,
+    "completion_tokens": 133430,
+    "cost_usd": 0.616928,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 0.616928,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  },
+  "scope": "Paired four-trace P3 follow-up with the same fixed cohort for both models",
+  "run_coverage": {
+    "trajectory_accuracy|think=off|average3": {
+      "valid_rows": 12,
+      "pass_rows": 9,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 1
+    },
+    "trajectory_accuracy|think=off|direct1": {
+      "valid_rows": 12,
+      "pass_rows": 9,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 0
+    },
+    "trajectory_accuracy|think=off|voting3": {
+      "valid_rows": 12,
+      "pass_rows": 10,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 1
+    },
+    "trajectory_accuracy|think=on|average3": {
+      "valid_rows": 12,
+      "pass_rows": 9,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 1
+    },
+    "trajectory_accuracy|think=on|direct1": {
+      "valid_rows": 12,
+      "pass_rows": 9,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 0
+    },
+    "trajectory_accuracy|think=on|voting3": {
+      "valid_rows": 12,
+      "pass_rows": 9,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 0
+    },
+    "trajectory_comprehensive|think=off|average3": {
+      "valid_rows": 11,
+      "pass_rows": 11,
+      "error_rows": 1,
+      "complete_traces": 3,
+      "score_varied_traces": 3
+    },
+    "trajectory_comprehensive|think=off|direct1": {
+      "valid_rows": 12,
+      "pass_rows": 12,
+      "error_rows": 0,
+      "complete_traces": 4,
+      "score_varied_traces": 2
+    },
+    "trajectory_comprehensive|think=off|voting3": {
+      "valid_rows": 11,
+      "pass_rows": 11,
+      "error_rows": 1,
+      "complete_traces": 3,
+      "score_varied_traces": 2
+    },
+    "trajectory_comprehensive|think=on|average3": {
+      "valid_rows": 11,
+      "pass_rows": 11,
+      "error_rows": 1,
+      "complete_traces": 3,
+      "score_varied_traces": 2
+    },
+    "trajectory_comprehensive|think=on|direct1": {
+      "valid_rows": 11,
+      "pass_rows": 11,
+      "error_rows": 1,
+      "complete_traces": 3,
+      "score_varied_traces": 3
+    },
+    "trajectory_comprehensive|think=on|voting3": {
+      "valid_rows": 11,
+      "pass_rows": 11,
+      "error_rows": 1,
+      "complete_traces": 3,
+      "score_varied_traces": 2
+    }
+  },
+  "usage_scope": "latest_row_usage is per run. phase_usage and budget_accounting cover all local P3 runs at report time."
+}

@@ -1,0 +1,75 @@
+{
+  "trace_id": "openjudge-docs-weather",
+  "grader": "trajectory_accuracy",
+  "score": 3.0,
+  "reason": "The trajectory is logically coherent, efficient, and directly fulfills the user's request by calling the weather tool and reporting the result. No unnecessary steps.",
+  "metadata": {
+    "raw_score": 3.0
+  },
+  "judge_model": "deepseek-flash",
+  "thinking": false,
+  "returned_reasoning": false,
+  "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f",
+  "timestamp": "2026-11-04T09:23:11+00:00",
+  "cached": false,
+  "response_format_policy": "json_object with local validation against the upstream callback schema",
+  "wire_observations": [
+    {
+      "thinking": {
+        "type": "disabled"
+      },
+      "response_format": {
+        "type": "json_object"
+      },
+      "request_fields": [
+        "max_tokens",
+        "messages",
+        "model",
+        "response_format",
+        "stream",
+        "thinking"
+      ]
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 504,
+    "completion_tokens": 38,
+    "raw_usage": {
+      "completion_tokens": 38,
+      "prompt_tokens": 504,
+      "total_tokens": 542,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 504
+    }
+  },
+  "sample_source": {
+    "source": "OpenJudge/docs/built_in_graders/agent_graders.md",
+    "section": "TrajectoryAccuracyGrader",
+    "openjudge_commit": "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+  },
+  "estimate": {
+    "completion_calls": 1,
+    "input_tokens_estimate": 1200,
+    "output_tokens_cap": 768,
+    "cost_usd_estimate": 0.001282,
+    "reserve_usd": 0.02,
+    "pricing_basis": "peak/cache-miss conservative estimate"
+  },
+  "cumulative_usage": {
+    "calls": 16,
+    "cached_calls": 9,
+    "prompt_tokens": 997,
+    "completion_tokens": 107,
+    "cost_usd": 0.000428,
+    "unpriced_models": []
+  },
+  "accounting_note": "Cumulative peak-price cost uses Decimal and rounds upward to six decimals; unrounded total USD 0.0004275."
+}

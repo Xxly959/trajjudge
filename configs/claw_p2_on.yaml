@@ -1,0 +1,27 @@
+# P2 agent config B: deepseek-flash, thinking enabled. Placeholders only.
+model:
+  api_key: ${DEEPSEEK_API_KEY}
+  base_url: https://api.deepseek.com
+  model_id: deepseek-flash
+  input_modalities: [text]
+  context_window: 1048576
+  temperature: 0.0
+  reasoning_field: reasoning_content
+  extra_body:
+    thinking:
+      type: enabled
+    max_tokens: 16384
+judge:
+  api_key: ${DEEPSEEK_API_KEY}
+  base_url: https://api.deepseek.com
+  model_id: deepseek-flash
+  enabled: true
+user_agent_model:
+  api_key: ${DEEPSEEK_API_KEY}
+  base_url: https://api.deepseek.com
+  model_id: deepseek-flash
+defaults:
+  tasks_dir: ../claw-eval/tasks
+sandbox:
+  enabled: true
+  image: trajjudge-claw-agent:s5
