@@ -1,5 +1,13 @@
 # Progress
 
+## P3 follow-up verified — 2026-11-10 CST
+
+- Flash strategy comparison: 144 rows, 139 valid and five errors. Pro Direct: 48 rows, 46 valid and two length-limit errors. The 192 rows replayed from cache with zero API calls.
+- On four matched traces, Flash Accuracy voting and Pro Direct Accuracy each had 1/4 complete panels flip with thinking off. Flash and Pro Direct disagreed on 1/45 valid paired verdicts. All valid Comprehensive verdicts passed in both runs.
+- 144 new requests and 240 local cache reads. New conservative guard cost $0.901859 / $4.00, cumulative $4.331591 including historical reservations. Post-run balance CNY 0.92. No active runner or pending accounting marker.
+- Reports: `reports/p3-flash-strategies-4.json` and `reports/p3-pro-direct-4.json`. Exact scope, commands and raw evidence hashes are in `docs/APPROVED_RUNS.md`.
+- Next: P4 LLM experiment on the 16 human failures needs its own budget and available balance. The OpenJudge patch and draft await owner approval for external submission.
+
 ## P3 Flash verified and Pro pre-batch — 2026-11-10 CST
 
 - Flash strategies saved all 144 rows: 139 valid and five invalid. The 336 logical completions used 96 new API responses and 240 local cache reads. Offline replay matched every row from cache, including all errors.

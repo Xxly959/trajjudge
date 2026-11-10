@@ -192,3 +192,44 @@ from cache, including the invalid completion, with zero API requests.
   attempt and no pending accounting marker. Cumulative guard accounting
   $3.429732 includes historical reservations. Post-run balance CNY 2.44 is
   a separate read-only snapshot.
+
+## 2026-11-10 P3 matched Flash strategies and Pro Direct
+
+The owner approved the two prepared P3 batches with separate caps of $1.35
+for Flash and $2.65 for Pro. Both ran in the midday CST off-peak window
+with one worker and one attempt per request. The batches used the first four
+frozen traces by trace ID, two graders, both thinking modes and three repeats.
+Flash Direct uses the first draw per repeat. Average and Voting share the
+three draws. The same four traces and Direct configuration are used for Pro.
+
+```sh
+.venvs/judge/bin/python scripts/experiment.py p3 --model deepseek-flash --thinking both --limit 4 --grid-traces 4 --repeats 3 --workers 1 --max-attempts 1 --run-id p3-flash-strategies-4 --run --cap-usd 1.35
+.venvs/judge/bin/python scripts/experiment.py p3 --model deepseek-v4-pro --thinking both --limit 4 --grid-traces 0 --repeats 3 --workers 1 --max-attempts 1 --run-id p3-pro-direct-4 --run --cap-usd 2.65
+```
+
+| Run | Planned rows | Valid / error | New completions | Local cache reads | Guard cost / cap |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Flash strategies | 144 | 139 / 5 | 96 | 240 | $0.274548 / $1.35 |
+| Pro Direct | 48 | 46 / 2 | 48 | 0 | $0.627312 / $2.65 |
+
+Flash had three affected rows from the shared step-coverage error and two
+rows affected by an invalid JSON payload. Pro had two thinking-on Comprehensive
+responses hit the 4,096-token output cap. Both commands exited 1 to report
+these errors and neither stopped early. An isolated cache replay matched
+all 192 stored statuses, scores and reasons, including errors, with zero API calls.
+
+- Flash source `outputs/p3/p3-flash-strategies-4.jsonl`, SHA-256
+  `5100ee612542a379faf494b0ec178bd5c7ab8cd6c564d629c684d6664dc847f0`.
+  [Aggregate report](../reports/p3-flash-strategies-4.json).
+- Pro source `outputs/p3/p3-pro-direct-4.jsonl`, SHA-256
+  `288c21d3cf377b2edcfa21be6f745b39b01fe1fe3bc85b0705d41bf2e55a9e5d`.
+  [Aggregate report](../reports/p3-pro-direct-4.json).
+- Manifests and budgets are in the corresponding `runs/<run-id>/` directories.
+  Regenerate each aggregate with `scripts/report_experiments.py p3 --input <run JSONL>`.
+  Compare Direct rows with matching trace, grader, thinking mode and repeat
+  after filtering to valid rows. The report's `phase_usage` is cumulative P3
+  usage at generation time, while `latest_row_usage` is scoped to that run.
+- Balance snapshots before Flash, after Flash and after Pro were CNY 2.15,
+  CNY 1.98 and CNY 0.92. The two batches added $0.901859 to the guard ledger,
+  which totals $4.331591 including historical reservations. The two rounded
+  per-batch costs differ from the combined ledger delta by $0.000001.

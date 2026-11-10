@@ -98,7 +98,11 @@ before a later paid batch. Flash/pro prices are in `configs/pricing_p3.yaml` fro
 the [official page](https://api-docs.deepseek.com/quick_start/pricing/). Default
 thinking is on except the D24 pre-registered P2 primary configuration (off).
 
-## Remaining paid runs, prepared 2026-11-10
+## P3 follow-up and P4 plans, prepared 2026-11-10
+
+The two P3 batches below were approved and executed on 2026-11-10. Their
+results and approved commands are in [the run record](APPROVED_RUNS.md).
+P4 still awaits approval. The preflight balance below is historical.
 
 P3 holds the sample fixed at the first four frozen traces by trace ID. Compare
 Flash and Pro in Direct mode, and compare Direct, Average and Voting on Flash.

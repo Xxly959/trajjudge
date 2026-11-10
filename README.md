@@ -10,11 +10,12 @@ LLM graders evaluating agent trajectories. It connects
 not establish judge reliability, agreement with humans, stability or injection
 resistance. Human annotation and those experiments remain future work.
 
-**Working status, 2026-11-09:** recovery, a frozen blind-annotation kit,
+**Working status, 2026-11-10:** recovery, a frozen blind-annotation kit,
 recoverable stage drivers and offline analysis are available. RQ1 has a partial
 comparison on 48 human labels. A ten-trace Flash Direct stability pilot has
-119 valid results and one preserved error. The wider stability experiment
-and formal LLM injection experiment remain pending. The free
+119 valid results and one preserved error. The four-trace follow-up compared
+Flash strategies and Flash/Pro Direct. The formal LLM injection experiment
+remains pending. The free
 rule-control report is exploratory. An OpenJudge fix is prepared locally and is
 unsubmitted. These are draft status statements, not approved resume conclusions.
 P2's main judge run now has 100/100 valid verdicts. The single-case sampling probe

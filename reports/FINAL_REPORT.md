@@ -104,10 +104,28 @@ output caps limit inference about thinking and general stability. The
 [pilot report](p3-flash-direct-pilot.json) preserves coverage and task-cluster
 intervals. Source: `outputs/p3/p3-flash-direct-pilot.jsonl`.
 
+### P3 matched strategy and model comparisons
+
+The four-trace follow-up compared Flash Direct, Average and Voting on shared
+draws, and Flash and Pro in Direct mode. Flash produced 139 valid rows out of
+144 and Pro produced 46 out of 48. Across complete panels, Flash Accuracy
+voting and Pro Direct Accuracy each flipped on one of four traces with
+thinking off. Other settings showed zero within-panel verdict flips.
+Flash and Pro Direct disagreed in 1 of 45 valid matched verdict pairs.
+Flash and Pro Comprehensive respectively passed all 67 and 22 valid
+results, with score variation in both models.
+
+The comparison uses a fixed four-trace cohort with different output caps by
+thinking mode. Both Pro errors hit the thinking-on Comprehensive cap. The
+Flash strategy results share draws and their errors can share a single
+completion. The [Flash report](p3-flash-strategies-4.json) and
+[Pro report](p3-pro-direct-4.json) include group coverage and task-cluster
+intervals.
+
 | Question | Current state | Required evidence |
 | --- | --- | --- |
 | RQ1 agreement | Partial comparison on 48 human labels | Two blank items and delayed re-label round remain pending |
-| RQ2 stability | Ten-trace Flash Direct pilot completed; wider P3 pending | Broader sample and strategy comparisons within separately approved scope |
+| RQ2 stability | Ten-trace Flash pilot and four-trace paired follow-up completed | The results describe the fixed cohorts and tested configurations |
 | RQ3 LLM injection | Matched rule controls complete on 16 human failures | Approved budget and matched LLM original/variant/defense repeats |
 | Upstream contribution | Local branch + portable patch + draft | Owner authorization, maintainer review; acceptance is not established |
 
@@ -129,8 +147,9 @@ added conservative budget costs P2 **$0.321302 /$0.80** and probe
 reservations for two unknown attempts, not fabricated measured tokens.
 
 The P3 pilot added **$0.342380 / $1.50**. Cumulative guard accounting including
-reservations is **$3.429732**. Actual usage for two historical attempts
-remains unknown. The last balance snapshot was CNY 2.44 after the P3 pilot.
+reservations reached **$4.331591** after the matched follow-up, which added
+**$0.901859 / $4.00**. Actual usage for two historical attempts remains
+unknown. The last balance snapshot was CNY 0.92 after Pro.
 Discounts, other account activity and exchange rates prevent exact reconciliation.
 See APPROVED_RUNS for unchanged ceilings, evidence and the separate budget policy.
 

@@ -29,6 +29,12 @@ rule behavior and completed research are kept distinct.
   across the 39 complete repeat panels, while Comprehensive scores varied in
   16 of its 19 complete panels. The [pilot report](../reports/p3-flash-direct-pilot.json)
   includes group denominators and intervals.
+- Compared Flash and Pro Direct on four matched trajectories and tested
+  Flash's three evaluation strategies on shared draws. Both batches
+  reproduced all 192 rows from cache, including seven invalid rows.
+  Flash and Pro differed on 1/45 valid matched Direct verdicts. See the
+  [Flash report](../reports/p3-flash-strategies-4.json) and
+  [Pro report](../reports/p3-pro-direct-4.json).
 - Ran 900 deterministic, free rule evaluations (100 originals and 800 variants).
   Among 400 variants per grader: loop score changed in 0, lexical information
   gain in 177. Source: `outputs/controls/controls-deepseek-flash.jsonl` and
