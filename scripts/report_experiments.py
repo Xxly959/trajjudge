@@ -99,7 +99,8 @@ def main() -> int:
                     raise ValueError("formal P4 evidence includes traces without an owner fail label")
                 result["annotation_coverage"] = {"unlabeled": args.expected_unlabeled,
                                                  "eligible_human_fail_traces": len(allowed)}
-            result["limitations"].append("Rule-control changes are lexical behavior, not evidence of LLM manipulation or defense effectiveness.")
+            else:
+                result["limitations"].append("Rule-control changes are lexical behavior, not evidence of LLM manipulation or defense effectiveness.")
         if manifest:
             planned = len(manifest.get("plan", {}).get("jobs", [])) or manifest.get("total_jobs", 0)
             result["planned_jobs"] = planned
@@ -111,6 +112,11 @@ def main() -> int:
                 actual_ids = {r.get("job_id") for r in grades}
                 if actual_ids != planned_ids:
                     result["status"] = "partial_identity_mismatch"
+                elif (phase == "p4" and result["successful_rows"] == planned == len(planned_ids)
+                      and {r["trace_id"] for r in grades if r.get("variant") != "original"} == allowed
+                      and result["analysis"]
+                      and all(not group["unpaired_observations"] for group in result["analysis"])):
+                    result["status"] = "complete"
         elif phase != "controls":
             result["status"] = "partial_missing_manifest"
     ledger = UsageLog(root / "outputs/usage/usage.jsonl").read()

@@ -1,5 +1,12 @@
 # Progress
 
+## P4 paused before launch — offline rehearsal, 2026-11-10 CST
+
+- The owner deferred API calls. The previously approved P4 cap is $22.50. Wait for the owner's request to resume, then recheck balance, model and off-peak time.
+- A socket-denied rehearsal used synthetic scores for the full 1,728-job plan. The report matched all job IDs and formed 1,536 perturbation pairs across 16 eligible traces. The rehearsal wrote to a temporary directory and preserved the live ledger and labels.
+- The P4 report marks a run complete only when the manifest identities match, all planned rows are valid, each eligible trace has perturbation results and every reported pair has its baseline. Missing pairs and rows retain explicit partial statuses.
+- Verification: 180 offline tests passed. The OpenJudge patch and draft remain ready for separate submission approval. The walkthrough now includes a short interview explanation using verified P2 and P3 results.
+
 ## Approved P4 run — waiting for off-peak, 2026-11-10 CST
 
 - Owner confirmed the previously proposed $22.50 stage cap in chat. The run remains scoped to 16 owner-labeled failures, with two blank records excluded, 1,728 planned jobs and 48 reusable results.

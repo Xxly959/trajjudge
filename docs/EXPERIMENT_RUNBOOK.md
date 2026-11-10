@@ -102,7 +102,9 @@ thinking is on except the D24 pre-registered P2 primary configuration (off).
 
 The two P3 batches below were approved and executed on 2026-11-10. Their
 results and approved commands are in [the run record](APPROVED_RUNS.md).
-P4 still awaits approval. The preflight balance below is historical.
+P4 has a $22.50 approved cap and is paused at the owner's request before
+launch. Resume when requested and recheck balance and off-peak time. The
+preflight balances are historical snapshots.
 
 P3 holds the sample fixed at the first four frozen traces by trace ID. Compare
 Flash and Pro in Direct mode, and compare Direct, Average and Voting on Flash.
