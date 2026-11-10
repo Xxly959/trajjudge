@@ -1,5 +1,11 @@
 # Progress
 
+## P4 results synchronized to GitHub — 2026-11-10 CST
+
+- Public main is now `a95a4d51e083a796f8e1c65b104863ef75972f2d`. It contains the P4 aggregate and updated [review guide](https://github.com/Xxly959/trajjudge/blob/main/REVIEW.md), report, runbook and supporting documentation. The public P4 aggregate matches the local file byte-for-byte.
+- The isolated public checkout passed 180 offline tests and four credential checks. Raw evidence, owner annotations, response cache and research Git history remain local.
+- Next: independent review using the updated public review guide. Human repeat annotation, upstream submission and final wording remain separate.
+
 ## P4 live batch executed and replayed — 2026-11-10 CST
 
 - All 1,728 jobs on 16 owner-labeled failures produced checkpoints. There were 1,701 valid verdicts, 27 retained Comprehensive validation errors, and 1,496/1,536 valid perturbation pairs. The numeric report marks coverage partial. The runner exited 1 because it observed validation errors. It completed the plan without an early stop.
