@@ -1,5 +1,13 @@
 # Progress
 
+## P4 live batch executed and replayed — 2026-11-10 CST
+
+- All 1,728 jobs on 16 owner-labeled failures produced checkpoints. There were 1,701 valid verdicts, 27 retained Comprehensive validation errors, and 1,496/1,536 valid perturbation pairs. The numeric report marks coverage partial. The runner exited 1 because it observed validation errors. It completed the plan without an early stop.
+- An independent run with sockets denied reproduced all 1,728 stored job IDs, statuses, scores and reasons, including errors, from copied cache. The original run lock and usage pending marker are clear. P4 used 1,680 new completions and 48 local cache reads.
+- P4 guard accounting added $4.848892 / $22.50. Cumulative guard accounting including historical reservations is $9.180483. Published off-peak prices applied to reported hit/miss/output tokens yield a $0.460284 estimate.
+- The report, README, resume evidence and Chinese walkthrough now include P4 and its coverage limits. The OpenJudge patch applied to upstream `1c0e05a` and passed 12 focused offline unit tests, with two quality tests deselected.
+- Remaining owner work: two first-round labels are blank, the delayed repeat has no labels, and upstream submission and final wording await confirmation. Current findings and evidence updates are local.
+
 ## P4 live launch authorized — 2026-11-10 CST
 
 - The owner explicitly asked to launch the full batch despite the read-only CNY 5.74 balance. Flash availability and the off-peak window were verified. The original $22.50 guard ceiling applies.
