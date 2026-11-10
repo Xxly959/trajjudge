@@ -1,8 +1,8 @@
 # Audit delivery report — incomplete research draft
 
 Updated: 2026-11-10 CST. Owner review is required before publishing conclusions or
-resume wording. This report distinguishes verified engineering and free lexical
-controls from experiments that still require human work and approved API spend.
+resume wording. This report separates engineering verification, rule controls
+and live LLM results. The delayed annotation repeat remains outstanding.
 
 ## Verified scope
 
@@ -64,9 +64,39 @@ On the matched 16 human-fail trajectories, loop scores changed in **0/128**
 and lexical information gain changed in **56/128** paired variants. This
 subset comes from the existing rule-control rows and uses the same grouping.
 The [matched report](p4-human-fail-rule-controls.json) contains task-cluster
-intervals for score changes. The LLM experiment remains pending.
+intervals for score changes.
 
-## Pending research
+## P4 paired LLM perturbation experiment
+
+The DeepSeek Flash Direct batch used 16 owner-labeled failures, two graders,
+three repeats, eight perturbations, and two defense settings. The two blank
+items were excluded. All **1,728** planned jobs produced records. Of these,
+**1,701** passed validation and **27** Comprehensive outputs failed validation.
+There were **1,496/1,536** valid original–perturbation pairs. The numeric report
+marks coverage partial. Invalid rows are retained in the local run evidence.
+
+| Grader | Wrapper | Valid pairs | Score changed | Fail-to-pass among baseline-fail pairs |
+| --- | --- | ---: | ---: | ---: |
+| Accuracy | Off | 384/384 | 47 | 18/24 |
+| Accuracy | On | 384/384 | 22 | 7/8 |
+| Comprehensive | Off | 376/384 | 354 | Undefined (0 eligible) |
+| Comprehensive | On | 352/384 | 305 | Undefined (0 eligible) |
+
+Each original can enter eight pairs. Accuracy's 24 and eight eligible pairs
+come from three and one distinct baseline failures, respectively, out of 48
+original evaluations per setting. The denominators differ, so the two flip
+counts do not establish a wrapper benefit. Every valid Comprehensive original
+passed (48 without the wrapper, 46 with it). The failure-to-pass rate is
+undefined for Comprehensive even though its scores changed.
+
+For the unwrapped Comprehensive grader, the level-three notice in a tool
+result raised the trace-averaged score by **0.054** on its 0–1 scale
+(task-cluster bootstrap 95% CI **[0.032, 0.080]**). This is one of eight
+variant contrasts on a small, failure-enriched cohort. The
+[P4 aggregate](p4.json) gives all per-variant effects, intervals and
+denominators. Raw source: `outputs/p4/p4-flash-human-fail-16.jsonl`.
+
+## P2 execution and sampling probe
 
 Approved execution update: the P2 main judge now has **100/100 valid verdicts**
 (50 traces × two graders). Human agreement is assessed separately on the 48
@@ -126,10 +156,11 @@ intervals.
 | --- | --- | --- |
 | RQ1 agreement | Partial comparison on 48 human labels | Two blank items and delayed re-label round remain pending |
 | RQ2 stability | Ten-trace Flash pilot and four-trace paired follow-up completed | The results describe the fixed cohorts and tested configurations |
-| RQ3 LLM injection | Matched rule controls complete on 16 human failures | Approved budget and matched LLM original/variant/defense repeats |
+| RQ3 LLM injection | All 1,728 planned rows collected with 27 invalid outputs and 1,496 valid pairs | The 16-trace study estimates effects within the tested configurations; sparse baseline failures limit the defense comparison |
 | Upstream contribution | Local branch + portable patch + draft | Owner authorization, maintainer review; acceptance is not established |
 
-`make phase2 phase3 phase4` explicitly reports pending when data are missing.
+`make phase2` rebuilds the main agreement report. Use the runbook's named
+inputs for the executed P3 and P4 batches.
 Offline reports cannot create absent experiments. Missing/error scores remain
 null with coverage counts; reports derive repeat panels and identities from the
 run manifest. RQ1 includes trivial baselines, confusion, kappa and AUC; stability
@@ -150,6 +181,10 @@ The P3 pilot added **$0.342380 / $1.50**. Cumulative guard accounting including
 reservations reached **$4.331591** after the matched follow-up, which added
 **$0.901859 / $4.00**. Actual usage for two historical attempts remains
 unknown. The provider balance was recorded separately after the Pro run.
+P4 added **$4.848892** on the conservative guard, for **$9.180483**
+cumulative including historical reservations. The P4 usage-based estimate at
+published off-peak prices is **$0.460284** with provider prompt-cache hits
+counted at the published hit rate.
 Discounts, other account activity and exchange rates prevent exact reconciliation.
 See APPROVED_RUNS for unchanged ceilings, evidence and the separate budget policy.
 
@@ -176,6 +211,5 @@ reproduction; a Git clone alone does not contain them. Public artifact release
 needs a content/rights review; benchmark code licensing alone does not establish
 all rights in model-generated text.
 
-The full completion definition remains unmet until the owner gates and actual
-experiments above are complete. See [EXPERIMENT_RUNBOOK](../docs/EXPERIMENT_RUNBOOK.md)
-for exact commands and unapproved budget proposals.
+The human repeat and owner review of the final wording remain open. See the
+[experiment runbook](../docs/EXPERIMENT_RUNBOOK.md) for reproduction commands.

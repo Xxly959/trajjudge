@@ -13,10 +13,10 @@ Later phases address grader agreement, stability and injection resistance.
 recoverable stage drivers and offline analysis are available. RQ1 has a partial
 comparison on 48 human labels. A ten-trace Flash Direct stability pilot has
 119 valid results and one preserved error. The four-trace follow-up compared
-Flash strategies and Flash/Pro Direct. The formal LLM injection experiment
-remains pending. The free
-rule-control report is exploratory. An OpenJudge fix is prepared locally and is
-unsubmitted. These are draft status statements, not approved resume conclusions.
+Flash strategies and Flash/Pro Direct. The P4 LLM injection batch collected all
+1,728 planned results on 16 human-labeled failures. It retained 27 invalid
+responses and yielded 1,496 valid pairs. An OpenJudge fix is prepared locally
+and awaits upstream submission. The research report is a draft for review.
 P2's main judge run now has 100/100 valid verdicts. The single-case sampling probe
 has 18 observations (17 new calls plus one cache reuse), 15 valid and three genuine
 format errors. Both runs replay from cache. Coverage does not establish correctness;
@@ -29,12 +29,13 @@ See [recovery](docs/STATE_RECOVERY.md), [current checkpoint](docs/PROGRESS.md),
 ```sh
 make test                     # offline, all model requests mocked
 make phase1                   # historical cache replay; needs restored evidence
-make phase2 phase3 phase4      # offline analysis; explicitly pending without data
+make phase2                    # offline agreement analysis from local evidence
 make rule-controls            # free deterministic perturbation controls
 .venvs/judge/bin/python scripts/annotate.py label   # owner only
 ```
 
 Raw evidence, blank/filled label files and private mappings stay local and ignored.
+Use the [runbook](docs/EXPERIMENT_RUNBOOK.md) to regenerate the named P3 and P4 reports.
 See [third-party provenance and release boundaries](docs/THIRD_PARTY.md).
 
 For a guided review of this public snapshot, start with [REVIEW.md](REVIEW.md).

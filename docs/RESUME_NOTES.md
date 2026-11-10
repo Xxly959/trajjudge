@@ -39,6 +39,12 @@ rule behavior and completed research are kept distinct.
   Among 400 variants per grader: loop score changed in 0, lexical information
   gain in 177. Source: `outputs/controls/controls-deepseek-flash.jsonl` and
   `reports/controls.json`. This is lexical sensitivity, not LLM attack success.
+- Executed the 1,728-job Flash Direct perturbation batch on 16 human-labeled
+  failures. It yielded 1,701 valid verdicts and 1,496 valid original–variant
+  pairs. Undefended Accuracy flipped 18 of 24 baseline-fail pairs, derived
+  from only three distinct baseline failures. The wrapper's denominator
+  came from a different baseline set. See [the P4 report](../reports/p4.json)
+  and [the execution record](APPROVED_RUNS.md) for coverage and intervals.
 - Prepared a small local OpenJudge raw-score metadata fix with six mock
   regressions. Source: `contributions/openjudge/PR_DRAFT.md` and the tracked patch.
   It is not submitted or accepted.

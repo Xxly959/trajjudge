@@ -232,3 +232,35 @@ all 192 stored statuses, scores and reasons, including errors, with zero API cal
 - Balance snapshots before Flash, after Flash and after Pro were recorded locally. The two batches added $0.901859 to the guard ledger,
   which totals $4.331591 including historical reservations. The two rounded
   per-batch costs differ from the combined ledger delta by $0.000001.
+
+## P4 Flash paired perturbations — 2026-11-10 CST
+
+The owner authorized the full run against 16 owner-labeled failures, excluding
+two blanks. DeepSeek Flash availability and off-peak pricing were confirmed.
+The original $22.50 guard cap was preserved.
+
+```sh
+.venvs/judge/bin/python scripts/experiment.py p4 --model deepseek-flash --thinking off --repeats 3 --expected-unlabeled 2 --workers 1 --max-attempts 1 --run-id p4-flash-human-fail-16 --run --cap-usd 22.50
+.venvs/judge/bin/python scripts/report_experiments.py p4 --input outputs/p4/p4-flash-human-fail-16.jsonl --expected-unlabeled 2
+```
+
+- 1,728/1,728 rows, 1,701 valid and 27 errors. The errors were all in
+  Comprehensive: 15 missing step evaluations, four incomplete step-coverage
+  results, and eight invalid JSON responses. Exit 1 reflects these errors.
+  No early stop or uncertain attempt occurred.
+- 1,496/1,536 valid original–perturbation pairs. [Aggregate](../reports/p4.json)
+  carries variant-level intervals and fail-to-pass denominators. It marks
+  valid coverage partial and retains the error count.
+- A fresh isolated `--offline` run with copied inputs and cache and sockets
+  blocked reproduced all 1,728 job IDs, statuses, scores and reasons. It also
+  exited 1 because it reproduced the same errors. The live ledger stayed intact.
+- 1,680 new completions and 48 local cache hits. New usage includes 13,361,646
+  provider cache-hit input tokens, 766,958 cache-miss input tokens and 508,592
+  output tokens. Published off-peak pricing yields an estimated $0.460284.
+  The conservative guard added $4.848892, for $9.180483 cumulative including
+  the previous reservations. No invoice was reconciled.
+- Source JSONL SHA-256
+  `10a0e5a3156c846fd07f9ea9a7473b3445e8b354b41234110a521009f7ba8f0a`.
+  Manifest SHA-256
+  `6d90c46494e8f5c3676c4e70a8601c48c07dc6fcad9fd1fe1ba766b3bd4c8f50`.
+  The local budget checkpoint preserves the original $26.831591 absolute ceiling.

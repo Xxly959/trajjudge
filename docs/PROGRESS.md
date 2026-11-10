@@ -1,5 +1,11 @@
 # Progress
 
+## P4 results available for review — 2026-11-10 CST
+
+- The live Flash Direct run recorded all 1,728 planned jobs on 16 human-labeled failures. It produced 1,701 valid verdicts, 27 Comprehensive validation errors and 1,496/1,536 valid perturbation pairs.
+- An isolated cache replay matched all 1,728 job IDs, statuses, scores and reasons with network access blocked. The public report includes aggregate coverage, costs and per-variant intervals. The raw trajectories, individual verdicts, labels and cache remain local.
+- Start with [REVIEW.md](../REVIEW.md), the [research report](../reports/FINAL_REPORT.md) and the [P4 aggregate](../reports/p4.json). Human repeat annotation and upstream patch submission remain open.
+
 ## P4 paused before launch — offline rehearsal, 2026-11-10 CST
 
 - The owner deferred API calls. The previously approved P4 cap is $22.50. Wait for the owner's request to resume, then recheck balance, model and off-peak time.

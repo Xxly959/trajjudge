@@ -102,9 +102,10 @@ thinking is on except the D24 pre-registered P2 primary configuration (off).
 
 The two P3 batches below were approved and executed on 2026-11-10. Their
 results and approved commands are in [the run record](APPROVED_RUNS.md).
-P4 has a $22.50 approved cap and is paused at the owner's request before
-launch. Resume when requested and recheck balance and off-peak time. The
-preflight balances are historical snapshots.
+P4 has a $22.50 approved cap. The owner authorized launch on 2026-11-10.
+See [the current checkpoint](PROGRESS.md) for run state. Recheck the model
+and off-peak window before a later resume. Preflight balances are historical
+snapshots.
 
 P3 holds the sample fixed at the first four frozen traces by trace ID. Compare
 Flash and Pro in Direct mode, and compare Direct, Average and Voting on Flash.
@@ -159,6 +160,16 @@ the stage and `--input` pointing to the exact run JSONL. Pass
 `--expected-unlabeled 2` for the P4 report. The offline report command writes
 the stage's default JSON filename. Keep each run's report under a distinct name.
 
+To regenerate the report for the named P4 batch from local checkpoints:
+
+```sh
+.venvs/judge/bin/python scripts/report_experiments.py p4 \
+  --input outputs/p4/p4-flash-human-fail-16.jsonl --expected-unlabeled 2
+```
+
+Use the same run ID and $22.50 stage cap when resuming this batch. The original
+cumulative ceiling remains in its budget checkpoint.
+
 ## Recovery and coverage
 
 Run state consists of `manifest.json` (exact hashed job plan), `rows/<job_id>.json`
@@ -184,8 +195,8 @@ The random fair-coin baseline is its exact expected accuracy, 0.5.
 ## Research gates still open
 
 The two blank annotations and delayed re-labeling remain unresolved. The P2
-comparison and Flash Direct pilot are available. The Flash/Pro and strategy
-comparison, human-fail P4 paired LLM experiment, and final
-claim approval. Cross-vendor validation would relax the DeepSeek-only scope and
-requires separate approval/key. The local upstream proposal is unsubmitted and
-cannot be described as accepted.
+comparison, Flash Direct pilot, and four-trace Flash/Pro and strategy results
+are available. The final claims depend on P4 coverage and owner review.
+Cross-vendor validation would relax the DeepSeek-only scope and requires
+separate approval and credentials. The local OpenJudge proposal awaits
+authorization to submit upstream.
