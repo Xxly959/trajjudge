@@ -303,10 +303,11 @@ markdown 表格被检验名里的 `|` 撕裂。
 **全部标 PROVISIONAL；未写入 `FINAL_REPORT_v2` 或 `RESUME_CLAIMS`（两者尚不存在）。**
 
 提交范围与隐私：`annotation/batch_extra.csv` 已加入 `.gitignore`（与 `labels.csv` 同一约定，
-其盲 ID 私钥在 `outputs/annotation/` 内，不入库）。入库的 Phase 3 JSON 只含**派生统计与 trace_id**，
-不含任何人工标签文本、标注理由或盲 ID→trace 映射；`human_fail.trace_ids` 会暴露「哪 16 条被判 fail」，
-这与 Phase 0 已入库的 `v2_fact_check.json`（含 `1503ef20`）口径一致。**若 owner 认为该列表也应保密，
-告知后改为只入库 markdown 报告。** 本次提交**不包含**工作区里既有的无关改动
+其盲 ID 私钥在 `outputs/annotation/` 内，不入库）。
+**owner 裁定（2026-11-13）：`reports/phase3_pool.json` 不入库**，已 `git rm --cached` 并加入 `.gitignore`，
+本地仍生成（markdown 的聚合数字由它派生）；入库的只有 markdown 聚合与 `phase3_scenario.json`。
+⚠️ 该文件仍存在于历史提交 `e3be153` 中；**是否清理历史需 owner 明确批准**（改写历史属破坏性操作，助手不自行执行）。
+本次提交**不包含**工作区里既有的无关改动
 （`Makefile`/`README.md`/`docs/THIRD_PARTY.md` 的 dataset 相关修改、`samples/`、`tasks/`、
 `scripts/build_*` 等训练候选/SWE 导入产物），按「不要继续投入」约束原样保留。
 

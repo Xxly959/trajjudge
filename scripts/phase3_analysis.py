@@ -255,6 +255,7 @@ def markdown(pool: Mapping[str, Any], analyses: Mapping[str, Any], dry: Mapping[
         f"split {split['candidate_scenarios']}；**对 Phase 3 候选池{'无影响' if same_pool else '有影响'}**"
         f"（人工 fail 池 merge {merge['human_fail']['n_traj']} 轨迹 / {merge['human_fail']['n_scenario']} 场景，"
         f"split {split['human_fail']['n_traj']} / {split['human_fail']['n_scenario']}）。",
+        "- 明细（含 trace_id 列表）只存本地 `reports/phase3_pool.json`，**不入库**；本文件仅保留聚合数字。",
         "",
         "### 人工 fail 池按场景（merge）",
         "",
