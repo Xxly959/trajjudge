@@ -318,3 +318,33 @@ markdown 表格被检验名里的 `|` 撕裂。
 - 闸门 B 不触发，**不需要 owner 标那 39 条**；`batch_extra.csv` 只是备用，不要误当成待办。
 - 可继续的零花费工作：Phase 4 的 LOSO 阈值校准与 `failure_taxonomy.md`（同样依赖 round1 标签，
   因此同样只能标 PROVISIONAL）。Phase 5 的中性 wrapper 对照需要真实花费，按 owner 指令等闸门 A。
+
+## 预注册补遗 — PREREG_v2 §7b（2026-11-13，Phase 4 任何结果产生之前）
+
+**做了什么**：把 §7 已冻结的 Phase 4 设计补成可执行口径，写入 `docs/PREREG_v2.md` §7b 并单独 commit。
+补遗只覆盖 §7 未规定的执行细节，**不改动 §7 的任何阈值、网格、主指标或校正方法**。
+
+**为什么必须先写**：硬约束要求「新增的阈值、过滤规则、主指标、多重比较方法必须在看到新结果之前
+写入 PREREG 并 commit」。§7 冻结了网格与目标函数，但以下六项此前未定义，若边算边定就等于事后挑选：
+
+1. **固定漏判率下 specificity 的选点规则**：漏判率定义为 human fail 中被判 pass 的比例；
+   在训练折上选 `train_miss_rate ≤ target` 中最接近 target 的网格点，并列取更接近默认阈值。
+2. **训练折缺类时的处理**：balanced accuracy 未定义 → 计入 `undefined_folds`，
+   该折改用上游默认阈值并标 `fallback`；主指标只在 calibrated-only 池上算，含 fallback 的池作敏感性臂。
+3. **PR-AUC 估计量**：average precision（step interpolation），不用 trapezoidal PR 面积。
+4. **framework 二值 rubric 的 AUC**：写「不适用（二值）」，禁止填 0.5。
+5. **缓存身份校验**：tag 不唯一（同一 tag 可有多条），必须用 token 总数 + 复算分数双重校验，
+   沿用 Phase 1 `recover_draws` 规则；失败即写「原始输出不可得」。
+6. **失败分类学的类别词表**（7 类，全部 `judgment: agent`）与混合评分的支持/反对判读规则。
+
+**同时落实 owner 三条约束**：①分类学与评分器原话只进 `reports/`，round2 前不得进 GUIDE.md / kit /
+标注视图；②LOSO 用 merge 与 split 两种场景口径并列，结果只标 exploratory；
+③`reports/phase3_pool.json` 已不入库（见上一条记录）。
+
+**受影响结果的性质**：Phase 4 全部 **exploratory + PROVISIONAL**（依赖 round1 标签，闸门 A 未通过）。
+本次补遗**不改变**任何 confirmatory 主张。
+
+**花费**：$0.00，新增 API 调用 0（纯文档）。
+
+**下一步**：实现 `src/trajjudge/calibration.py` 与 `scripts/phase4_analysis.py`，
+先写覆盖真实失败模式的测试，再产出 `reports/phase4_*`。

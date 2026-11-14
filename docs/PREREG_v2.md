@@ -256,6 +256,90 @@ owner 同一封消息先写「同意拆分」、后写「T159zh/T160 按你的�
 - 给出「可执行检查 + LLM judge 混合评分」的**支持与反对证据各一份**；
   证据不足时**明确写「证据不足，不下结论」**，不得为了好看而下结论。
 
+## 7b. Phase 4 执行口径补遗（冻结于任何 Phase 4 结果产生之前）
+
+owner 指令（2026-11-13）：Phase 4 全部输出标 **PROVISIONAL + exploratory**；
+LOSO 校准 **merge / split 两种场景口径并列**；`failure_taxonomy` 与评分器原话
+**只写入 `reports/`**，round2 完成前不得进入 `GUIDE.md`、kit 或任何标注视图。
+本节写于 `reports/phase4_*.json` 与 `reports/failure_taxonomy.md` 产生之前。
+
+### 标签与场景口径
+
+- 标签连接**复用 `analysis.join_labels`**（同一 validity 规则、同一
+  Direct / `thinking=off` / `repeat_id=0` / `original` / 未防御 选择），不另写一套。
+- 场景口径沿用 §6b：**merge 为主口径，split 为敏感性口径**，两者并列重算，
+  每个输出带 `scenario_variant` 标签；不得只报有利的一种。
+- LOSO 折 = **留出整个 `scenario_id`**；训练 = 其余场景的全部轨迹。
+  译本孪生必须同折，**不得**把同一场景的 zh/en 分到训练与测试两侧。
+
+### 阈值选择（冻结）
+
+- 目标 = **balanced accuracy**（sensitivity 与 specificity 的均值），在**训练折**上计算。
+- 并列时取**更接近上游默认阈值**者（accuracy 2.0 / comprehensive 0.6）；
+  仍并列时取网格中**较小值**（确定性规则，不看数据）。
+- 哨兵 `always_pass` / `always_fail` **参与选择**（它们是合法策略），
+  但**不参与 AUC / PR-AUC**（阈值无关指标只用连续分数）。
+- 训练折缺某一类（无 human fail 或无 human pass）→ balanced accuracy 未定义：
+  该折记入 `undefined_folds`，**不得静默用默认阈值替代**。
+  该折的 out-of-fold 预测改用**上游默认阈值**产出并标 `fallback: default_threshold`。
+- 主指标只在 **calibrated-only** 的 out-of-fold 池上算；
+  含 fallback 折的池作为**敏感性臂并列报告**，两臂的折数与轨迹数都必须写出。
+
+### 固定漏判率下的 specificity（冻结）
+
+- **漏判率 = human fail 中被判 pass 的比例** = `FN / (FN + TP)` = 1 − sensitivity。
+- 对每个目标 ∈ `{0.10, 0.25, 0.50}`（**主值 0.25**）：在**训练折**上选满足
+  `train_miss_rate ≤ target` 的网格点中**最接近 target** 者；并列取更接近默认阈值。
+  `always_fail` 的漏判率为 0，故约束总可满足。
+- 在**留出折**上算 specificity = `TN / (TN + FP)`（human pass 中判 pass 的比例）。
+- 训练折无 human fail → 漏判率未定义；留出折无 human pass → specificity 未定义。
+  两者都计入 `undefined_folds` / `undefined_share`，**不得静默丢弃**。
+- 汇总值 = out-of-fold 预测**池化后重算一次**，并附 per-fold 未定义计数。
+
+### 指标估计量（冻结）
+
+- **AUC**：沿用 `metrics.auc`，正类 = pass（与 v1 可比）；同时报告
+  `AUC_fail = 1 − AUC_pass`。单类缺失 → `null` + 原因，不用 0.5 冒充。
+- **PR-AUC（fail 为正类）** = 按分数升序扫描的 **average precision**
+  （`AP = Σ (R_n − R_{n−1}) · P_n`，step interpolation，同分并列合并），
+  **不用** trapezoidal PR 面积。冻结理由：AP 是 PR 曲线下的标准保守估计。
+- **framework rubric 是二值**，无连续分数 → AUC / PR-AUC 写「不适用（二值）」，
+  **不得**填 0.5 或任何插补值。
+- 全部指标附 **scenario 簇 bootstrap CI**（B=2000、percentile 95%、seed=0），
+  沿用 §2 全部规则：未定义抽样计入、`undefined_share > 0.10` → unreliable、
+  禁止零宽 CI、贡献簇 ≥ 2。AUC / PR-AUC 的贡献簇 = 含 ≥1 条有效评分轨迹的场景。
+- **若 out-of-fold AUC 的 CI 覆盖 0.5 → 必须写「无证据支持可用区分度」**（§7 原文）。
+
+### 硬样本子集与失败分类学
+
+- 硬样本定义沿用 §7（human `fail` ∧ framework `passed` ∧ accuracy ≥ 2.0 ∧ comprehensive ≥ 0.6），
+  报告 `n_traj` / `n_scenario`；`n_scenario < 5` → case study，不出百分比结论句。
+- **原始输出恢复**：`.cache/llm` 按 tag 找候选，再用 **token 总数 + 复算分数双重身份校验**
+  （沿用 Phase 1 `recover_draws` 的规则），**不靠 tag 唯一性**（同一 tag 可有多条）。
+  校验失败或缓存缺失 → 写「**原始输出不可得**」，不得编造、不得用 LLM 补写。
+- **理由类别词表（冻结；全部是我的判断，逐条标 `judgment: agent`）**：
+  `rubric_mismatch`（rubric 与人工判据维度不同）、`missing_evidence_check`（未核验关键事实）、
+  `surface_fluency`（被流畅完整的表面形式说服）、`partial_credit`（部分步骤高分掩盖关键失败）、
+  `threshold_saturation`（分数顶格，阈值无区分力）、`annotation_disagreement`（人工标签本身可疑，
+  交 owner 复核，不下结论）、`other`（必须写明理由）。一条轨迹可多标。
+- 每条必须附 **(a) 轨迹证据（消息编号 + 原文摘录）、(b) grader 原始 comment 摘录、
+  (c) `judgment: agent` 标记**。缺任一项不得写入分类学。
+- 分类学**只写入 `reports/failure_taxonomy.md`**；`reports/` 之外一律不得出现评分器原话。
+
+### 混合评分（可执行检查 + LLM judge）的判读规则（冻结）
+
+- **支持证据** = human fail 上 framework 与两个 grader 的**漏判集合不重合**
+  （存在一方抓到而另一方漏掉的轨迹），且并集漏判率 < 任一单独漏判率。
+- **反对证据** = framework 在 human pass 上的误杀率高于 grader，
+  或并集的召回增益小于误杀增量。
+- 两者都不成立、或 `n_scenario < 5` → 写「**证据不足，不下结论**」，不得为了好看而下结论。
+
+### 成本与状态
+
+- **新增 API 调用 0，新增花费 $0.00**：全部离线（标签连接、LOSO、缓存恢复）。
+- 依赖 round1 标签 → 全部 `status: provisional` + 文件级 PROVISIONAL 横幅；
+  闸门 A 通过且人类 test-retest κ 判定产出后才允许升级；κ < 0.60 → **永久 exploratory**（§5b/§6b）。
+
 ## 8. Phase 5 中性文本 wrapper 对照（预注册）
 
 **目的**：把「instruction-hierarchy 框架效应」与「单纯文本稀释/长度效应」分开。
