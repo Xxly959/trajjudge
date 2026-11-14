@@ -429,6 +429,9 @@ def markdown(block: Mapping[str, Any], framework: Mapping[str, Any], hard: Mappi
         + "，".join(f"{g} {hybrid['grader_false_fail_on_human_pass'][g]}" for g in THRESHOLDS) + "。",
         f"- **判读：{hybrid['verdict']}** —— {hybrid['verdict_reason']}。",
         f"- 判读规则：{hybrid['rule']}。",
+        "- **判读的效力边界**：以上按 round1 标签原样计算。`reports/failure_taxonomy.md` §4 记录了金标准疑点"
+        "（其中一条同时落在 Phase 3 注入池内），§6 说明硬样本中有条目无法干净地计为评分器漏判。"
+        "因此该增益建立在含未裁定疑点的标签上，owner 裁定前不得升级为确认性结论。",
         "",
         "## 6. 限制（只写真实的）",
         "",

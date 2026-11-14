@@ -148,6 +148,7 @@
 - human pass 上的误杀（判 fail）：framework 0，trajectory_accuracy 1，trajectory_comprehensive 0。
 - **判读：有支持证据** —— framework 与 grader 的漏判集合不重合，且并集漏判率低于任一单独漏判率。
 - 判读规则：PREREG_v2 §7b：支持=漏判集合不重合且并集更优；反对=framework 误杀更多或增益不抵误杀。
+- **判读的效力边界**：以上按 round1 标签原样计算。`reports/failure_taxonomy.md` §4 记录了金标准疑点（其中一条同时落在 Phase 3 注入池内），§6 说明硬样本中有条目无法干净地计为评分器漏判。因此该增益建立在含未裁定疑点的标签上，owner 裁定前不得升级为确认性结论。
 
 ## 6. 限制（只写真实的）
 

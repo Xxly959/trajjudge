@@ -399,6 +399,12 @@ class TestMarkdown:
         assert "效应量" in text
         assert re.search(r"多抓 \d+ 条 human fail", text)
 
+    def test_the_hybrid_verdict_is_never_rendered_without_its_label_caveat(self, text):
+        section = text.split("## 5.")[1].split("## 6.")[0]
+        assert "判读：" in section
+        assert "判读的效力边界" in section
+        assert "failure_taxonomy.md" in section and "未裁定疑点" in section
+
     def test_both_scenario_variants_are_rendered(self, text):
         assert "`merge`（主口径）" in text and "`split`（敏感性口径）" in text
 

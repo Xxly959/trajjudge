@@ -365,12 +365,12 @@ markdown 表格被检验名里的 `|` 撕裂。
   硬样本块（**人工理由原文不输出，只输出可用性布尔**）、混合评分判读、markdown 报告。
 - `reports/failure_taxonomy.md`（新增，**入库**）：10 条硬样本逐条分类，每条含
   消息编号轨迹证据 + 评分器原话逐字摘录 + `judgment: agent`；只用盲 ID。
-- `tests/test_calibration.py`（51）、`tests/test_phase4_analysis.py`（58）：共 **109 个新测试**。
+- `tests/test_calibration.py`（51）、`tests/test_phase4_analysis.py`（59）：共 **110 个新测试**。
 - `.gitignore`：新增 `reports/phase4_hard_samples.json`（含 trace_id 与评分器原话，按 owner 裁定只留本地）。
 - `docs/BUDGET_v2.md`：§2 Phase 4 行改为「已核实」，§6 回填，新增 **§8**（实际 token 推算与 guard 保守口径并列）。
 
 **关键数字**：
-- 测试 **475 passed, 1 skipped**（367 → 475；原有 214 个离线测试全部保持通过）。
+- 测试 **476 passed, 1 skipped**（367 → 476；原有 214 个离线测试全部保持通过）。
   skip 的是「GUIDE.md 不得含分类学内容」——round2 kit 尚未构建，属预期。
 - 样本：48 条已连接标签，独立场景 **28（merge）/ 29（split）**；缺失分数 0。
 - **上游默认阈值下三者对比**：framework rubric accuracy 0.7708 / **κ 0.3774** / balanced 0.6562 / 漏判 0.6875；
@@ -450,8 +450,12 @@ markdown 表格被检验名里的 `|` 撕裂。
   `phase3_pool.json` 的裁定属同一类问题。改为输出**盲 ID**（私钥仍在 gitignore 的 `outputs/` 内），
   未映射的 trace **抛 KeyError 而非静默回退到原 id**。三个入库产物现测得 **UUID 0 个**，
   并加 3 个产物级守卫测试 + 2 个单元测试。
+- **混合评分判读在主报告里「裸奔」**：`phase4_provisional.md` §5 只写「有支持证据」，
+  而金标准疑点与「部分硬样本无法干净计为评分器漏判」只写在另一份分类学里。
+  先打开主报告的读者会把它当成已确证的增益。现在 §5 紧跟一条**判读的效力边界**，
+  指明增益建立在含未裁定疑点的 round1 标签上、owner 裁定前不得升级为确认性结论，并加测试守卫。
 
-**测试覆盖的「真实会出错的地方」**（新增 109 个）：
+**测试覆盖的「真实会出错的地方」**（新增 110 个）：
 留出标签参与选阈值（泄漏）、译本孪生被拆到 train/test 两侧、未定义折被静默丢弃、
 二值 rubric 被填 AUC=0.5、缓存 tag 相同但 token 不符、token 相符但复算分数不符、
 两条缓存都通过校验但内容不同被猜选、缓存缺失被编造原话、其他 phase/grader 被混入缓存池、
@@ -459,7 +463,7 @@ framework 与 human 一致被当成误杀、缺分数被当成抓到或误杀、
 支持与反对并存仍下结论、n=0 时崩溃、人工理由原文被写进产物、round2 理由冒充 round1、
 不可估 CI 被渲染成「否」、markdown 表格被 `|` 撕裂、退化哨兵未被警告、
 分类学缺失 `judgment: agent`、类别超出冻结词表、trace_id/UUID 泄漏进入库文件、
-分类学内容渗入 GUIDE.md/kit。
+混合评分判读脱离其效力边界单独出现、分类学内容渗入 GUIDE.md/kit。
 
 **花费**：**$0.00**，新增 API 调用 **0**，零网络请求。累计 guard **$9.180483（未变）**，余量 $5.000000。
 缓存依赖的冷启动反事实（**不是本阶段花费**）：100 个面板、849,260 prompt + 28,844 completion tokens →
