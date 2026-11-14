@@ -7,8 +7,10 @@ random blind ids; the id mapping lives outside the annotation directory.
 from __future__ import annotations
 
 import csv
+import json
 import os
 import random
+import re
 import secrets
 import tempfile
 from collections import Counter
@@ -90,9 +92,17 @@ def save_labels(path: Path, rows: Sequence[Mapping[str, str]]) -> None:
         Path(temporary).unlink(missing_ok=True)
 
 
-def validate_labels(rows: Sequence[Mapping[str, str]], expected: Sequence[str]) -> list[str]:
-    """Return human-readable problems: bad labels, missing reasons, unknown or missing ids (blank is allowed while in progress)."""
+def validate_labels(rows: Sequence[Mapping[str, str]], expected: Sequence[str], *,
+                    excluded: Sequence[tuple[str, str]] = (),
+                    evidence: Mapping[str, Sequence[int]] | None = None) -> list[str]:
+    """Return human-readable problems: bad labels, missing reasons, unknown or missing ids (blank is allowed while in progress).
+
+    ``excluded`` holds (blind_id, round) pairs retired by the owner; an excluded row
+    must stay blank, because labeling it would silently reintroduce retired evidence.
+    ``evidence`` maps blind_id to the message indices a round-2 reason may cite.
+    """
     problems: list[str] = []
+    retired = {(b, str(r)) for b, r in excluded}
     seen = {(r["blind_id"], r.get("round", "1")) for r in rows}
     problems += [f"duplicate row for {key[0]} round {key[1]}" for key, count in
                  Counter((r["blind_id"], r.get("round", "1")) for r in rows).items() if count > 1]
@@ -103,6 +113,10 @@ def validate_labels(rows: Sequence[Mapping[str, str]], expected: Sequence[str]) 
             problems.append(f"{row['blind_id']}: label must be one of {LABELS}")
         if row["label"] and not row["reason"].strip():
             problems.append(f"{row['blind_id']}: one-line reason is required")
+        if (row["blind_id"], str(row.get("round", "1"))) in retired and row["label"]:
+            problems.append(f"{row['blind_id']}: excluded row carries a label; reinstate it before labeling")
+        if row["label"] and evidence is not None and row["blind_id"] in evidence:
+            problems += [f"{row['blind_id']}: {p}" for p in evidence_problems(row["reason"], evidence[row["blind_id"]])]
     problems += [f"missing row for {b}" for b in expected if (b, "1") not in seen]
     return problems
 
@@ -115,3 +129,101 @@ def relabel_sample(blind: Sequence[str], count: int, *, seed: int) -> list[str]:
 def new_seed() -> int:
     """Draw a fresh random seed (used once, then recorded)."""
     return secrets.randbits(32)
+
+
+UNINFORMATIVE_REASONS = {"ok", "okay", "正确", "合理", "好", "好的", "可以", "通过", "没问题", "无", "yes", "pass"}
+CITATION_RE = re.compile(r"\[(\d+)\]")
+
+
+def reason_warnings(reason: str) -> list[str]:
+    """Advisory only: a terse reason is weak evidence, not an invalid label."""
+    text = (reason or "").strip()
+    out = []
+    if len(text) <= 4:
+        out.append("reason is 4 characters or fewer")
+    if text.lower() in UNINFORMATIVE_REASONS:
+        out.append("reason is a generic phrase that records no deciding evidence")
+    return out
+
+
+def message_indices(messages: Sequence[Mapping[str, Any]]) -> list[int]:
+    """Indices a reason can cite; they match the ``### [i] role`` headings in the rendered view."""
+    return list(range(len(messages)))
+
+
+def evidence_problems(reason: str, indices: Sequence[int]) -> list[str]:
+    """Round 2 requires a citation to a concrete message, so a verdict cannot rest on impression."""
+    cited = [int(n) for n in CITATION_RE.findall(reason or "")]
+    if not cited:
+        return ["round 2 reason must cite at least one message index like [3]"]
+    unknown = sorted({n for n in cited if n not in set(indices)})
+    return [f"reason cites message(s) {unknown} that do not exist in this trace"] if unknown else []
+
+
+def read_exclusions(path: Path) -> dict[tuple[str, str], dict[str, Any]]:
+    """Replay the append-only exclusion log; the last action per (blind_id, round) wins."""
+    state: dict[tuple[str, str], dict[str, Any]] = {}
+    if not path.is_file():
+        return state
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        record = json.loads(line)
+        key = (record["blind_id"], str(record.get("round", "1")))
+        if record["action"] == "exclude":
+            state[key] = record
+        else:
+            state.pop(key, None)
+    return state
+
+
+def append_exclusion(path: Path, record: Mapping[str, Any]) -> None:
+    """Append one audit record; nothing is ever rewritten or deleted."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(dict(record), ensure_ascii=False) + "\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def exclude_row(log: Path, rows: Sequence[Mapping[str, str]], blind_id: str, reason: str, *,
+                round_id: str = "1", now: str) -> dict[str, Any]:
+    """Explicitly retire an unresolved item. A labeled row can never be excluded."""
+    if not (reason or "").strip():
+        raise ValueError("an exclusion requires a reason")
+    matching = [r for r in rows if r["blind_id"] == blind_id and str(r.get("round", "1")) == round_id]
+    if not matching:
+        raise ValueError(f"no round {round_id} row for {blind_id}")
+    if matching[0]["label"]:
+        raise ValueError(f"{blind_id} already carries a label; excluding it would discard evidence")
+    if (blind_id, round_id) in read_exclusions(log):
+        raise ValueError(f"{blind_id} round {round_id} is already excluded")
+    record = {"action": "exclude", "blind_id": blind_id, "round": round_id,
+              "reason": reason.strip(), "at": now}
+    append_exclusion(log, record)
+    return record
+
+
+def reinstate_row(log: Path, blind_id: str, reason: str, *, round_id: str = "1", now: str) -> dict[str, Any]:
+    """Undo an exclusion, keeping both the original and the undo in the audit log."""
+    if not (reason or "").strip():
+        raise ValueError("a reinstate requires a reason")
+    if (blind_id, round_id) not in read_exclusions(log):
+        raise ValueError(f"{blind_id} round {round_id} is not excluded")
+    record = {"action": "reinstate", "blind_id": blind_id, "round": round_id,
+              "reason": reason.strip(), "at": now}
+    append_exclusion(log, record)
+    return record
+
+
+def round2_blind_ids(round1: Sequence[str], *, seed: int) -> dict[str, str]:
+    """Fresh ids for the re-label round, disjoint from round 1 so no label can be recalled by id."""
+    rng = random.Random(seed)
+    taken = set(round1)
+    mapping: dict[str, str] = {}
+    for blind_id in sorted(round1):
+        while (fresh := f"R{rng.getrandbits(24):06x}") in taken:
+            pass
+        taken.add(fresh)
+        mapping[blind_id] = fresh
+    return mapping

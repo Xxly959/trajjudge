@@ -97,6 +97,57 @@
   - `invalid_as_fail`：把 invalid 当作 fail 重算主指标。
   - 两个边界与主结果并列输出；若结论方向在两个边界间翻转，必须明确写出「结论对缺失假设敏感」。
 
+## 5b. Phase 2 标注可靠性（预注册；写于任何 round-2 结果产生之前）
+
+冻结时点：round 2 盲标 kit 尚未构建，`annotation/round2_labels.csv` 不存在，
+本节全部阈值与主指标都在**看到任何第二轮标签之前**确定。
+编号用 `5b` 是为了不改动已被代码与日志引用的 §6–§12。
+
+### 主指标
+
+- **test-retest 原始一致度** = 两轮都有标签的轨迹上 `round1 == round2` 的比例。
+- **Cohen κ**：二分 pass/fail，round1 与 round2 视为两个 rater。
+- 并列 **PABAK = 2·一致度 − 1**（标签偏斜时 κ 被患病率压低，单看 κ 会误判）。
+- 单位 = 轨迹；区间 = **scenario 簇 bootstrap**，B=2000、percentile 95%、seed=0，
+  沿用第 2 节全部规则（未定义抽样计入、>10% unreliable、禁止零宽 CI、贡献簇 ≥2）。
+- 同时输出 `task_id` 聚簇版本用于对比，不作为主口径。
+
+### 配对与覆盖率（不得静默丢弃）
+
+- 只有 **round1 与 round2 都有标签**的轨迹进入配对；round2 盲 ID 经私钥回映到 round1 盲 ID。
+- 未配对项逐条列出原因：round1 空白 / round1 已 exclude / round2 空白 / round2 已 exclude / 未抽中。
+- 指标必须与三元组 **`(n_paired, n_scenario_paired, n_round2_selected)`** 一起输出。
+- `n_scenario_paired < 5` → 按第 3 节标记 **case study**，不输出百分比结论句。
+
+### 金标准稳定性判据（冻结）
+
+- **人类 test-retest κ < 0.60 → 判定「金标准不稳定」**，并且：
+  - 在 `FINAL_REPORT_v2.md` 与 `RESUME_CLAIMS.md` 明确写出该判定；
+  - 所有「评分器与人类一致度」指标**降级为 exploratory**，不得作为评分器有效性的 confirmatory 证据；
+  - 报告必须并列「评分器 κ」与「人类自身 κ」，不得只报前者。
+- κ ≥ 0.60 **不自动**认定稳定：CI 下界 < 0.60 时写「稳定性未确证」。
+- κ 不可估（第 2 节）时不得用点估计替代判定，直接写「无法判定金标准稳定性」。
+- 0.60 取自 owner 任务书，不是从数据里挑的；本轮不得事后调整。
+
+### 第二标注者（若有）
+
+- inter-annotator κ 用同一套指标与区间规则，单位与簇口径相同。
+- 没有第二标注者时明确写「单标注者，无 inter-annotator 一致度」，**不得用 test-retest 冒充**。
+
+### 理由质量（advisory，不是过滤规则）
+
+- `check` 的 reason 质量警告**只提示**，不剔除任何标签、不改变分母。
+- round2 理由必须引用 `[消息编号]`：这是**输入期**约束（CLI 拒绝无引用的理由），
+  不是事后过滤；已落盘的标签一律保留。
+- `exclude` 只能作用于**空白**行；已带标签的行永不排除，CSV 行永不删除，审计日志 append-only。
+
+### 闸门 A（人工动作，助手不得代做）
+
+1. round1 剩余空白：给标签，或 `exclude --blind-id ... --reason ...` 显式退役。
+2. `round2` 构建 kit 后，由 owner 完成 `label --round 2 --csv annotation/round2_labels.csv`。
+3. 两轮间隔 ≥ 48h（`MIN_GAP`，已冻结）。
+4. 闸门通过前**不做任何依赖标签的分析**；`annotator_agreement.py` 在配对数为 0 时只输出闸门状态。
+
 ## 6. Phase 3 注入实验（预注册）
 
 | 项 | 冻结值 |

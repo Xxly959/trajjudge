@@ -156,3 +156,75 @@ Phase 1/2/3/4 均为 **$0**。Phase 6 拿到 key 后必须按真实 vendor 定�
 
 **闸门/下一步**：Phase 1 无闸门。下一步 Phase 2（标注可靠性工具，零成本），结束时停在**闸门 A**
 等 owner 完成人工标注；在闸门前不做任何依赖新标签的分析。
+
+---
+
+## Phase 2 — 标注可靠性工具（2026-11-13，停在闸门 A）
+
+**动机**：v1 的金标准是单人一次性标注，没有 test-retest 一致度，因此「评分器与人类 κ=0.377」
+无法与「人类自己与自己的一致度」对比；同时 `relabel` 在 round1 存在空白行时永久死锁，
+owner 无法在不伪造标签的前提下推进第二轮。
+
+**改动**：
+- `docs/PREREG_v2.md` 新增 **§5b**（编号用 5b 以免改动已被代码引用的 §6–§12）。
+  **写于任何 round-2 结果产生之前**：`annotation/round2_labels.csv` 当时不存在，kit 尚未构建。
+  冻结内容：主指标（原始一致度 / Cohen κ / PABAK）、scenario 簇 bootstrap（B=2000、seed=0、
+  沿用 §2 全部区间规则）、配对与未配对逐条归因、`n_scenario_paired < 5` → case study、
+  **κ < 0.60 → 金标准不稳定且评分器一致度指标降级为 exploratory**、
+  κ ≥ 0.60 但 CI 下界 < 0.60 → 「稳定性未确证」、κ 不可估 → 不得用点估计替代判定。
+  理由质量警告明确为 **advisory，不是过滤规则**；`[N]` 引用是**输入期**约束而非事后过滤。
+- `src/trajjudge/annotation.py`：新增 `reason_warnings`、`message_indices`、`evidence_problems`、
+  `read_exclusions` / `append_exclusion`（append-only + fsync）、`exclude_row` / `reinstate_row`、
+  `round2_blind_ids`；`validate_labels` 增加 keyword-only `excluded` 与 `evidence`（向后兼容）。
+- `scripts/annotate.py`：新增 `exclude` / `reinstate` / `round2` 子命令与 `label --csv`；
+  `check` 报告两轮进度、逐条排除记录（时间 + 理由）与理由质量警告；
+  round2 从**冻结证据重渲染并校验 sha256**，写入独立目录与独立 CSV，私钥在 `annotation/` 之外；
+  生成 `annotation/GUIDE.md`（7 条判定规则照抄 + `[N]` 引用要求 + **2 正例 2 反例，全部标注为虚构演示**，
+  不含任何评分器输出、分数、模型名或真实 trace id）。
+- `scripts/annotator_agreement.py`（新增）：test-retest 一致度 + κ + PABAK，scenario 簇 CI，
+  并列 task_id 簇版本；未配对逐条归因；闸门未通过时**只输出闸门状态，不计算任何依赖标签的统计量**；
+  支持 `--second` 计算 inter-annotator κ，无第二标注者时明确写「单标注者」，不用 test-retest 冒充。
+- `.gitignore`：新增 `annotation/round2/`、`annotation/round2_labels.csv`、`annotation/exclusions.jsonl`
+  （私钥本已被 `outputs/` 覆盖）。`docs/ANNOTATION_GUIDE.md` 更新流程与退役说明。
+- 测试：`tests/annotation_env.py`（共享合成环境）、`tests/test_annotation_v2.py`、
+  `tests/test_annotator_agreement.py`，共 **36 个新测试**，全部使用合成标签。
+
+**修掉的两个真实 bug**（都由新测试暴露，不是假想问题）：
+1. `round2 --count N` 把 `kit.new_seed()` 写在列表推导的条件里，**每行重新抽一次随机样本**，
+   导致选中的行数不等于 N（实测 `--count 1` 选出 **0** 条，`--count 2` 选出 1 条），
+   且不是均匀子样本。改为先抽一次再过滤，并拒绝 `--count < 1`（空 kit 会因拒绝覆盖而永久卡住）。
+2. `exclude` 在**审计记录已成功落盘之后**，因 `_exclusions().relative_to(root)` 在 annotation
+   目录被 relocation 时抛 `ValueError`，owner 看到 traceback 却以为写入失败。新增 `_show()` 容错显示。
+
+**关键数字**：
+- 测试 **297 passed**（261 → 297；原有 214 个离线测试全部保持通过）。
+- round 1 现状：**48/50 已标注**（32 pass / 16 fail），**2 条空白** `Be5538d`、`Bf3d4a1`，0 条显式排除。
+- `check` 给出 **62 条理由质量警告**，落在 **32/48 条已标注行（66.7%）**：
+  大量理由 ≤4 字或为「正确 / 合理」这类无判定证据的短语。**不剔除任何标签**，如实报告为证据强度限制。
+- 时间间隔：round1 最后一条标签 2026-11-09T09:54:32Z，今日 2026-11-13 → **≥48h 已满足**。
+- `reports/annotator_agreement.json` 当前为 **blocked**：`test_retest = null`，
+  `verdict.status = blocked`，未产出任何一致度数字。
+
+**与旧结果的差异**：
+1. **解除死锁**：v1 的 `relabel` 在 round1 有空白时 `sys.exit`，owner 只能被迫给标签或放弃第二轮。
+   现在可以显式退役（理由 + append-only 审计 + 保留空白行），或补标签。
+2. **第二轮不再是「同文件追加」**：旧 `relabel` 把 round2 行追加进 `labels.csv`，
+   第一轮标签与第二轮同处一文件，存在回忆污染风险。新 `round2` 用独立目录 + 独立 CSV + 全新盲 ID。
+   旧 `relabel` 路径保留（既有测试依赖），但指南推荐 `round2`。
+3. **金标准稳定性判据首次被冻结**：v1 从未定义「人类自身一致度低到多少就要降级评分器指标」。
+   现在 0.60 是**事前**阈值，不是看到结果后挑的。
+4. 尚未推翻任何既有数值结论：本阶段不产生新标签，也不重算 RQ1。
+
+**花费**：**$0.00**，零 API 调用，零网络请求。`docs/BUDGET_v2.md` 中 Phase 2 预算本就是 0。
+
+**闸门 A（需要 owner 的人工动作，助手不得代做）**：
+1. 处理 round1 的 2 条空白 `Be5538d`、`Bf3d4a1`：二选一
+   - 补标签：`python scripts/annotate.py label`
+   - 显式退役：`python scripts/annotate.py exclude --blind-id Be5538d --reason "<你的理由>"`（另一条同理）
+2. 完成后由助手运行 `python scripts/annotate.py round2` 构建第二轮盲标 kit（默认全部 48 条已标注轨迹；
+   也可 `--count N` 抽子集）。**标签仍然只能由 owner 给。**
+3. owner 完成第二轮：`python scripts/annotate.py label --round 2 --csv annotation/round2_labels.csv`
+   （理由必须引用 `[消息编号]`；先读 `annotation/GUIDE.md`）。
+4. 可选：提供第二标注者的 CSV（同一批 round1 盲 ID），用 `--second` 计算 inter-annotator κ。
+5. 闸门通过后运行 `python scripts/annotator_agreement.py`，再重算 RQ1 并列报告
+   「评分器 κ vs 人类 test-retest κ」。**在此之前不做任何依赖标签的分析。**
