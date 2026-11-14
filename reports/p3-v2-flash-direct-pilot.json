@@ -1,0 +1,413 @@
+{
+  "phase": "p3",
+  "status": "partial",
+  "source": "outputs/p3/p3-flash-direct-pilot.jsonl",
+  "score_rows": 120,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "ci_policy": "v2",
+  "cluster_unit": "scenario_id",
+  "evaluated_traces": 10,
+  "latest_row_usage": {
+    "api_calls": 95,
+    "cached_calls": 25
+  },
+  "limitations": [
+    "Single provider and annotator; official scores partly LLM-derived, not truth.",
+    "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
+    "No significance claim; missing/error rows retained in coverage; scenario-cluster bootstrap CIs (PREREG_v2)."
+  ],
+  "analysis": [
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 10,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 10,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": null,
+        "flip_rate": null,
+        "pairwise_disagreement": null,
+        "mean_spearman": null,
+        "mean_kappa": null
+      },
+      "cluster_unit": "scenario_id",
+      "intervals": {
+        "mean_sd": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "flip_rate": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "pairwise_disagreement": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "mean_spearman": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 694,
+          "undefined_share": 0.347,
+          "defined_draws": 1306,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "unreliable",
+          "reason": "undefined bootstrap share 0.3470 exceeds 0.1"
+        },
+        "mean_kappa": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 694,
+          "undefined_share": 0.347,
+          "defined_draws": 1306,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "unreliable",
+          "reason": "undefined bootstrap share 0.3470 exceeds 0.1"
+        }
+      },
+      "bootstrap_clusters": 8
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=on|direct1",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_accuracy",
+      "expected_repeats": 3,
+      "complete_traces": 10,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 10,
+        "repeats": 3,
+        "mean_sd": 0.0,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 1.0,
+        "mean_kappa": 1.0
+      },
+      "ci": {
+        "mean_sd": null,
+        "flip_rate": null,
+        "pairwise_disagreement": null,
+        "mean_spearman": null,
+        "mean_kappa": null
+      },
+      "cluster_unit": "scenario_id",
+      "intervals": {
+        "mean_sd": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "flip_rate": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "pairwise_disagreement": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "mean_spearman": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 694,
+          "undefined_share": 0.347,
+          "defined_draws": 1306,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "unreliable",
+          "reason": "undefined bootstrap share 0.3470 exceeds 0.1"
+        },
+        "mean_kappa": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 694,
+          "undefined_share": 0.347,
+          "defined_draws": 1306,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "unreliable",
+          "reason": "undefined bootstrap share 0.3470 exceeds 0.1"
+        }
+      },
+      "bootstrap_clusters": 8
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 10,
+      "incomplete_traces": 0,
+      "error_rows": 0,
+      "summary": {
+        "traces": 10,
+        "repeats": 3,
+        "mean_sd": 0.021838888456949753,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.8445807770961146,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.011488908342904197,
+          0.03156797916137762
+        ],
+        "flip_rate": null,
+        "pairwise_disagreement": null,
+        "mean_spearman": [
+          0.3913043478260871,
+          0.9853692137624086
+        ],
+        "mean_kappa": null
+      },
+      "cluster_unit": "scenario_id",
+      "intervals": {
+        "mean_sd": {
+          "ci": [
+            0.011488908342904197,
+            0.03156797916137762
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "ok",
+          "reason": null
+        },
+        "flip_rate": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "pairwise_disagreement": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "mean_spearman": {
+          "ci": [
+            0.3913043478260871,
+            0.9853692137624086
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "ok",
+          "reason": null
+        },
+        "mean_kappa": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 2000,
+          "undefined_share": 1.0,
+          "defined_draws": 0,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        }
+      },
+      "bootstrap_clusters": 8
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=on|direct1",
+        "deepseek-flash",
+        4096,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "grader": "trajectory_comprehensive",
+      "expected_repeats": 3,
+      "complete_traces": 9,
+      "incomplete_traces": 1,
+      "error_rows": 1,
+      "summary": {
+        "traces": 9,
+        "repeats": 3,
+        "mean_sd": 0.022389567952355357,
+        "flip_rate": 0.0,
+        "pairwise_disagreement": 0.0,
+        "mean_spearman": 0.9130325189342963,
+        "mean_kappa": null
+      },
+      "ci": {
+        "mean_sd": [
+          0.01396992588557916,
+          0.02912528160577637
+        ],
+        "flip_rate": null,
+        "pairwise_disagreement": null,
+        "mean_spearman": [
+          0.45504184409174675,
+          1.0
+        ],
+        "mean_kappa": null
+      },
+      "cluster_unit": "scenario_id",
+      "intervals": {
+        "mean_sd": {
+          "ci": [
+            0.01396992588557916,
+            0.02912528160577637
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "ok",
+          "reason": null
+        },
+        "flip_rate": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "pairwise_disagreement": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        },
+        "mean_spearman": {
+          "ci": [
+            0.45504184409174675,
+            1.0
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "ok",
+          "reason": null
+        },
+        "mean_kappa": {
+          "ci": null,
+          "resamples": 2000,
+          "undefined_draws": 2000,
+          "undefined_share": 1.0,
+          "defined_draws": 0,
+          "clusters": 8,
+          "contributing_clusters": 8,
+          "status": "not_estimable",
+          "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+        }
+      },
+      "bootstrap_clusters": 8
+    }
+  ],
+  "planned_jobs": 120,
+  "successful_rows": 119,
+  "phase_usage": {
+    "calls": 504,
+    "cached_calls": 265,
+    "prompt_tokens": 1862533,
+    "completion_tokens": 178566,
+    "cost_usd": 1.24424,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 1.24424,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  }
+}

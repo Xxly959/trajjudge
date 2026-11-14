@@ -95,3 +95,64 @@ Phase 1/2/3/4 均为 **$0**。Phase 6 拿到 key 后必须按真实 vendor 定�
 **花费**：**$0.00**，零 API 调用。
 
 **下一步**：commit 本预注册，然后进入 Phase 1（零 API 成本）。
+
+---
+
+## Phase 1 — 统计口径修复（2026-11-13）
+
+**动机**：v1 的区间与翻转率建立在伪重复单元、静默丢弃的未定义抽样、零宽 CI 和被误称为独立策略的
+共享抽样之上。这些不是算错，而是口径错——必须在同一批原始数据上把口径改对，并保留 v1 结果做对照。
+
+**改动**：
+- `src/trajjudge/metrics.py`：新增 `bootstrap_interval`（报告未定义抽样占比、拒绝零宽、贡献簇 <2 判不可估）
+  与 `NOT_ESTIMABLE`。`bootstrap_ci` **行为完全不变**，仅供 v1 对照路径使用（既有测试断言零宽 CI）。
+- `src/trajjudge/analysis.py`：新增 `cluster_interval`；`stability_report` / `injection_report` /
+  `agreement_with_clusters` 增加显式 `policy="v1"|"v2"` 与 `cluster_unit`。
+  `injection_report` 改为按轨迹聚合，输出 ASR、双向判定翻转、`n_traj/n_scenario/pairs`、`case_study`。
+- `src/trajjudge/robustness.py`（新增）：逐抽样分数恢复（按上游运算顺序）、`mode_min`、
+  共享抽样诊断、分层缺失率 + Fisher 精确检验、RQ1 与注入两套敏感性。
+- `scripts/report_experiments.py`：新增 `--ci-policy / --cluster-unit / --scenario-map / --output-suffix`，
+  默认 v1，**v1 数值零变化**（已逐键比对：p2 agreement 与 p4 analysis 的数值差异为 0，只新增元数据键）。
+- `scripts/robustness_diagnostics.py`、`scripts/v2_stats_compare.py`（新增）。
+- `tests/test_robustness_v2.py`：6 个测试类 **31 个测试**。
+- 产物：`reports/p2-v2.json`、`reports/p4-v2.json`、`reports/p3-v{1,2}-*.json`（3 个运行）、
+  `reports/robustness_v2.json`、`reports/v1_vs_v2_stats.md`。
+
+**关键数字**：
+- 测试 **261 passed**（原有 214 全部保持通过；Phase 0 后 230 → 261）。
+- RQ1：自助簇 **35 → 28**。accuracy κ CI `[-0.1086, 0.2520] → [0.0000, 0.1453]`；
+  comprehensive κ 由零宽 `[0,0]` 改判**不可估**；两个 κ 区间都覆盖 0。
+- RQ2：20 个完整配置中 **18 个 v1 零宽 flip CI** 全部改判「不可估（簇数不足）」；
+  其余 2 个由 `[0, 0.75]` **变宽为 `[0, 1]`**（完全无信息）。
+- RQ3：32 个条目 **全部 case study**（baseline-fail 仅 1 轨迹 / 1 场景）→ 翻转率百分比全部撤回。
+  配对 1496、未配对 40；fail→pass **25**、pass→fail **8**（v1 只报前者）。
+  ASR 主指标覆盖 **16 轨迹 / 11 场景**，32/32 条目 ASR>0。
+  comprehensive 最强变体 `L3_notice/tool_result`：未防御 ASR **0.8936** `[0.8085, 0.9762]`，
+  防御 **0.4545** `[0.3488, 0.5714]`，CI 不重叠。
+- 共享抽样：**46/46** ok 面板 token 完全一致且 voting 新增调用 0。逐抽样恢复 **41/48**（覆盖率 85.4%），
+  每个恢复面板**同时复现**已记录的 average 与 voting 分数（双重校验）。
+  三次互不相同 9/41（accuracy 0/19、comprehensive 9/22）；voting==min 33/41（18/19、15/22）；
+  voting<average 行级 **15/46**，comprehensive **12/22**——与 v1 声称的 12/22 一致。
+- 缺失：P4 invalid **27/1728**，**全部落在 comprehensive**（accuracy 0）；
+  防御臂 2.20% vs 未防御 0.93%（**2.4 倍**），Fisher p=**0.0504**（exploratory）。
+  注入敏感性：comprehensive ASR 未防御 0.6915→[0.6771, 0.6979]、防御 0.3636→[0.3724, 0.3750]，
+  **防御收益在三个臂下方向与量级不变**；但防御臂排除配对 32 vs 未防御 8。
+  RQ1 帧缺失分数为 0 → 三臂重合，敏感性在此不具信息量（如实记录）。
+
+**与旧结果的差异**：
+1. **推翻**「注入翻转率 75%」：分母是同一条轨迹的 3 次重复，n_scenario=1，只能作个案。
+2. **推翻**「voting 是独立稳定性策略」：抽样完全共享；comprehensive 的 MIN tie-break 使其退化为取最小值。
+   注意 accuracy 的 voting==min 比例更高（18/19），但成因是**饱和导致三次同分**，与 tie-break 无关——
+   两种机制必须分开陈述，不能合并成一个「退化率」。
+3. **削弱**「多数配置 flip_rate=0」：v1 的零宽区间读作「精确为零」，v2 只能读作「簇数不足以估计」。
+4. **推翻**「缺失可忽略」：缺失非随机，且与防御臂相关。
+5. **加强（附条件）**「wrapper 防御有效」：ASR 差在敏感性三臂下稳定，不是缺失造成的假象；
+   但防御臂格式失败率更高这一事实必须写进限制。
+6. **反直觉但如实记录**：scenario 聚类**没有让所有区间变宽**——accuracy 的 κ 与 AUC 区间反而收窄。
+   译本成对入簇后标签比例在重采样中更稳定。伪重复的危害不是单向放大区间，而是让宽度失去解释力。
+   我没有把「区间应该变宽」当成预期去调参。
+
+**花费**：**$0.00**，零 API 调用，零网络请求。全部从既有 JSONL 与 `.cache/llm` 重算。
+
+**闸门/下一步**：Phase 1 无闸门。下一步 Phase 2（标注可靠性工具，零成本），结束时停在**闸门 A**
+等 owner 完成人工标注；在闸门前不做任何依赖新标签的分析。

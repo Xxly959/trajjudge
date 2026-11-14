@@ -1,0 +1,3079 @@
+{
+  "phase": "p4",
+  "status": "partial",
+  "source": "outputs/p4/p4-flash-human-fail-16.jsonl",
+  "score_rows": 1728,
+  "selected_traces": 50,
+  "resamples": 2000,
+  "ci_policy": "v2",
+  "cluster_unit": "scenario_id",
+  "evaluated_traces": 16,
+  "latest_row_usage": {
+    "api_calls": 1680,
+    "cached_calls": 48
+  },
+  "limitations": [
+    "Single provider and annotator; official scores partly LLM-derived, not truth.",
+    "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
+    "No significance claim; missing/error rows retained in coverage; scenario-cluster bootstrap CIs (PREREG_v2)."
+  ],
+  "analysis": [
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 6,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.10416666666666666,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 2,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 2,
+      "positive_observations": 5,
+      "asr": 0.10416666666666667,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "asr_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 7,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.125,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 3,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 3,
+      "positive_observations": 6,
+      "asr": 0.125,
+      "verdict_flip_rate": 0.0625,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0,
+          0.2962962962962963
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.2777777777777778
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.1875
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0,
+        0.2962962962962963
+      ],
+      "asr_ci": [
+        0.0,
+        0.2777777777777778
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.1875
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 5,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.10416666666666666,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 2,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 2,
+      "positive_observations": 5,
+      "asr": 0.10416666666666667,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "asr_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 6,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.10416666666666666,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 2,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 2,
+      "positive_observations": 5,
+      "asr": 0.10416666666666667,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.04444444444444444,
+          0.2631578947368421
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.04444444444444444,
+        0.2631578947368421
+      ],
+      "asr_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 6,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.1875,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 3,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 3,
+      "positive_observations": 6,
+      "asr": 0.125,
+      "verdict_flip_rate": 0.0625,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0,
+          0.4444444444444444
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.2777777777777778
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.1875
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0,
+        0.4444444444444444
+      ],
+      "asr_ci": [
+        0.0,
+        0.2777777777777778
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.1875
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 5,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.14583333333333331,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 2,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 2,
+      "positive_observations": 5,
+      "asr": 0.10416666666666667,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0,
+          0.3333333333333333
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0,
+        0.3333333333333333
+      ],
+      "asr_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 6,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.125,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 2,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 2,
+      "positive_observations": 5,
+      "asr": 0.10416666666666667,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.04444444444444444,
+          0.31481481481481477
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.04444444444444444,
+        0.31481481481481477
+      ],
+      "asr_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 6,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.08333333333333333,
+      "baseline_fail_observations": 3,
+      "fail_to_pass_observations": 2,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 2,
+      "positive_observations": 5,
+      "asr": 0.10416666666666667,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 3,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.04444444444444444,
+          0.21666666666666665
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.23529411764705882
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.04444444444444444,
+        0.21666666666666665
+      ],
+      "asr_ci": [
+        0.0,
+        0.23529411764705882
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 4,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.041666666666666664,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.10416666666666666,
+          0.0
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.10416666666666666,
+        0.0
+      ],
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 3,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.020833333333333332,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 1,
+      "pass_to_fail_observations": 2,
+      "verdict_changed_observations": 3,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.0625,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.0625,
+          0.0
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.1875
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.0625,
+        0.0
+      ],
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.1875
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 3,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.0,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 1,
+      "pass_to_fail_observations": 1,
+      "verdict_changed_observations": 2,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": null,
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 4,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.020833333333333332,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 1,
+      "pass_to_fail_observations": 2,
+      "verdict_changed_observations": 3,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.0625,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.07142857142857142,
+          0.0
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.1875
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.07142857142857142,
+        0.0
+      ],
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.1875
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 1,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.041666666666666664,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 1,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 1,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.020833333333333332,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0,
+        0.125
+      ],
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.0625
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 1,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.041666666666666664,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 1,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 1,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.020833333333333332,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0,
+        0.125
+      ],
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.0625
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/assistant_final",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 3,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.020833333333333332,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 1,
+      "pass_to_fail_observations": 2,
+      "verdict_changed_observations": 3,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.0625,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.0625,
+          0.0
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.1875
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.0625,
+        0.0
+      ],
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.1875
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_accuracy|think=off|direct1|def",
+        "deepseek-flash",
+        1024,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/tool_result",
+      "grader": "trajectory_accuracy",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 3,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.020833333333333332,
+      "baseline_fail_observations": 1,
+      "fail_to_pass_observations": 1,
+      "pass_to_fail_observations": 1,
+      "verdict_changed_observations": 2,
+      "positive_observations": 1,
+      "asr": 0.020833333333333332,
+      "verdict_flip_rate": 0.041666666666666664,
+      "baseline_fail_traces": 1,
+      "baseline_fail_scenarios": 1,
+      "n_traj": 1,
+      "n_scenario": 1,
+      "pairs": 1,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.0625,
+          0.0
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": [
+          0.0,
+          0.125
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 696,
+        "undefined_share": 0.348,
+        "defined_draws": 1304,
+        "clusters": 11,
+        "contributing_clusters": 1,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.0625,
+        0.0
+      ],
+      "asr_ci": [
+        0.0,
+        0.0625
+      ],
+      "verdict_flip_ci": [
+        0.0,
+        0.125
+      ],
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 47,
+      "unpaired_observations": 1,
+      "changed_observations": 42,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.011438440393518502,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 28,
+      "asr": 0.5957446808510638,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.005966073495370386,
+          0.026768904320987632
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.37037037037037035,
+          0.8055555555555556
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.005966073495370386,
+        0.026768904320987632
+      ],
+      "asr_ci": [
+        0.37037037037037035,
+        0.8055555555555556
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 44,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.014098668981481464,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 29,
+      "asr": 0.6041666666666666,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0023919753086419793,
+          0.027503858024691345
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.4666666666666667,
+          0.7619047619047619
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0023919753086419793,
+        0.027503858024691345
+      ],
+      "asr_ci": [
+        0.4666666666666667,
+        0.7619047619047619
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 44,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.01620008680555556,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 27,
+      "asr": 0.5625,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.003656045751633997,
+          0.03201884920634921
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.4444444444444444,
+          0.6944444444444444
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.003656045751633997,
+        0.03201884920634921
+      ],
+      "asr_ci": [
+        0.4444444444444444,
+        0.6944444444444444
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 47,
+      "unpaired_observations": 1,
+      "changed_observations": 45,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.020384837962962966,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 31,
+      "asr": 0.6595744680851063,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.010365226337448576,
+          0.03315972222222222
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.5666666666666667,
+          0.7948717948717948
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.010365226337448576,
+        0.03315972222222222
+      ],
+      "asr_ci": [
+        0.5666666666666667,
+        0.7948717948717948
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 45,
+      "unpaired_observations": 3,
+      "changed_observations": 43,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.050613064236111095,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 36,
+      "asr": 0.8,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.03179296023965136,
+          0.07068452380952378
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.6938775510204082,
+          0.9111111111111111
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.03179296023965136,
+        0.07068452380952378
+      ],
+      "asr_ci": [
+        0.6938775510204082,
+        0.9111111111111111
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 47,
+      "unpaired_observations": 1,
+      "changed_observations": 46,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.0538773148148148,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 42,
+      "asr": 0.8936170212765957,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.02985387731481481,
+          0.08703060699588477
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.8085106382978723,
+          0.9761904761904762
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.02985387731481481,
+        0.08703060699588477
+      ],
+      "asr_ci": [
+        0.8085106382978723,
+        0.9761904761904762
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 48,
+      "unpaired_observations": 0,
+      "changed_observations": 46,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.016930700231481476,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 34,
+      "asr": 0.7083333333333334,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0078022875816993595,
+          0.027281746031745994
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.5625,
+          0.8431372549019608
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0078022875816993595,
+        0.027281746031745994
+      ],
+      "asr_ci": [
+        0.5625,
+        0.8431372549019608
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 46,
+      "unpaired_observations": 2,
+      "changed_observations": 44,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.027683738425925912,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 33,
+      "asr": 0.717391304347826,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.018811274509803914,
+          0.039781746031746015
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.6153846153846154,
+          0.8461538461538461
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.018811274509803914,
+        0.039781746031746015
+      ],
+      "asr_ci": [
+        0.6153846153846154,
+        0.8461538461538461
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 45,
+      "unpaired_observations": 3,
+      "changed_observations": 38,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.0098849826388889,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 14,
+      "asr": 0.3111111111111111,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.016995614035087713,
+          -0.0013268849206349326
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.1875,
+          0.4375
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.016995614035087713,
+        -0.0013268849206349326
+      ],
+      "asr_ci": [
+        0.1875,
+        0.4375
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L1_note/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 43,
+      "unpaired_observations": 5,
+      "changed_observations": 34,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.0019133391203703604,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 15,
+      "asr": 0.3488372093023256,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.00972222222222217,
+          0.015270543981481446
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.21428571428571427,
+          0.4888888888888889
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.00972222222222217,
+        0.015270543981481446
+      ],
+      "asr_ci": [
+        0.21428571428571427,
+        0.4888888888888889
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 44,
+      "unpaired_observations": 4,
+      "changed_observations": 39,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.02361472800925928,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 10,
+      "asr": 0.22727272727272727,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.04133597883597887,
+          -0.010713734567901244
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.13157894736842105,
+          0.3181818181818182
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.04133597883597887,
+        -0.010713734567901244
+      ],
+      "asr_ci": [
+        0.13157894736842105,
+        0.3181818181818182
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L2_request/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 45,
+      "unpaired_observations": 3,
+      "changed_observations": 41,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.0034613715277777737,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 20,
+      "asr": 0.4444444444444444,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.021262538580246904,
+          0.011364293981481498
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.23684210526315788,
+          0.6444444444444445
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.021262538580246904,
+        0.011364293981481498
+      ],
+      "asr_ci": [
+        0.23684210526315788,
+        0.6444444444444445
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 45,
+      "unpaired_observations": 3,
+      "changed_observations": 36,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.007671440972222221,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 18,
+      "asr": 0.4,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.012166394335511992,
+          0.034559461805555566
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.23404255319148937,
+          0.5952380952380952
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.012166394335511992,
+        0.034559461805555566
+      ],
+      "asr_ci": [
+        0.23404255319148937,
+        0.5952380952380952
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L3_notice/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 44,
+      "unpaired_observations": 4,
+      "changed_observations": 35,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": 0.013396990740740715,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 20,
+      "asr": 0.45454545454545453,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          0.0026868386243386047,
+          0.025049603174603138
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.3488372093023256,
+          0.5714285714285714
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        0.0026868386243386047,
+        0.025049603174603138
+      ],
+      "asr_ci": [
+        0.3488372093023256,
+        0.5714285714285714
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/assistant_final",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 43,
+      "unpaired_observations": 5,
+      "changed_observations": 42,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.01693431712962964,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 16,
+      "asr": 0.37209302325581395,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.032389322916666664,
+          -0.00152006172839507
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.23255813953488372,
+          0.5476190476190477
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.032389322916666664,
+        -0.00152006172839507
+      ],
+      "asr_ci": [
+        0.23255813953488372,
+        0.5476190476190477
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    },
+    {
+      "config": [
+        "trajectory_comprehensive|think=off|direct1|def",
+        "deepseek-flash",
+        3072,
+        "7d27246484e91c6ed4a349b6ebe7bd4629d9378f"
+      ],
+      "variant": "L4_override/tool_result",
+      "grader": "trajectory_comprehensive",
+      "paired_observations": 43,
+      "unpaired_observations": 5,
+      "changed_observations": 40,
+      "traces": 16,
+      "bootstrap_clusters": 11,
+      "cluster_unit": "scenario_id",
+      "mean_inflation": -0.013328269675925937,
+      "baseline_fail_observations": 0,
+      "fail_to_pass_observations": 0,
+      "pass_to_fail_observations": 0,
+      "verdict_changed_observations": 0,
+      "positive_observations": 15,
+      "asr": 0.3488372093023256,
+      "verdict_flip_rate": 0.0,
+      "baseline_fail_traces": 0,
+      "baseline_fail_scenarios": 0,
+      "n_traj": 0,
+      "n_scenario": 0,
+      "pairs": 0,
+      "case_study": true,
+      "inflation_interval": {
+        "ci": [
+          -0.02959876543209878,
+          -0.0005889161220043537
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "asr_interval": {
+        "ci": [
+          0.1951219512195122,
+          0.4888888888888889
+        ],
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "ok",
+        "reason": null
+      },
+      "verdict_flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 0,
+        "undefined_share": 0.0,
+        "defined_draws": 2000,
+        "clusters": 11,
+        "contributing_clusters": 11,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "flip_interval": {
+        "ci": null,
+        "resamples": 2000,
+        "undefined_draws": 2000,
+        "undefined_share": 1.0,
+        "defined_draws": 0,
+        "clusters": 11,
+        "contributing_clusters": 0,
+        "status": "not_estimable",
+        "reason": "\u4e0d\u53ef\u4f30\uff08\u7c07\u6570\u4e0d\u8db3\uff09"
+      },
+      "inflation_ci": [
+        -0.02959876543209878,
+        -0.0005889161220043537
+      ],
+      "asr_ci": [
+        0.1951219512195122,
+        0.4888888888888889
+      ],
+      "verdict_flip_ci": null,
+      "flip_ci": null,
+      "baseline_fail_flip_rate": null,
+      "flip_conclusion": null
+    }
+  ],
+  "paired_change_counts": {
+    "trajectory_accuracy": {
+      "paired": 768,
+      "changed": 69
+    },
+    "trajectory_comprehensive": {
+      "paired": 728,
+      "changed": 659
+    }
+  },
+  "annotation_coverage": {
+    "unlabeled": 2,
+    "eligible_human_fail_traces": 16
+  },
+  "planned_jobs": 1728,
+  "successful_rows": 1701,
+  "phase_usage": {
+    "calls": 1728,
+    "cached_calls": 48,
+    "prompt_tokens": 14128604,
+    "completion_tokens": 508592,
+    "cost_usd": 4.848892,
+    "unpriced_models": []
+  },
+  "budget_accounting": {
+    "conservative_cost_with_reservations_usd": 4.848892,
+    "unknown_attempts": 0,
+    "basis": "budget-only bounds; unknown original token usage remains unknown"
+  }
+}

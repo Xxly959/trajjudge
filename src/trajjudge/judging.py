@@ -29,12 +29,11 @@ from .cache import make_key
 from .llm import LLMClient, LLMError
 from .openjudge_bridge import openjudge_model
 from .perturb import defended_template
+from .score_scales import SCALES
 from .usage import utc_now
 
 LLM_GRADERS = ("trajectory_accuracy", "trajectory_comprehensive")
 RULE_GRADERS = ("action_loop_detection", "observation_information_gain")
-SCALES = {"trajectory_accuracy": (1.0, 3.0), "trajectory_comprehensive": (0.0, 1.0),
-          "action_loop_detection": (0.0, 1.0), "observation_information_gain": (0.0, 1.0)}
 STRATEGIES = ("direct", "average", "voting")
 
 
