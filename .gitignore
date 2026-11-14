@@ -17,6 +17,7 @@ __pycache__/
 traces/
 annotation/traces/
 annotation/labels.csv
+annotation/batch_extra.csv
 annotation/round2/
 annotation/round2_labels.csv
 annotation/exclusions.jsonl

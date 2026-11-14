@@ -228,3 +228,92 @@ owner 无法在不伪造标签的前提下推进第二轮。
 4. 可选：提供第二标注者的 CSV（同一批 round1 盲 ID），用 `--second` 计算 inter-annotator κ。
 5. 闸门通过后运行 `python scripts/annotator_agreement.py`，再重算 RQ1 并列报告
    「评分器 κ vs 人类 test-retest κ」。**在此之前不做任何依赖标签的分析。**
+
+## Phase 3 — 注入实验的场景级重算（2026-11-13，全部 PROVISIONAL，零花费）
+
+**做了什么**：冻结 `docs/PREREG_v2.md` §6b 执行口径，新增 `src/trajjudge/scenario_stats.py`
+（配对 → 场景聚合 → 簇级 sign-flip 置换 → Holm）与 `scripts/phase3_analysis.py`
+（候选池普查、闸门 B 盲标批次、dry-run 成本与缓存覆盖证据、PROVISIONAL 报告）。
+用 round1 标签离线重算 P4 注入网格，**不新增任何 API 调用**。
+
+**关键数字**：
+- 测试 **367 passed**（297 → 367，新增 70；原有 214 个离线测试全部保持通过）。
+- 候选池：87 条完成轨迹 / 51 个 task_id / **36 个场景（merge）vs 37（split）**；
+  已选入标注 50、已标注 48、从未选入 37、空白 2 → **未标注合计 39**（覆盖 25 个场景，其中 20 个不在 fail 池）。
+- 人工 fail 池：**16 条轨迹 / 11 个独立场景** → **闸门 B 在两种口径下都不触发**（需 ≥10）。
+  备用盲标批次已生成：`annotation/batch_extra.csv`（39 行全空白）+ 私钥 `outputs/annotation/batch_extra_key.json`。
+  **未渲染视图、未冻结这 39 条的证据哈希**（闸门 B 未触发，不做无用的冻结）。
+- dry-run：1,728 logical job / 1,728 completions / **冷启动峰值估算 $10.892966**。
+- 离线 replay（新 run-id `p4-phase3-replay-check`，不覆盖已发布产物）：
+  **1,728/1,728 行，job 集合一致，score/status/reason 差异 0，缓存未命中 0**；
+  新增 1,728 条 ledger 记录**全部 `cached=true`、`api_calls=0`**。
+- error 行 **27**（防御 19 / 未防御 8，全部 comprehensive，10 种不同 reason），如实保留，不补全。
+- **配对级 ASR（未防御臂，分母 = 全部有效配对）**：accuracy **5–6 / 48 = 0.104–0.125**；
+  comprehensive **27–42 / 45–48 = 0.5625–0.8936**。
+  防御臂：accuracy **1 / 48 = 0.0208**（8 个变体全部相同）；comprehensive **10–20 / 43–45 = 0.227–0.455**。
+- **场景级 asr_flip**：accuracy **2/11 = 0.18**；comprehensive **7–11/11 = 0.64–1.00**。
+- **场景级 verdict_flip**：accuracy **1/11**；comprehensive **0/11**（基线全部 ≥0.6，饱和）。
+- **Holm 族 16 个检验（仅未防御臂），拒绝 4 个，跳过 0 个**，全部是 comprehensive：
+  `L2_request/tool_result`（p_adj 0.0254）、`L3_notice/assistant_final`、`L3_notice/tool_result`、
+  `L4_override/tool_result`（三者 p_adj 0.0078）。accuracy 的 8 个变体**一个都不显著**。
+
+**与旧结果的差异（含一条被推翻的头条结论）**：
+1. **v1 的「75% 翻转率」被精确分解，其总体含义被推翻**：它等于 **18/24 个配对**，
+   而这 24 个配对全部来自**同一条轨迹** `1503ef20`（场景 `ambiguous_contact_email`）× 8 变体 × 3 重复。
+   `n_traj = 1`、`n_scenario = 1` → 按 §3 只能是 case study，**不能作为总体翻转率写进任何交付物**。
+   （Phase 0 复核表第 4 条已指出「全部翻转来自 1 条轨迹、n_traj=1 而非 3」；本阶段把它量化到比值本身：
+   18/24 = 0.75，并给出防御臂对照 7/8 = 0.88。）
+2. **同一条轨迹在防御臂下 7/8 = 0.88 仍然翻转**：wrapper 并没有守住这唯一一条 baseline-fail 轨迹。
+   v1 的「防御有效」印象来自其他轨迹与更高的格式失败率，不是来自这条关键证据。
+3. **防御臂不是判定中性的**：未防御臂 accuracy 的 pass→fail 在 8 个变体上**全为 0**，
+   防御臂则有 **5 个变体出现 pass→fail（各 1–2 个配对，另 3 个为 0）**。
+   wrapper 在压低分数的同时也制造了新的误判方向，Phase 5 必须把这一点作为对照结果报告。
+4. **accuracy 的显著性厚度远低于表面 k**：sign-flip 的 k=11，但非零均值场景只有 **2–3 个**，
+   其余场景配对差均值为 0、在置换下不变 → p 值实际由 2–3 个场景支撑。已写入报告限制。
+5. **T159zh/T160 归并歧义对 Phase 3 无影响**：fail 池里 `vip_ticket_escalation` 的两条轨迹
+   **都是 T159zh**（think-off `6cc8b3c6` / think-on `c912f307`），T160 根本不在 fail 池。
+   两种口径都是 11 个场景、同一批 16 条轨迹；歧义只改变全库场景数（36 vs 37）。
+   仍按 §1 与 §6b **merge 为主、split 并列重算**，两份结果都带 `scenario_variant` 标签，等 owner 核对。
+6. 主指标口径从「翻转率」改为 **ASR（配对级）+ 场景级翻转率并列**，两者不合并；
+   comprehensive 的饱和使 verdict flip 恒为 0，而 ASR 仍有 0.56–0.89 的信息量。
+
+**测试覆盖的「真实会出错的地方」**（新增 70 个）：
+跨防御臂配对、repeat 错配、invalid/缺基线被静默补全、译本孪生被当独立场景、
+`any` 冒充 `mean`、方向分解用「任一」而非净计数、case study 仍出百分比、
+全 0/全 1 指标给出零宽 CI、Monte Carlo 分支返回 **p = 0**、
+被跳过的检验悄悄缩小 Holm 族、闸门 B 数轨迹而不是数场景、
+框架 `passed` 冒充人工标签、覆盖 owner 的盲标批次、缓存未命中被报成干净 replay、
+报告散文与自己的表格矛盾（硬编码「闸门 B 不触发」「缓存未命中 0」「19/864」）、
+markdown 表格被检验名里的 `|` 撕裂。
+
+**本轮修掉的两个真实缺陷**（由测试发现，非事后调参）：
+- `sign_flip_test` 的 Monte Carlo 分支未计入观测指派，强效应可能报出 **p = 0**；
+  现改为 `hits` 从 1 起、`total = draws + 1`，与 §6b「含观测指派本身」一致。本轮 k=11 走精确枚举，未受影响。
+- 报告把检验名直接写进 markdown 表格，`trajectory_comprehensive|L1_note/...` 里的 `|` 会多切出一列；现统一转义。
+- 同时把报告里所有硬编码数字改为从计算结果回读（闸门 B 状态、缓存未命中、error 按臂分布、
+  超上限警告、baseline-fail 计数、非零簇数、v1 比值分解），避免散文与数据脱节。
+
+**花费**：**$0.00**，新增 API 调用 **0**。累计 guard **$9.180483 → $9.180483（未变）**，
+口径为 `configs/pricing_p3.yaml`（`scripts/experiment.py:147` 已覆盖默认定价表）。
+`docs/BUDGET_v2.md` 新增 §7 回填实测，并记录：
+⚠️ **冷启动重跑这 1,728 个 completion 的峰值估算 $10.892966 超过 $5 硬上限，必须先停下询问 owner。**
+
+**产物**：`reports/phase3_pool.json`、`reports/phase3_scenario.json`、`reports/phase3_provisional.md`、
+`reports/phase3_dryrun_plan.json`、`annotation/batch_extra.csv`（全空白）。
+**全部标 PROVISIONAL；未写入 `FINAL_REPORT_v2` 或 `RESUME_CLAIMS`（两者尚不存在）。**
+
+提交范围与隐私：`annotation/batch_extra.csv` 已加入 `.gitignore`（与 `labels.csv` 同一约定，
+其盲 ID 私钥在 `outputs/annotation/` 内，不入库）。入库的 Phase 3 JSON 只含**派生统计与 trace_id**，
+不含任何人工标签文本、标注理由或盲 ID→trace 映射；`human_fail.trace_ids` 会暴露「哪 16 条被判 fail」，
+这与 Phase 0 已入库的 `v2_fact_check.json`（含 `1503ef20`）口径一致。**若 owner 认为该列表也应保密，
+告知后改为只入库 markdown 报告。** 本次提交**不包含**工作区里既有的无关改动
+（`Makefile`/`README.md`/`docs/THIRD_PARTY.md` 的 dataset 相关修改、`samples/`、`tasks/`、
+`scripts/build_*` 等训练候选/SWE 导入产物），按「不要继续投入」约束原样保留。
+
+**下一步 / 闸门**：
+- **闸门 A 仍未通过**，是唯一的硬阻塞：owner 需处理 2 条空白（补标签或 `exclude`），
+  然后助手建 round2 kit、owner 完成第二轮带 `[N]` 引用的标注，才能算人类 test-retest κ。
+- 若 κ < 0.60，本阶段全部数字按 §5b/§6b **永久降级为 exploratory**，不得升级为 confirmatory。
+- 闸门 B 不触发，**不需要 owner 标那 39 条**；`batch_extra.csv` 只是备用，不要误当成待办。
+- 可继续的零花费工作：Phase 4 的 LOSO 阈值校准与 `failure_taxonomy.md`（同样依赖 round1 标签，
+  因此同样只能标 PROVISIONAL）。Phase 5 的中性 wrapper 对照需要真实花费，按 owner 指令等闸门 A。

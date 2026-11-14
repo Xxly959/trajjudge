@@ -31,7 +31,7 @@ P4 `defended=true` 行的平均 token 画像（用于 v2 预估）：
 | Phase 0 复核 | 0 | $0.000000 | $0.000000 | 只读，已完成 |
 | Phase 1 统计口径 | 0 | $0.000000 | $0.000000 | 纯离线重算 |
 | Phase 2 标注可靠性 | 0 | $0.000000 | $0.000000 | 人工标注，闸门 A |
-| Phase 3 注入扩展 | **0**（预计） | $0.000000 | $0.000000 | estimate-only dry-run 已确认 864 个 off 臂 job 与 P4 完全一致；缓存覆盖待临时目录离线 replay 核对 |
+| Phase 3 注入扩展 | **0**（已核实） | $0.000000 | $0.000000 | 1728 个 logical job（双臂）离线 replay 全命中缓存，score/status/reason 差异 0；见 §7 |
 | Phase 4 阈值校准 | 0 | $0.000000 | $0.000000 | LOSO 离线；per-step 原始分从 `.cache/llm` 恢复 |
 | Phase 5 中性对照（主） | 864 | $2.524608 | $1.262304 | 16 轨迹 × 9 变体 × 3 重复 × 2 grader |
 | Phase 5 非饱和子集 | 90 | $0.262980 | $0.131490 | 5 轨迹 × 9 变体 × 1 重复 × 2 grader，仅中性臂 |
@@ -70,9 +70,33 @@ v2 的 $5 上限只约束**本次新增**，与历史账本分开记账，但沿
 | 阶段 | 实际新 completion | 实际 guard | 实际 published 估算 | 余额快照 | 日期 |
 | --- | ---: | ---: | ---: | --- | --- |
 | Phase 0 | 0 | $0.000000 | $0.000000 | 未查询（只读阶段） | 2026-11-13 |
-| Phase 1 | — | — | — | — | — |
-| Phase 2 | — | — | — | — | — |
-| Phase 3 | — | — | — | — | — |
+| Phase 1 | 0 | $0.000000 | $0.000000 | 累计 guard $9.180483（未变） | 2026-11-13 |
+| Phase 2 | 0 | $0.000000 | $0.000000 | 累计 guard $9.180483（未变） | 2026-11-13 |
+| Phase 3 | 0 | $0.000000 | $0.000000 | 累计 guard $9.180483（未变）；余量 $5.000000 | 2026-11-13 |
 | Phase 4 | — | — | — | — | — |
 | Phase 5 | — | — | — | — | — |
 | Phase 6 | — | — | — | — | — |
+
+## 7. Phase 3 实测（2026-11-13，零花费）
+
+| 项 | 值 | 证据 |
+| --- | ---: | --- |
+| 成本计划 logical job | 1,728 | `reports/phase3_dryrun_plan.json` |
+| 成本计划 completions | 1,728 | 同上 |
+| **冷启动峰值上限估算** | **$10.892966** | 字符估算，非账单；**超过 $5 硬上限** |
+| 离线 replay 行数 | 1,728 / 1,728 | `outputs/p4/p4-phase3-replay-check.jsonl` |
+| job 集合一致 / score·status·reason 差异 | True / **0** | `reports/phase3_scenario.json` → `dry_run.replay` |
+| 缓存未命中 | **0** | replay 行中无 `cache miss` reason |
+| 新增 ledger 记录 | 1,728，**全部 `cached=true`、`api_calls=0`** | `outputs/usage/usage.jsonl` 尾部 1728 条 |
+| 累计 guard（`pricing_p3.yaml` 口径） | **$9.180483 → $9.180483（未变）** | `budget_cost(...)` 复算 |
+| error 行（如实保留） | 27（防御 19 / 未防御 8，全部 comprehensive） | 同上 |
+
+**结论：Phase 3 新增花费 $0.00，新增 API 调用 0。** 注入网格完全由既有缓存支撑。
+
+⚠️ **冷启动重跑不可自行执行**：若缓存失效而需要真实重跑这 1,728 个 completion，
+峰值上限估算 $10.892966 已超过 $5 硬上限（也超过 §2 的 $4.287588 总 guard 计划）。
+按 §4.1 与硬约束，必须**先停下询问 owner**，不得直接跑，也不得自行缩小预注册范围来省钱。
+
+记账口径提醒：guard 复算必须用 `configs/pricing_p3.yaml`（`scripts/experiment.py:147` 已如此覆盖）。
+若误用默认的 `configs/pricing.yaml`（只含 `deepseek-flash`），ledger 中 48 条 `deepseek-v4-pro`
+与 8 条 `model-discovery` 记录会让 `budget_cost` 返回 `None`，看起来像「历史花费未知」，实为定价表缺项。
