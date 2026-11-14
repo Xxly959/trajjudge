@@ -25,3 +25,4 @@ runs/
 
 # Trace-level lists derived from human labels stay local; only markdown aggregates are tracked
 reports/phase3_pool.json
+reports/phase4_hard_samples.json

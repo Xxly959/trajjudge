@@ -348,3 +348,141 @@ markdown 表格被检验名里的 `|` 撕裂。
 
 **下一步**：实现 `src/trajjudge/calibration.py` 与 `scripts/phase4_analysis.py`，
 先写覆盖真实失败模式的测试，再产出 `reports/phase4_*`。
+
+## Phase 4 — LOSO 阈值校准、饱和正面证据与失败分类学（2026-11-13，全部 PROVISIONAL / exploratory，零花费）
+
+**动机**：v1 把「评分器与人类 κ=0.377」当成 LLM judge 的成绩，但从未区分**可执行 rubric** 与 **LLM 评分器**；
+也从未在「不偷看留出标签」的前提下校准过阈值。饱和（accuracy 顶格 92.07%、comprehensive 100% 过阈）
+被当成背景噪声，没有正面证据。本阶段把这三件事一次算清，并且**只标 exploratory**。
+
+**改动**：
+- `src/trajjudge/calibration.py`（新增）：冻结网格 + 哨兵、训练折选点（balanced / 固定漏判率两套目标）、
+  LOSO 折计划、out-of-fold 池化、`binary_metrics`（缺类返回 `None` 而非 0）、
+  step-interpolation average precision、`summarize`（scenario 簇 CI + AUC 覆盖 0.5 判定）、
+  `hard_samples`、`hybrid_evidence`。
+- `scripts/phase4_analysis.py`（新增）：merge/split 并列、framework 二值 rubric 拒绝 AUC、
+  两臂（calibrated_only / with_fallback）、缓存身份校验恢复原话、消息编号轨迹证据、
+  硬样本块（**人工理由原文不输出，只输出可用性布尔**）、混合评分判读、markdown 报告。
+- `reports/failure_taxonomy.md`（新增，**入库**）：10 条硬样本逐条分类，每条含
+  消息编号轨迹证据 + 评分器原话逐字摘录 + `judgment: agent`；只用盲 ID。
+- `tests/test_calibration.py`（51）、`tests/test_phase4_analysis.py`（58）：共 **109 个新测试**。
+- `.gitignore`：新增 `reports/phase4_hard_samples.json`（含 trace_id 与评分器原话，按 owner 裁定只留本地）。
+- `docs/BUDGET_v2.md`：§2 Phase 4 行改为「已核实」，§6 回填，新增 **§8**（实际 token 推算与 guard 保守口径并列）。
+
+**关键数字**：
+- 测试 **475 passed, 1 skipped**（367 → 475；原有 214 个离线测试全部保持通过）。
+  skip 的是「GUIDE.md 不得含分类学内容」——round2 kit 尚未构建，属预期。
+- 样本：48 条已连接标签，独立场景 **28（merge）/ 29（split）**；缺失分数 0。
+- **上游默认阈值下三者对比**：framework rubric accuracy 0.7708 / **κ 0.3774** / balanced 0.6562 / 漏判 0.6875；
+  trajectory_accuracy 0.6667 / **κ 0.0400** / balanced 0.5156 / 漏判 0.9375；
+  trajectory_comprehensive 0.6667 / **κ 0.0000** / balanced 0.5000 / 漏判 **1.0000**。
+- **AUC（pass 为正）**：accuracy **0.5459**，CI **[0.5000, 0.6103] 覆盖 0.5 → 无证据支持可用区分度**；
+  comprehensive **0.6748**，CI [0.5161, 0.7913] 不覆盖 0.5（弱但非零）。
+  framework 的 AUC / PR-AUC 写「不适用（二值 rubric，无连续分数）」，**未填 0.5**。
+- **LOSO 校准（balanced 目标）**：comprehensive κ **0.0000 → 0.2373**、balanced **0.5000 → 0.6094**
+  （28 折中 25 折选 0.8、3 折选 0.95），但漏判率只从 1.0000 降到 **0.6250**，specificity **0.3750**
+  ——即**误杀 62.5% 的 human pass**。accuracy 几乎不动（27/28 折选 2.5，κ 仍 0.0400）。
+- **固定漏判率下的 specificity**：accuracy 在 0.10 / 0.25 / 0.50 三个 target 上**只能靠 `always_fail` 达标**
+  （specificity 1.0、**sensitivity 0.0**）→ 报告带**退化警告**，明确这是「拒绝一切」的退化解，不是校准成功。
+  comprehensive 在 0.10/0.25 选 0.95：specificity 0.9375 [0.7692, 1.0000]、sensitivity 0.2812、漏判 0.0625。
+- **硬样本子集**：**n_traj = 10，n_scenario = 7**（≥5，非 case study）。
+  9 条 accuracy 顶格 3.0，comprehensive 0.7031–0.9500。
+- **混合评分**：human fail 16 条 / 11 场景。抓到数 framework **5**、accuracy **1**、comprehensive **0**，
+  并集 **6**；**两者都抓到 0**（漏判集合不重合），并集漏判 **0.6250 < 0.6875**。
+  human pass 上误杀：framework **0**、accuracy 1、comprehensive 0。判读 **有支持证据**。
+  **效应量按条数说：并集比最好的单独评分器多抓 1 条（5/16 → 6/16）**，不写百分比结论句。
+- 原始输出恢复 **100/100**，全部通过 token 总数 + 复算分数双重身份校验；不可得条目 **0**。
+- 分类分布：`missing_evidence_check` **5**（3 场景）、`annotation_disagreement` **2**（2 场景）、
+  `rubric_mismatch` **1**、`other`（理由过短无法定位）**2**。`threshold_saturation` **0**——
+  饱和是子集的**入选条件**，不是每条的失败成因，重复计数会掩盖真实机制。
+
+**与旧结果的差异（含两条必须立即上报的金标准疑点）**：
+1. **「κ=0.377」属于可执行 rubric，不属于 LLM judge**。两个 LLM 评分器的 κ 是 **0.04 与 0.00**。
+   v1 的头条一致度数字被归错了主体；这是本阶段最重要的口径更正。
+2. **accuracy 评分器没有可用区分度**：OOF AUC 0.5459，CI 覆盖 0.5。按 §7b 必须写
+   「无证据支持可用区分度」，不得因为点估计 > 0.5 就声称有效。
+3. **校准不能凭空创造区分度**：comprehensive 的 κ 改善是用**误杀 62.5% 的 human pass** 换来的；
+   分数顶格时降阈值换召回必然牺牲 specificity。v1 未披露这一权衡。
+4. **specificity = 1.0 是退化解而非成绩**：accuracy 的固定漏判率目标只能由 `always_fail` 满足，
+   它把全部 human pass 也判 fail。若不加退化警告，这一格会被误读成「完美校准」。
+5. ⚠️ **B78c979（competitive_intelligence）疑似人工标注错误**：理由称未识别 C 轮 5 亿元融资与东南亚计划、
+   未更新「海外拓展受限」旧判断；但 `[23]`/`[24]` 逐字写出融资额、东南亚扩张，并显式标注
+   `KB-802（2026-01）称竞品B"海外拓展受限" → **已被推翻**`，且给出 `更新KB-801/KB-802` 建议。
+   accuracy 原话也明确记为 `Competitor B (funding + overseas expansion)`。
+   「没看出」被证据否证；「更新」可争辩（建议 vs 执行落库）。
+   **该轨迹属于 Phase 3 注入实验的 16 条 human fail 候选池，故此疑点同时影响 Phase 3 的 PROVISIONAL 数字。**
+   **未改标签、未改理由、未剔除**，全部统计仍按原标签计算。
+6. ⚠️ **Bed2fd2（pinbench_apm_market_research）理由与条目不匹配**：理由指向「培训需求 / 干扰工单」，
+   但本条 rubric 只要求 APM 厂商/定价/趋势分析，全轨迹 `培训` 与 `training` 命中 **0** 次，本任务不含工单。
+   盲 ID → trace 映射已独立复核 **10/10 一致**，排除助手侧映射错误。
+   **不主张标签错误**（fail 可能出于未写明的原因），**不猜测、不补写理由**，需 owner 澄清。
+7. **混合评分的支持证据比 §5 的计数更弱**：10 条硬样本中 **5 条不能干净地算作评分器漏判**
+   （2 条金标准疑点 + 2 条理由过短无法定位 + 1 条人工判据与 rubric 维度不同）。
+   真正可验证的评分器漏判是 **5 条 / 3 个场景**。并集 +1 条的增益建立在含疑点的标签上，owner 裁定后可能变化。
+8. **找到了漏判的具体机制**（5 条 `missing_evidence_check` 同型）：rubric 列出的**必通知人**中有一人
+   从未成为任何草稿收件人（onsite 族漏技术总监、vip 族漏客户经理赵蕾；后者在全轨迹出现 **0** 次），
+   或逐案行动项缺责任人与时限。两个评分器的原话**自证**了盲区——它们枚举收件人时恰好漏掉那个人，
+   仍判「完整达成」。**扣分去向是冗余搜索/重复保存草稿等效率问题，实质遗漏一次都没被扣分。**
+   这类缺陷是**集合/结构谓词**，可执行检查无需语义判断即可覆盖 → 混合评分的机制解释。
+9. **一处 rubric 与 fixture 的口径分歧，如实记录且不归责任何一方**：onsite rubric 写「13:00 起空闲」，
+   日历 fixture 的架构评审 `end_time` 为 12:00，故 agent 的「free from 12:00」**与 fixture 一致**。
+   人工「时间不对」的**可验证部分**是 agent 采用 SLA **14:15** 而客户邮件要求 **14:00** 前到场。
+
+**本轮修掉的真实缺陷（由测试或复算发现，非事后调参）**：
+- `hybrid_evidence` 把**一致**当成**误杀**：原实现统计 human pass 中 framework 判 pass 的条数，
+  得出 framework 误杀 **32**（真值 **0**）。这会**直接反转混合评分判读**。改为显式 `false_kill`
+  （human pass ∧ 判 fail），并加两个回归测试。
+- **同一统计量在 §2b 与 §3 得到不同 CI**（[0.5000, 0.6085] vs [0.5000, 0.6103]）：
+  `cluster_interval` 按行序分组，而 OOF 行是折序。`summarize` 内改为按 (scenario_id, trace_id) 排序，
+  并加「区间不依赖输入行序」测试。两处现均为 [0.5000, 0.6103]。
+- **AUC CI 不可估时被渲染成「否」**：`_covers_half` 返回 `None` → `no_usable_discrimination=False`
+  → 表格打印「否」，读起来像**有区分度的证据**。这正是 v1「零宽 CI 读作精确为零」的同类错误。
+  新增 `_auc_verdict` 三态（是 / 否 / **不可估（簇数不足）→ 不得据此声称区分度**）+ 4 个测试。
+  本阶段真实数据的 AUC CI 均可估，故数字未变，但潜在误报已堵死。
+- **comprehensive 原始输出没有顶层 `reason`**（只有 `step_evaluations`）：按 reason 匹配缓存得 **0/50**。
+  改为 token 总数 + 按上游运算顺序复算分数双重校验 → **100/100**；原话摘录取逐步骤 `step_reason`。
+- `baseline_balanced` 原用一个任意随机预测器（`i % 2 == 0`）→ 改为恒等式：
+  两类都存在时任何常数预测器的 balanced accuracy 都是 0.5。
+- 报告曾**落后于脚本**（缺效应量行）→ 重新生成；`_fmt` 的 `-0.0000`、空 summarize 的 KeyError、
+  `min()` 在全 `None` 漏判率上的 TypeError 一并修掉。
+- **入库聚合里泄漏了 16 个 trace UUID**：`hybrid_scoring` 的 `framework_only / graders_only / neither / both`
+  四个成员列表原样输出 `trace_id`，读者可据此定位到人工标签背后的具体轨迹——与 owner 对
+  `phase3_pool.json` 的裁定属同一类问题。改为输出**盲 ID**（私钥仍在 gitignore 的 `outputs/` 内），
+  未映射的 trace **抛 KeyError 而非静默回退到原 id**。三个入库产物现测得 **UUID 0 个**，
+  并加 3 个产物级守卫测试 + 2 个单元测试。
+
+**测试覆盖的「真实会出错的地方」**（新增 109 个）：
+留出标签参与选阈值（泄漏）、译本孪生被拆到 train/test 两侧、未定义折被静默丢弃、
+二值 rubric 被填 AUC=0.5、缓存 tag 相同但 token 不符、token 相符但复算分数不符、
+两条缓存都通过校验但内容不同被猜选、缓存缺失被编造原话、其他 phase/grader 被混入缓存池、
+framework 与 human 一致被当成误杀、缺分数被当成抓到或误杀、case study 仍出判读、
+支持与反对并存仍下结论、n=0 时崩溃、人工理由原文被写进产物、round2 理由冒充 round1、
+不可估 CI 被渲染成「否」、markdown 表格被 `|` 撕裂、退化哨兵未被警告、
+分类学缺失 `judgment: agent`、类别超出冻结词表、trace_id/UUID 泄漏进入库文件、
+分类学内容渗入 GUIDE.md/kit。
+
+**花费**：**$0.00**，新增 API 调用 **0**，零网络请求。累计 guard **$9.180483（未变）**，余量 $5.000000。
+缓存依赖的冷启动反事实（**不是本阶段花费**）：100 个面板、849,260 prompt + 28,844 completion tokens →
+**实际 token 推算（off-peak）$0.144695 / guard 保守口径（peak）$0.289391**，两者均远低于 $5，
+故与 Phase 3 的 $10.892966 不同，此处无需停下询问 owner。详见 `docs/BUDGET_v2.md` §8。
+
+**产物**：`reports/phase4_calibration.json`、`reports/phase4_provisional.md`、`reports/failure_taxonomy.md`（入库）；
+`reports/phase4_hard_samples.json`（**已 gitignore，只留本地**）。
+**全部标 PROVISIONAL + exploratory；未写入 `FINAL_REPORT_v2` 或 `RESUME_CLAIMS`（两者尚不存在）。**
+
+**提交范围与隐私**：三个入库产物（分类学、`phase4_calibration.json`、`phase4_provisional.md`）
+均只用盲 ID，**0 个 UUID、0 条 trace 路径**；`phase4_calibration.json` 的 `hybrid_scoring` 成员列表
+已由 trace_id 改为盲 ID。人工理由一律**转述**不逐字引用
+（原文只在已 gitignore 的 `annotation/labels.csv`）；评分器原话逐字摘录只在 `reports/` 内，
+**未进入** `GUIDE.md`、kit 或任何标注视图（并有测试守卫）。
+本次提交**不包含**工作区里既有的无关改动（dataset/训练候选/SWE 导入产物），按「不要继续投入」约束原样保留。
+
+**下一步 / 闸门**：
+- **闸门 A 仍是唯一硬阻塞**，且现在**多了两条需 owner 裁定的金标准疑点**（B78c979、Bed2fd2）。
+  助手不得代做标注或改判；裁定前全部统计按原标签计算。
+- owner 待办累计：①处理 round1 两条空白 `Be5538d`、`Bf3d4a1`（补标签或 `exclude`）；
+  ②裁定 B78c979 的判定标准（识别并指出 vs 必须执行 KB 写入）；③澄清 Bed2fd2 的判定依据；
+  ④核对 T159zh/T160 归并；⑤决定是否清理历史提交 `e3be153` 中的 `reports/phase3_pool.json`（破坏性操作，需明确批准）。
+- 若人类 test-retest κ < 0.60，Phase 3 与本阶段全部数字**永久降级为 exploratory**。
+- Phase 5（中性 wrapper 对照，954 completions）仍需真实花费：**等闸门 A + owner 批准 + 先备份缓存**，
+  开跑前并列给出实际 token 推算与 guard 保守口径两个数。
