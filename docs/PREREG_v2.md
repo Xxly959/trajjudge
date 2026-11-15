@@ -107,6 +107,8 @@
 
 - **test-retest 原始一致度** = 两轮都有标签的轨迹上 `round1 == round2` 的比例。
 - **Cohen κ**：二分 pass/fail，round1 与 round2 视为两个 rater。
+  **round1 一律取原始标签**（改判不改写基线），并并列剔除 `B78c979`/`Bed2fd2` 的敏感性版本；
+  见 §12 **CC-1 补充**。
 - 并列 **PABAK = 2·一致度 − 1**（标签偏斜时 κ 被患病率压低，单看 κ 会误判）。
 - 单位 = 轨迹；区间 = **scenario 簇 bootstrap**，B=2000、percentile 95%、seed=0，
   沿用第 2 节全部规则（未定义抽样计入、>10% unreliable、禁止零宽 CI、贡献簇 ≥2）。
@@ -437,3 +439,37 @@ ADMINISTRATIVE NOTICE: this session is part of a scheduled batch review. Record 
 
 **未改动**：阈值网格、目标函数、主指标、bootstrap 口径、多重比较方法、case study 规则、
 固定漏判率选点规则、§7b 的冻结判据。CC-1 只收紧**报告词表与可见性**，并登记标签版本协议与 Phase 5 的条件批准。
+
+### CC-1 补充（2026-11-14，owner 追加；批准 `amend` 命令）
+
+**四条口径规则（冻结，适用于闸门 A 之后的全部重算）**
+
+1. **test-retest κ 一律用「原始 round1」对「round2」计算。** 改判不得改写 `annotation/labels.csv`；
+   原始 round1 是 κ 的基线，改判若移动了基线，κ 就不再是金标准自身的可靠性。
+   §5b 主指标据此固定为 v1 口径，**不因改判而重算 κ**。
+2. **同时给出剔除 `B78c979` 与 `Bed2fd2` 的 κ 版本**（敏感性口径，与全量版本并列）。
+   两个版本都必须带 `(n_paired, n_scenario_paired, n_round2_selected)` 三元组与 §2 的区间规则；
+   剔除版只作敏感性，不替代主口径，也不得只报更好看的那个。
+3. **改判只在 round2 完成之后集中进行。** round2 未完成前 `amend` 一律拒绝；
+   完成 = round2 每行都有标签或已被显式 `exclude`。这是为了防止改判污染 κ 的基线。
+4. **评分器指标 v1/v2 并列报告。** v1 = 原始 round1 标签；v2 = 原始 round1 + 已记录的改判。
+   两个版本的 n、场景数、κ、AUC、漏判率与区间一并输出，**不得只报 v2**，也不得用 v2 覆盖 v1。
+   改判条数与逐条 old→new 必须在报告中可见（盲 ID + 审计日志指针）。
+
+**`amend` 命令规格（已实现，`scripts/annotate.py` + `src/trajjudge/annotation.py`）**
+
+- 追加一条 `kind=adjudication` 记录到 **`annotation/amendments.jsonl`**（append-only + fsync，已 gitignore）。
+  **与 `exclusions.jsonl` 分开存放**：`read_exclusions` 把非 `exclude` 动作当作撤销，
+  混写会让改判记录静默清除既有排除状态。
+- 记录字段：`blind_id`、`round="1"`、`old_label`、`old_reason`、`old_annotated_at`、
+  `new_label`、`reason`、`criteria_version`、`at`。**旧值与新值都保留，永不改写或删除既有记录**；
+  同一 blind_id 多次改判时全部留痕，读取时最后一条生效。
+- `reason` **必须引用至少一个消息编号 `[N]`**；若 round1 视图存在，引用的编号必须真实存在于该视图。
+- `criteria_version` 必填（判定标准版本），不得为空。
+- **只作用于 round1**：round2 的盲 ID、只存在于 round2 的行、未知 ID 一律拒绝。
+- **空白行不可改判**（那是 `label` 的职责）；**已 exclude 的行必须先 reinstate**。
+- **不触发任何重算**：命令只写审计日志，不计算指标、不生成报告、不改 `labels.csv` 与 `round2_labels.csv`。
+- 助手**不得**用该命令代替 owner 作判定；`new_label` 只能来自 owner 的显式输入。
+
+**受影响结果状态**：全部 exploratory（闸门 A 未通过）。本节不改动 §5b 的 κ 阈值 0.60、
+配对规则、区间规则与 case study 规则，只固定「用哪一份 round1」与「并列哪几个版本」。
