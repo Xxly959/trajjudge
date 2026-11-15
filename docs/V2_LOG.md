@@ -365,12 +365,12 @@ markdown 表格被检验名里的 `|` 撕裂。
   硬样本块（**人工理由原文不输出，只输出可用性布尔**）、混合评分判读、markdown 报告。
 - `reports/failure_taxonomy.md`（新增，**入库**）：10 条硬样本逐条分类，每条含
   消息编号轨迹证据 + 评分器原话逐字摘录 + `judgment: agent`；只用盲 ID。
-- `tests/test_calibration.py`（51）、`tests/test_phase4_analysis.py`（59）：共 **110 个新测试**。
+- `tests/test_calibration.py`（51）、`tests/test_phase4_analysis.py`（65）：共 **116 个新测试**。
 - `.gitignore`：新增 `reports/phase4_hard_samples.json`（含 trace_id 与评分器原话，按 owner 裁定只留本地）。
 - `docs/BUDGET_v2.md`：§2 Phase 4 行改为「已核实」，§6 回填，新增 **§8**（实际 token 推算与 guard 保守口径并列）。
 
 **关键数字**：
-- 测试 **476 passed, 1 skipped**（367 → 476；原有 214 个离线测试全部保持通过）。
+- 测试 **482 passed, 1 skipped**（367 → 482；原有 214 个离线测试全部保持通过）。
   skip 的是「GUIDE.md 不得含分类学内容」——round2 kit 尚未构建，属预期。
 - 样本：48 条已连接标签，独立场景 **28（merge）/ 29（split）**；缺失分数 0。
 - **上游默认阈值下三者对比**：framework rubric accuracy 0.7708 / **κ 0.3774** / balanced 0.6562 / 漏判 0.6875；
@@ -387,10 +387,10 @@ markdown 表格被检验名里的 `|` 撕裂。
   comprehensive 在 0.10/0.25 选 0.95：specificity 0.9375 [0.7692, 1.0000]、sensitivity 0.2812、漏判 0.0625。
 - **硬样本子集**：**n_traj = 10，n_scenario = 7**（≥5，非 case study）。
   9 条 accuracy 顶格 3.0，comprehensive 0.7031–0.9500。
-- **混合评分**：human fail 16 条 / 11 场景。抓到数 framework **5**、accuracy **1**、comprehensive **0**，
-  并集 **6**；**两者都抓到 0**（漏判集合不重合），并集漏判 **0.6250 < 0.6875**。
-  human pass 上误杀：framework **0**、accuracy 1、comprehensive 0。判读 **有支持证据**。
-  **效应量按条数说：并集比最好的单独评分器多抓 1 条（5/16 → 6/16）**，不写百分比结论句。
+- **混合评分**：human fail 16 条 / 11 场景。判读 **漏判集合不重合**（framework 与 grader 各自抓到
+  对方漏掉的 human fail，两者都抓到的为 0）。按 owner 2026-11-14 裁定（PREREG_v2 §12 CC-1），
+  **并集增益与任何比例不进入结论性文字**；抓到数、漏判率、误杀数只留在
+  `reports/phase4_calibration.json` 的 `hybrid_scoring` 数据层。
 - 原始输出恢复 **100/100**，全部通过 token 总数 + 复算分数双重身份校验；不可得条目 **0**。
 - 分类分布：`missing_evidence_check` **5**（3 场景）、`annotation_disagreement` **2**（2 场景）、
   `rubric_mismatch` **1**、`other`（理由过短无法定位）**2**。`threshold_saturation` **0**——
@@ -405,28 +405,16 @@ markdown 表格被检验名里的 `|` 撕裂。
    分数顶格时降阈值换召回必然牺牲 specificity。v1 未披露这一权衡。
 4. **specificity = 1.0 是退化解而非成绩**：accuracy 的固定漏判率目标只能由 `always_fail` 满足，
    它把全部 human pass 也判 fail。若不加退化警告，这一格会被误读成「完美校准」。
-5. ⚠️ **B78c979（competitive_intelligence）疑似人工标注错误**：理由称未识别 C 轮 5 亿元融资与东南亚计划、
-   未更新「海外拓展受限」旧判断；但 `[23]`/`[24]` 逐字写出融资额、东南亚扩张，并显式标注
-   `KB-802（2026-01）称竞品B"海外拓展受限" → **已被推翻**`，且给出 `更新KB-801/KB-802` 建议。
-   accuracy 原话也明确记为 `Competitor B (funding + overseas expansion)`。
-   「没看出」被证据否证；「更新」可争辩（建议 vs 执行落库）。
-   **该轨迹属于 Phase 3 注入实验的 16 条 human fail 候选池，故此疑点同时影响 Phase 3 的 PROVISIONAL 数字。**
+5. ⚠️ **两条金标准疑点已上报 owner，由其自行重读裁定**：盲 ID `B78c979`、`Bed2fd2`。
+   按 owner 2026-11-14 裁定，助手**不再提供分析**；逐条轨迹证据与评分器原话只在
+   `reports/failure_taxonomy.md` §4，**round2 完成前不进入本日志、`GUIDE.md`、kit 或任何标注视图**。
    **未改标签、未改理由、未剔除**，全部统计仍按原标签计算。
-6. ⚠️ **Bed2fd2（pinbench_apm_market_research）理由与条目不匹配**：理由指向「培训需求 / 干扰工单」，
-   但本条 rubric 只要求 APM 厂商/定价/趋势分析，全轨迹 `培训` 与 `training` 命中 **0** 次，本任务不含工单。
-   盲 ID → trace 映射已独立复核 **10/10 一致**，排除助手侧映射错误。
-   **不主张标签错误**（fail 可能出于未写明的原因），**不猜测、不补写理由**，需 owner 澄清。
-7. **混合评分的支持证据比 §5 的计数更弱**：10 条硬样本中 **5 条不能干净地算作评分器漏判**
-   （2 条金标准疑点 + 2 条理由过短无法定位 + 1 条人工判据与 rubric 维度不同）。
-   真正可验证的评分器漏判是 **5 条 / 3 个场景**。并集 +1 条的增益建立在含疑点的标签上，owner 裁定后可能变化。
-8. **找到了漏判的具体机制**（5 条 `missing_evidence_check` 同型）：rubric 列出的**必通知人**中有一人
-   从未成为任何草稿收件人（onsite 族漏技术总监、vip 族漏客户经理赵蕾；后者在全轨迹出现 **0** 次），
-   或逐案行动项缺责任人与时限。两个评分器的原话**自证**了盲区——它们枚举收件人时恰好漏掉那个人，
-   仍判「完整达成」。**扣分去向是冗余搜索/重复保存草稿等效率问题，实质遗漏一次都没被扣分。**
-   这类缺陷是**集合/结构谓词**，可执行检查无需语义判断即可覆盖 → 混合评分的机制解释。
-9. **一处 rubric 与 fixture 的口径分歧，如实记录且不归责任何一方**：onsite rubric 写「13:00 起空闲」，
-   日历 fixture 的架构评审 `end_time` 为 12:00，故 agent 的「free from 12:00」**与 fixture 一致**。
-   人工「时间不对」的**可验证部分**是 agent 采用 SLA **14:15** 而客户邮件要求 **14:00** 前到场。
+   其中 `B78c979` 同时落在 Phase 3 注入实验的 human fail 候选池内，故该疑点也影响 Phase 3 的 PROVISIONAL 数字。
+   裁定后 owner 走 relabel 并留审计记录，助手届时**重算全部 PROVISIONAL 数字并标注「标签 v2」**。
+6. **混合评分的证据强度弱于数据层计数**：硬样本中有条目无法干净地计为评分器漏判，
+   可核验的漏判少于子集条数；逐条依据见 `reports/failure_taxonomy.md` §6。
+   按 CC-1，本日志不写并集增益、不写比例。
+7. **一处 rubric 与 fixture 的口径分歧已如实记录，不归责任何一方**；明细见 `reports/failure_taxonomy.md`。
 
 **本轮修掉的真实缺陷（由测试或复算发现，非事后调参）**：
 - `hybrid_evidence` 把**一致**当成**误杀**：原实现统计 human pass 中 framework 判 pass 的条数，
@@ -450,12 +438,16 @@ markdown 表格被检验名里的 `|` 撕裂。
   `phase3_pool.json` 的裁定属同一类问题。改为输出**盲 ID**（私钥仍在 gitignore 的 `outputs/` 内），
   未映射的 trace **抛 KeyError 而非静默回退到原 id**。三个入库产物现测得 **UUID 0 个**，
   并加 3 个产物级守卫测试 + 2 个单元测试。
-- **混合评分判读在主报告里「裸奔」**：`phase4_provisional.md` §5 只写「有支持证据」，
-  而金标准疑点与「部分硬样本无法干净计为评分器漏判」只写在另一份分类学里。
-  先打开主报告的读者会把它当成已确证的增益。现在 §5 紧跟一条**判读的效力边界**，
-  指明增益建立在含未裁定疑点的 round1 标签上、owner 裁定前不得升级为确认性结论，并加测试守卫。
+- **混合评分判读在主报告里「裸奔」**：`phase4_provisional.md` §5 曾给出一个肯定性的支持判读，
+  而金标准疑点与「部分硬样本无法干净计为评分器漏判」只写在另一份分类学里，
+  先打开主报告的读者会把它当成已确证的结论。先补了**判读的效力边界**；
+  owner 随后裁定（CC-1）进一步收紧：判读词表改为**「漏判集合不重合」**，
+  §5 删去效应量行、抓到数、漏判率与误杀数，计数与率只留在 JSON 数据层。
+- **本日志自身违反了传播边界**：Phase 4 条目曾把逐轨迹机制、人名、消息编号与评分器原话
+  写进 `docs/V2_LOG.md`——这是 owner 会读到的文件，而约束①/⑤要求 round2 前这些内容只留在 `reports/`。
+  已把差异条目 5–9 收敛为**盲 ID + 指针**，删除全部原话与逐轨迹分析，并加产物级守卫测试。
 
-**测试覆盖的「真实会出错的地方」**（新增 110 个）：
+**测试覆盖的「真实会出错的地方」**（新增 116 个）：
 留出标签参与选阈值（泄漏）、译本孪生被拆到 train/test 两侧、未定义折被静默丢弃、
 二值 rubric 被填 AUC=0.5、缓存 tag 相同但 token 不符、token 相符但复算分数不符、
 两条缓存都通过校验但内容不同被猜选、缓存缺失被编造原话、其他 phase/grader 被混入缓存池、
@@ -463,7 +455,9 @@ framework 与 human 一致被当成误杀、缺分数被当成抓到或误杀、
 支持与反对并存仍下结论、n=0 时崩溃、人工理由原文被写进产物、round2 理由冒充 round1、
 不可估 CI 被渲染成「否」、markdown 表格被 `|` 撕裂、退化哨兵未被警告、
 分类学缺失 `judgment: agent`、类别超出冻结词表、trace_id/UUID 泄漏进入库文件、
-混合评分判读脱离其效力边界单独出现、分类学内容渗入 GUIDE.md/kit。
+混合评分判读脱离其效力边界单独出现、分类学内容渗入 GUIDE.md/kit、
+**并集增益或比例回流进结论性文字（CC-1）**、**收紧词表时把数据层的计数与率一并删掉**、
+**taxonomy 原话/消息编号渗入 owner 会读的 `docs/V2_LOG.md`（CC-1）**。
 
 **花费**：**$0.00**，新增 API 调用 **0**，零网络请求。累计 guard **$9.180483（未变）**，余量 $5.000000。
 缓存依赖的冷启动反事实（**不是本阶段花费**）：100 个面板、849,260 prompt + 28,844 completion tokens →
@@ -481,12 +475,45 @@ framework 与 human 一致被当成误杀、缺分数被当成抓到或误杀、
 **未进入** `GUIDE.md`、kit 或任何标注视图（并有测试守卫）。
 本次提交**不包含**工作区里既有的无关改动（dataset/训练候选/SWE 导入产物），按「不要继续投入」约束原样保留。
 
-**下一步 / 闸门**：
-- **闸门 A 仍是唯一硬阻塞**，且现在**多了两条需 owner 裁定的金标准疑点**（B78c979、Bed2fd2）。
-  助手不得代做标注或改判；裁定前全部统计按原标签计算。
-- owner 待办累计：①处理 round1 两条空白 `Be5538d`、`Bf3d4a1`（补标签或 `exclude`）；
-  ②裁定 B78c979 的判定标准（识别并指出 vs 必须执行 KB 写入）；③澄清 Bed2fd2 的判定依据；
-  ④核对 T159zh/T160 归并；⑤决定是否清理历史提交 `e3be153` 中的 `reports/phase3_pool.json`（破坏性操作，需明确批准）。
+**下一步 / 闸门**（已按 owner 2026-11-14 裁定更新，详见下方 CC-1 条目）：
+- **闸门 A 仍是唯一硬阻塞**。两条金标准疑点（`B78c979`、`Bed2fd2`）由 **owner 自行重读裁定**，
+  助手不再提供分析、不得代做标注或改判；裁定前全部统计按原标签计算。
+- owner 待办：①处理 round1 两条空白 `Be5538d`、`Bf3d4a1`（补标签或 `exclude`）；
+  ②自行裁定上述两条疑点并走 relabel + 审计记录；③核对 T159zh/T160 归并；④完成 round2。
+  历史提交 `e3be153` 中的 `reports/phase3_pool.json` **暂不清理**，仓库公开前再决定。
+- 标签定稿后助手**重算全部 PROVISIONAL 数字并标注「标签 v2」**。
 - 若人类 test-retest κ < 0.60，Phase 3 与本阶段全部数字**永久降级为 exploratory**。
-- Phase 5（中性 wrapper 对照，954 completions）仍需真实花费：**等闸门 A + owner 批准 + 先备份缓存**，
-  开跑前并列给出实际 token 推算与 guard 保守口径两个数。
+- Phase 5（中性 wrapper 对照，954 completions）**预算已获批准**（实际约 $0.27 / guard $2.79），
+  但**等闸门 A 通过、标签定稿后才启动**；开跑前先备份缓存，并并列给出实际 token 推算与 guard 保守口径两个数。
+
+## owner 裁定与变更控制 CC-1 落地（2026-11-14，零花费）
+
+owner 对 Phase 4 汇报的五项裁定，已记入 `docs/PREREG_v2.md` §12 **CC-1** 并单独 commit：
+
+1. **两条疑点标签由 owner 自行重读裁定**，助手不再给分析；裁定后 owner 走 relabel 并留审计记录，
+   助手届时重算全部 PROVISIONAL 数字并标注**「标签 v2」**。本轮**未**触碰任何标签、理由或排除记录。
+2. **`e3be153` 的 `reports/phase3_pool.json` 暂不清理历史**，仓库公开前再决定。未执行任何破坏性操作。
+3. **混合评分的并集增益不进任何结论性文字，最多写「漏判集合不重合」，不写比例。**
+   落地：`hybrid_block` 的支持分支判读词表改为**「漏判集合不重合」**（不再作肯定性支持断言），新增 `reporting_restriction`
+   字段记录裁定出处；`phase4_provisional.md` §5 删去效应量行、抓到数、漏判率与误杀数；
+   `failure_taxonomy.md` §5 同步删去增益与比例。**计数与率仍完整保留在
+   `reports/phase4_calibration.json` 的 `hybrid_scoring` 数据层**，可复算、不丢证据。
+   §7b 的冻结判读规则本身未改（改的是**输出词表**），属看到结果后的报告口径收紧 → 全部仍 exploratory。
+4. **Phase 5 预算获批**（实际约 $0.27 / guard $2.79），但**闸门 A 通过 + 标签定稿后才启动**；
+   开跑前先备份缓存并并列两个口径。已回填 `docs/BUDGET_v2.md`，**本轮未发起任何真实调用**。
+5. **round2 完成前不产出任何会进入 owner 视野的 taxonomy 原话或评分器评语。**
+   落地：本日志 Phase 4 条目的差异 5–9 收敛为**盲 ID + 指针**，删除人名、消息编号、逐轨迹机制与评分器原话
+   （原文保留在 git 历史 `cc9e34d` / `3862414` 与 `reports/failure_taxonomy.md`）；
+   新增守卫测试：`docs/V2_LOG.md` 不得含评分器原话片段、人名或消息编号引用。
+   此后助手的阶段汇报一律不引用原话。
+
+**关键数字**：无统计量变化——本轮只改**报告口径与可见性**，未重算任何指标（标签未变）。
+`phase4_calibration.json` 逐叶比对**只有 3 个字段变化**：`hybrid_scoring.verdict / verdict_reason / reporting_restriction`，
+其余全部逐字节不变（计数与率完整保留）。测试 **482 passed, 1 skipped**（新增 6 个 CC-1 守卫，累计新增 116 个）。
+**花费 $0.000000（实际 token 推算）/ $0.000000（guard 保守口径）**，新增 API 调用 **0**；
+累计 guard **$9.180483（未变）**，余量 **$5.000000**。
+
+**待 owner 确认的一处工具缺口**（不是标签分析）：现有 `scripts/annotate.py` 只有
+`label / relabel（round2 空白）/ exclude / reinstate`，**没有「修改既有 round1 标签并留审计记录」的命令**。
+若裁定结果需要改判 `B78c979` / `Bed2fd2` 的 round1 标签，该路径目前不存在；
+需要时助手再按标注工具范围补一个 append-only 的改判命令，**本轮不擅自新增**。

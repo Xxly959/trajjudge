@@ -18232,9 +18232,10 @@
   "status": "exploratory",
   "support": true,
   "against": false,
-  "verdict": "有支持证据",
-  "verdict_reason": "framework 与 grader 的漏判集合不重合，且并集漏判率低于任一单独漏判率",
-  "rule": "PREREG_v2 §7b：支持=漏判集合不重合且并集更优；反对=framework 误杀更多或增益不抵误杀"
+  "verdict": "漏判集合不重合",
+  "verdict_reason": "framework 与 grader 的漏判集合不重合（存在一方抓到而另一方漏掉的轨迹）",
+  "rule": "PREREG_v2 §7b：支持=漏判集合不重合且并集更优；反对=framework 误杀更多或增益不抵误杀",
+  "reporting_restriction": "owner 2026-11-14 裁定（PREREG_v2 §12 CC-1）：并集增益与任何比例不得进入结论性文字，最多陈述「漏判集合不重合」；计数与率只留在本数据层"
  },
  "hard_samples": {
   "definition": "human fail ∧ framework passed ∧ accuracy ≥ 2.0 ∧ comprehensive ≥ 0.6",

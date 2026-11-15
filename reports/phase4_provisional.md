@@ -141,14 +141,11 @@
 ## 5. 混合评分（可执行检查 + LLM judge）的证据
 
 - human fail **16** 条，覆盖 **11** 个独立场景；human pass 32 条。
-- 抓到数：framework 5，trajectory_accuracy 1，trajectory_comprehensive 0；并集 6。
-- 漏判率：framework 0.6875，trajectory_accuracy 0.9375，trajectory_comprehensive 1.0000；并集 0.6250。
-- 分解：仅 framework 抓到 5，仅 grader 抓到 1，两者都抓到 0，都漏 10。
-- **效应量（必须与判读一起读）**：并集比最好的单独评分器多抓 1 条 human fail（5/16 → 6/16）。增益以条数计，不以百分比结论句表述。
-- human pass 上的误杀（判 fail）：framework 0，trajectory_accuracy 1，trajectory_comprehensive 0。
-- **判读：有支持证据** —— framework 与 grader 的漏判集合不重合，且并集漏判率低于任一单独漏判率。
+- **判读：漏判集合不重合** —— framework 与 grader 的漏判集合不重合（存在一方抓到而另一方漏掉的轨迹）。
 - 判读规则：PREREG_v2 §7b：支持=漏判集合不重合且并集更优；反对=framework 误杀更多或增益不抵误杀。
-- **判读的效力边界**：以上按 round1 标签原样计算。`reports/failure_taxonomy.md` §4 记录了金标准疑点（其中一条同时落在 Phase 3 注入池内），§6 说明硬样本中有条目无法干净地计为评分器漏判。因此该增益建立在含未裁定疑点的标签上，owner 裁定前不得升级为确认性结论。
+- **报告口径限制**：owner 2026-11-14 裁定（PREREG_v2 §12 CC-1）：并集增益与任何比例不得进入结论性文字，最多陈述「漏判集合不重合」；计数与率只留在本数据层。
+- **判读的效力边界**：以上按 round1 标签原样计算。`reports/failure_taxonomy.md` §4 记录了金标准疑点（其中一条同时落在 Phase 3 注入池内），§6 说明硬样本中有条目无法干净地计为评分器漏判。因此该观察建立在含未裁定疑点的标签上，owner 裁定前不得升级为确认性结论。
+- 抓到数、漏判率、误杀数与并集增益只保留在 `reports/phase4_calibration.json` 的 `hybrid_scoring` 数据层，按上述裁定**不进入**本报告的结论性文字。
 
 ## 6. 限制（只写真实的）
 

@@ -258,7 +258,7 @@ class TestHybridVerdict:
         assert out["framework_false_fail_on_human_pass"] == 0
         assert out["n_human_pass"] == 6
 
-    def test_disjoint_misses_with_a_better_union_support_hybrid_scoring(self):
+    def test_disjoint_misses_are_reported_as_disjointness_not_as_a_gain(self):
         rows = []
         for k in range(6):
             rows.append(row(f"p{k}", f"s{k}", True, 3.0, 0.95, official=True))
@@ -272,7 +272,12 @@ class TestHybridVerdict:
         assert out["caught_by"][ACC] == 1
         assert out["both"] == [] and out["caught_union"] == 4
         assert out["support"] is True and out["against"] is False
-        assert out["verdict"] == "有支持证据"
+        # CC-1: the union gain may not reach conclusive text, so the verdict vocabulary
+        # itself must not claim support; the measurements stay in the data layer.
+        assert out["verdict"] == "漏判集合不重合"
+        assert "增益" not in out["verdict_reason"] and "0.6" not in out["verdict_reason"]
+        assert out["caught_union"] == 4 and out["miss_rate_union"] is not None
+        assert "CC-1" in out["reporting_restriction"]
 
     def test_fewer_than_five_failure_scenarios_is_a_case_study(self):
         rows = [row(f"t{k}", f"s{k % 2}", False, 3.0, 0.95, official=False) for k in range(6)]
@@ -395,9 +400,18 @@ class TestMarkdown:
         warning = text.split("退化警告")[1].split("\n\n")[0]
         assert COMP not in warning
 
-    def test_effect_size_is_stated_in_counts_not_percentage_points(self, text):
-        assert "效应量" in text
-        assert re.search(r"多抓 \d+ 条 human fail", text)
+    def test_hybrid_section_states_disjointness_without_gain_or_rates(self, text):
+        # CC-1: the union gain and any ratio are barred from conclusive text. The
+        # measurements stay in the JSON data layer, so the narrative must not
+        # smuggle them back in as counts, fractions or four-decimal rates.
+        section = text.split("## 5.")[1].split("## 6.")[0]
+        assert "有支持证据" not in section
+        for banned in ("效应量", "多抓", "抓到数：", "漏判率：", "误杀（判 fail）："):
+            assert banned not in section, banned
+        assert not re.search(r"\d+\.\d{4}", section)
+        assert not re.search(r"\d+\s*/\s*\d+", section)
+        assert "报告口径限制" in section and "CC-1" in section
+        assert "phase4_calibration.json" in section
 
     def test_the_hybrid_verdict_is_never_rendered_without_its_label_caveat(self, text):
         section = text.split("## 5.")[1].split("## 6.")[0]
@@ -502,6 +516,21 @@ class TestTrackedCalibrationArtefact:
         assert payload["raw_recovery"]["api_calls"] == 0
         assert payload["raw_recovery"]["new_cost_usd"] == 0.0
 
+    def test_the_tracked_verdict_uses_the_restricted_vocabulary(self):
+        payload = json.loads((ROOT / "reports/phase4_calibration.json").read_text(encoding="utf-8"))
+        hybrid = payload["hybrid_scoring"]
+        assert hybrid["verdict"] != "有支持证据"
+        assert "CC-1" in hybrid["reporting_restriction"]
+        # The measurements must survive the reporting restriction, not be deleted.
+        assert hybrid["caught_union"] is not None and hybrid["miss_rate_union"] is not None
+
+    def test_the_tracked_report_keeps_the_gain_out_of_its_narrative(self):
+        text = (ROOT / "reports/phase4_provisional.md").read_text(encoding="utf-8")
+        section = text.split("## 5.")[1].split("## 6.")[0]
+        assert "有支持证据" not in section and "效应量" not in section
+        assert not re.search(r"\d+\.\d{4}", section)
+        assert not re.search(r"\d+\s*/\s*\d+", section)
+
 
 class TestNoLeakIntoAnnotationPaths:
     def test_guide_and_kit_contain_no_taxonomy_content(self):
@@ -515,3 +544,42 @@ class TestNoLeakIntoAnnotationPaths:
         if TAXONOMY.exists():
             for blind in re.findall(r"\n### (B[0-9a-f]{6}) —", TAXONOMY.read_text(encoding="utf-8")):
                 assert blind not in text
+
+
+@pytest.mark.skipif(not TAXONOMY.exists(), reason="taxonomy artefact not generated")
+class TestOwnerVisibleLog:
+    """CC-1 #5: before round2, nothing the owner reads may carry verbatim evidence.
+
+    The log is a docs/ deliverable the owner actually opens, so it is inside the
+    propagation boundary just like the annotation kit — a pointer is allowed,
+    the quoted trajectory or grader text is not.
+    """
+
+    @pytest.fixture()
+    def log(self):
+        return (ROOT / "docs/V2_LOG.md").read_text(encoding="utf-8")
+
+    @pytest.fixture()
+    def verbatim(self):
+        spans = []
+        for line in TAXONOMY.read_text(encoding="utf-8").splitlines():
+            if re.match(r"^- (?:accuracy|comprehensive)（", line) or re.match(r"^- `\[\d+\]`", line):
+                spans += [s.strip() for s in line.split("`")[1::2] if len(s.strip()) >= 20]
+        return spans
+
+    def test_the_taxonomy_really_contains_verbatim_to_guard_against(self, verbatim):
+        assert len(verbatim) >= 10
+
+    def test_no_trajectory_or_grader_quote_reaches_the_log(self, log, verbatim):
+        for quote in verbatim:
+            assert quote not in log, quote[:60]
+
+    def test_no_message_number_citation_reaches_the_log(self, log):
+        assert not re.search(r"`\[\d+\]`", log)
+
+    def test_the_log_does_not_restate_the_union_gain(self, log):
+        for banned in ("有支持证据", "多抓"):
+            assert banned not in log, banned
+        # Boundaries matter: "16/16" is a Phase 0 wrapper fact, not the hybrid gain.
+        for fraction in (r"(?<!\d)5/16(?!\d)", r"(?<!\d)6/16(?!\d)"):
+            assert not re.search(fraction, log), fraction

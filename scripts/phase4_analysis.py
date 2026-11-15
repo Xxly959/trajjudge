@@ -241,10 +241,10 @@ def hybrid_block(joined: Sequence[Mapping[str, Any]], key: Mapping[str, str]) ->
         reason = f"human fail 只覆盖 {ev['n_scenario_fail']} 个独立场景（< {cal.MIN_SCENARIOS}），按 §3 属 case study"
     elif support and against:
         verdict = "支持与反对证据并存，不下结论"
-        reason = "并集漏判率更低，但 framework 在 human pass 上的误杀也更多；两者必须并列"
+        reason = "漏判集合不重合，但 framework 在 human pass 上的误杀也更多；两者必须并列，不下增益结论"
     elif support:
-        verdict = "有支持证据"
-        reason = "framework 与 grader 的漏判集合不重合，且并集漏判率低于任一单独漏判率"
+        verdict = "漏判集合不重合"
+        reason = "framework 与 grader 的漏判集合不重合（存在一方抓到而另一方漏掉的轨迹）"
     elif against:
         verdict = "有反对证据"
         reason = "framework 在 human pass 上的误杀多于 grader，并集未降低漏判率"
@@ -252,7 +252,9 @@ def hybrid_block(joined: Sequence[Mapping[str, Any]], key: Mapping[str, str]) ->
         verdict = "证据不足，不下结论"
         reason = "支持与反对判据都不成立"
     return {**ev, "support": support, "against": against, "verdict": verdict, "verdict_reason": reason,
-            "rule": "PREREG_v2 §7b：支持=漏判集合不重合且并集更优；反对=framework 误杀更多或增益不抵误杀"}
+            "rule": "PREREG_v2 §7b：支持=漏判集合不重合且并集更优；反对=framework 误杀更多或增益不抵误杀",
+            "reporting_restriction": "owner 2026-11-14 裁定（PREREG_v2 §12 CC-1）：并集增益与任何比例"
+                                     "不得进入结论性文字，最多陈述「漏判集合不重合」；计数与率只留在本数据层"}
 
 
 def _fmt(value: Any, digits: int = 4) -> str:
@@ -412,26 +414,14 @@ def markdown(block: Mapping[str, Any], framework: Mapping[str, Any], hard: Mappi
         "",
         f"- human fail **{hybrid['n_human_fail']}** 条，覆盖 **{hybrid['n_scenario_fail']}** 个独立场景；"
         f"human pass {hybrid['n_human_pass']} 条。",
-        f"- 抓到数：framework {hybrid['caught_by']['framework']}，"
-        + "，".join(f"{g} {hybrid['caught_by'][g]}" for g in THRESHOLDS)
-        + f"；并集 {hybrid['caught_union']}。",
-        f"- 漏判率：framework {_fmt(hybrid['miss_rate']['framework'])}，"
-        + "，".join(f"{g} {_fmt(hybrid['miss_rate'][g])}" for g in THRESHOLDS)
-        + f"；并集 {_fmt(hybrid['miss_rate_union'])}。",
-        f"- 分解：仅 framework 抓到 {len(hybrid['framework_only'])}，仅 grader 抓到 {len(hybrid['graders_only'])}，"
-        f"两者都抓到 {len(hybrid['both'])}，都漏 {len(hybrid['neither'])}。",
-        f"- **效应量（必须与判读一起读）**：并集比最好的单独评分器多抓 "
-        f"{hybrid['caught_union'] - max(hybrid['caught_by'].values())} 条 human fail"
-        f"（{max(hybrid['caught_by'].values())}/{hybrid['n_human_fail']} → "
-        f"{hybrid['caught_union']}/{hybrid['n_human_fail']}）。"
-        "增益以条数计，不以百分比结论句表述。",
-        f"- human pass 上的误杀（判 fail）：framework {hybrid['framework_false_fail_on_human_pass']}，"
-        + "，".join(f"{g} {hybrid['grader_false_fail_on_human_pass'][g]}" for g in THRESHOLDS) + "。",
         f"- **判读：{hybrid['verdict']}** —— {hybrid['verdict_reason']}。",
         f"- 判读规则：{hybrid['rule']}。",
+        f"- **报告口径限制**：{hybrid['reporting_restriction']}。",
         "- **判读的效力边界**：以上按 round1 标签原样计算。`reports/failure_taxonomy.md` §4 记录了金标准疑点"
         "（其中一条同时落在 Phase 3 注入池内），§6 说明硬样本中有条目无法干净地计为评分器漏判。"
-        "因此该增益建立在含未裁定疑点的标签上，owner 裁定前不得升级为确认性结论。",
+        "因此该观察建立在含未裁定疑点的标签上，owner 裁定前不得升级为确认性结论。",
+        "- 抓到数、漏判率、误杀数与并集增益只保留在 `reports/phase4_calibration.json` 的 `hybrid_scoring` "
+        "数据层，按上述裁定**不进入**本报告的结论性文字。",
         "",
         "## 6. 限制（只写真实的）",
         "",
