@@ -517,3 +517,47 @@ owner 对 Phase 4 汇报的五项裁定，已记入 `docs/PREREG_v2.md` §12 **C
 `label / relabel（round2 空白）/ exclude / reinstate`，**没有「修改既有 round1 标签并留审计记录」的命令**。
 若裁定结果需要改判 `B78c979` / `Bed2fd2` 的 round1 标签，该路径目前不存在；
 需要时助手再按标注工具范围补一个 append-only 的改判命令，**本轮不擅自新增**。
+
+## `amend` 改判命令与 CC-1 补充（2026-11-14，零花费，**不含任何分析**）
+
+owner 批准新增 append-only 改判命令，并追加四条口径规则。按 owner 要求，
+**命令与测试完成后即停下，不做任何分析、不重算任何指标、不触碰任何标签**。
+
+**改动**：
+- `src/trajjudge/annotation.py`：新增 `AMENDMENT_KIND`、`read_amendments`、`amend_row`；
+  `append_exclusion` 更名为 **`append_audit`**（现在服务两份审计日志，旧名会误导），两处调用点同步更新。
+- `scripts/annotate.py`：新增 `amend` 子命令（`--blind-id / --label / --reason / --criteria-version`，
+  后三者与 `--label` 均必填，`--label` 限定 `pass|fail`）、`_amendments()`、`_round2_complete()`。
+- `.gitignore`：新增 `annotation/amendments.jsonl`（含人工理由原文与 old/new 标签，只留本地）。
+- `docs/PREREG_v2.md`：§12 新增 **CC-1 补充**（四条口径规则 + 命令规格），§5b 主指标加指针。
+- `tests/test_annotation_amend.py`（新增）：**24 个测试**。
+
+**命令行为（与 owner 规格逐条对应）**：
+- 追加 `kind=adjudication` 记录，保留 `old_label / old_reason / old_annotated_at` 与 `new_label`，
+  并记录 `at`、`reason`、`criteria_version`；**append-only + fsync，永不改写或删除既有记录**。
+- `reason` 必须引用 `[N]`；round1 视图存在时，引用编号必须真实存在。`criteria_version` 不得为空。
+- **只作用于 round1**；空白行、已 exclude 行、round2 盲 ID、未知 ID 一律拒绝。
+- **不触发重算**：只写审计日志，`labels.csv` 与 `round2_labels.csv` **逐字节不变**（已用真实 kit 冒烟验证：
+  改判前后 `labels.csv` 的 sha1 相同，且未生成 `amendments.jsonl`）。
+- **改判只在 round2 完成后集中进行**：round2 kit 不存在、有未标签行时一律拒绝；
+  round2 行「已标签或已显式 exclude」即视为完成（否则一条退役的 round2 行会永久阻塞改判）。
+
+**本轮避免的一个真实缺陷**：改判记录若写进 `exclusions.jsonl`，`read_exclusions` 会把非 `exclude`
+动作当作**撤销**，从而静默清除既有排除状态。故使用**独立日志** `amendments.jsonl`，
+并加回归测试：改判后既有排除仍然生效。
+
+**CC-1 补充的四条口径规则**（详见 `docs/PREREG_v2.md` §12）：
+1. test-retest κ **一律用原始 round1 对 round2** 计算，改判不得移动基线。
+2. 同时给出**剔除 `B78c979` 与 `Bed2fd2`** 的 κ 敏感性版本，与全量版本并列，各带三元组与区间。
+3. 改判**只在 round2 完成之后集中进行**。
+4. **评分器指标 v1/v2 并列报告**（v1 = 原始 round1；v2 = 原始 round1 + 已记录改判），
+   不得只报 v2，不得用 v2 覆盖 v1；改判条数与逐条 old→new 必须可见。
+
+**关键数字**：测试 **506 passed, 1 skipped**（482 → 506，新增 24 个；原有 214 个离线测试全部保持通过）。
+**未重算任何统计量**，`reports/` 下产物本轮未改动。
+
+**花费**：**$0.000000（实际 token 推算）/ $0.000000（guard 保守口径）**，新增 API 调用 **0**，零网络请求。
+累计 guard **$9.180483（未变）**，余量 **$5.000000**。
+
+**下一步**：停在闸门 A。等 owner 完成 round1 空白处理、round2、以及 round2 之后的集中改判；
+届时按 CC-1 补充重算并**并列报告 v1/v2 与两个 κ 版本**，标注「标签 v2」。本轮不做任何分析。

@@ -4,10 +4,13 @@
     annotate.py build --set outputs/p2/annotation_set.json   # writes annotation/ + private key
     annotate.py label                                         # interactive, resumable
     annotate.py relabel --count 10                            # start round 2 on a random subset
+    annotate.py amend --blind-id Bxxxxxx --label fail --reason "[7] ..." --criteria-version v1
     annotate.py check
 
 The viewer shows the task criteria and conversation only: never judge scores,
 official scores, model names or real trace ids. Labels are yours alone.
+`amend` records an adjudication without rewriting round 1, so test-retest kappa
+still compares the original round-1 labels with round 2.
 """
 
 from __future__ import annotations
@@ -36,6 +39,10 @@ MIN_GAP = timedelta(days=2)
 
 def _exclusions() -> Path:
     return ANN / "exclusions.jsonl"
+
+
+def _amendments() -> Path:
+    return ANN / "amendments.jsonl"
 
 
 def _round2_csv() -> Path:
@@ -180,6 +187,38 @@ def reinstate(blind_id: str, reason: str, round_id: str) -> None:
     """Undo an exclusion; both the exclusion and the undo stay in the audit log."""
     kit.reinstate_row(_exclusions(), blind_id, reason, round_id=round_id, now=_now())
     print(f"reinstated {blind_id} round {round_id}; it is unresolved again and must be labeled")
+
+
+def _round2_complete() -> bool:
+    """Every round-2 row is labeled or explicitly retired; a missing kit is not complete."""
+    path = _round2_csv()
+    if not path.is_file():
+        return False
+    rows = kit.read_labels(path)
+    excluded = kit.read_exclusions(_exclusions())
+    return bool(rows) and all(r["label"] or (r["blind_id"], str(r.get("round", "2"))) in excluded
+                              for r in rows)
+
+
+def amend(blind_id: str, new_label: str, reason: str, criteria_version: str) -> None:
+    """Record an owner adjudication of a round-1 label; the label CSV is never rewritten."""
+    if not _round2_complete():
+        sys.exit("adjudication is batched after round 2 is complete; finish `label --round 2` first "
+                 "(test-retest kappa is computed against the original round 1)")
+    rows = kit.read_labels(CSV_PATH)
+    if (blind_id, "1") in kit.read_exclusions(_exclusions()):
+        sys.exit(f"{blind_id} round 1 is excluded; reinstate it before adjudicating")
+    view = ANN / "traces" / f"{blind_id}.md"
+    indices = _rendered_indices(view.read_text(encoding="utf-8")) if view.is_file() else None
+    try:
+        record = kit.amend_row(_amendments(), rows, blind_id, new_label, reason,
+                               criteria_version=criteria_version, now=_now(), indices=indices)
+    except ValueError as error:
+        sys.exit(str(error))
+    print(f"adjudicated {blind_id} round 1: {record['old_label']} -> {record['new_label']} "
+          f"under criteria {record['criteria_version']}")
+    print(f"audit log: {_show(_amendments())} (append-only; {_show(CSV_PATH)} is unchanged)")
+    print("no metrics recomputed; the v1 and v2 views are reported together after the batch")
 
 
 GUIDE = """# 第二轮盲标注指南（round 2）
@@ -334,10 +373,16 @@ if __name__ == "__main__":
     u.add_argument("--round", default="1")
     r2 = sub.add_parser("round2", help="build the separate round-2 blind kit (fresh ids, blank CSV, guide)")
     r2.add_argument("--count", type=int, default=None, help="default: every labeled round-1 trace")
+    a = sub.add_parser("amend", help="record an owner adjudication of a round-1 label (append-only, after round 2)")
+    a.add_argument("--blind-id", required=True)
+    a.add_argument("--label", required=True, choices=kit.LABELS, help="the adjudicated round-1 label")
+    a.add_argument("--reason", required=True, help="adjudication rationale; must cite a message index like [3]")
+    a.add_argument("--criteria-version", required=True, help="the criteria version the decision was made under")
     sub.add_parser("check")
     args = parser.parse_args()
     {"build": lambda: build(args.set), "label": lambda: label(args.round, args.csv),
      "relabel": lambda: relabel(args.count), "check": check,
      "exclude": lambda: exclude(args.blind_id, args.reason, args.round),
      "reinstate": lambda: reinstate(args.blind_id, args.reason, args.round),
+     "amend": lambda: amend(args.blind_id, args.label, args.reason, args.criteria_version),
      "round2": lambda: round2(args.count)}[args.cmd]()

@@ -177,7 +177,7 @@ def read_exclusions(path: Path) -> dict[tuple[str, str], dict[str, Any]]:
     return state
 
 
-def append_exclusion(path: Path, record: Mapping[str, Any]) -> None:
+def append_audit(path: Path, record: Mapping[str, Any]) -> None:
     """Append one audit record; nothing is ever rewritten or deleted."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as stream:
@@ -200,7 +200,7 @@ def exclude_row(log: Path, rows: Sequence[Mapping[str, str]], blind_id: str, rea
         raise ValueError(f"{blind_id} round {round_id} is already excluded")
     record = {"action": "exclude", "blind_id": blind_id, "round": round_id,
               "reason": reason.strip(), "at": now}
-    append_exclusion(log, record)
+    append_audit(log, record)
     return record
 
 
@@ -212,7 +212,60 @@ def reinstate_row(log: Path, blind_id: str, reason: str, *, round_id: str = "1",
         raise ValueError(f"{blind_id} round {round_id} is not excluded")
     record = {"action": "reinstate", "blind_id": blind_id, "round": round_id,
               "reason": reason.strip(), "at": now}
-    append_exclusion(log, record)
+    append_audit(log, record)
+    return record
+
+
+AMENDMENT_KIND = "adjudication"
+
+
+def read_amendments(path: Path) -> dict[str, dict[str, Any]]:
+    """Replay the append-only adjudication log; the last record per blind id wins.
+
+    Every record stays in the file. The v1 label view is the untouched CSV and the
+    v2 view is derived from this log, so neither overwrites the other.
+    """
+    state: dict[str, dict[str, Any]] = {}
+    if not path.is_file():
+        return state
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        record = json.loads(line)
+        state[record["blind_id"]] = record
+    return state
+
+
+def amend_row(log: Path, rows: Sequence[Mapping[str, str]], blind_id: str, new_label: str,
+              reason: str, *, criteria_version: str, now: str,
+              indices: Sequence[int] | None = None) -> dict[str, Any]:
+    """Record an owner adjudication of a round-1 label without rewriting the CSV.
+
+    Round 1 must stay byte-identical: test-retest kappa is defined against the
+    original round-1 labels, so an amendment that edited them would move the
+    baseline it is supposed to be measured against.
+    """
+    if new_label not in LABELS:
+        raise ValueError(f"label must be one of {LABELS}")
+    if not (criteria_version or "").strip():
+        raise ValueError("an adjudication requires the criteria version it was decided under")
+    if not CITATION_RE.search(reason or ""):
+        raise ValueError("an adjudication reason must cite at least one message index like [3]")
+    if indices is not None:
+        unknown = sorted({int(n) for n in CITATION_RE.findall(reason)} - set(indices))
+        if unknown:
+            raise ValueError(f"reason cites message(s) {unknown} that do not exist in this trace")
+    matching = [r for r in rows if r["blind_id"] == blind_id and str(r.get("round", "1")) == "1"]
+    if not matching:
+        raise ValueError(f"no round 1 row for {blind_id}; adjudication only applies to round 1")
+    old = matching[0]
+    if not old["label"]:
+        raise ValueError(f"{blind_id} round 1 is blank; label it instead of adjudicating it")
+    record = {"kind": AMENDMENT_KIND, "blind_id": blind_id, "round": "1",
+              "old_label": old["label"], "old_reason": old["reason"],
+              "old_annotated_at": old.get("annotated_at", ""), "new_label": new_label,
+              "reason": reason.strip(), "criteria_version": criteria_version.strip(), "at": now}
+    append_audit(log, record)
     return record
 
 

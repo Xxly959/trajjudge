@@ -21,6 +21,7 @@ annotation/batch_extra.csv
 annotation/round2/
 annotation/round2_labels.csv
 annotation/exclusions.jsonl
+annotation/amendments.jsonl
 runs/
 
 # Trace-level lists derived from human labels stay local; only markdown aggregates are tracked
