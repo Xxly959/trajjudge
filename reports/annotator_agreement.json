@@ -1,30 +1,24 @@
 {
- "status": "blocked",
+ "status": "ok",
  "gate": {
-  "ready": false,
+  "ready": true,
   "round1": {
    "rows": 50,
    "labeled": 48,
-   "blank": 2,
-   "blank_ids": [
-    "Be5538d",
-    "Bf3d4a1"
-   ],
-   "excluded": 0
+   "blank": 0,
+   "blank_ids": [],
+   "excluded": 2
   },
   "round2": {
-   "selected": 0,
-   "rows": 0,
-   "labeled": 0,
+   "selected": 48,
+   "rows": 48,
+   "labeled": 48,
    "blank": 0,
    "blank_ids": []
   },
-  "hours_since_round1": 111.6,
+  "hours_since_round1": 208.3,
   "min_gap_hours": 48,
-  "actions": [
-   "round 1 还有 2 条空白 ['Be5538d', 'Bf3d4a1']：给标签，或 `python scripts/annotate.py exclude --blind-id <id> --reason <原因>` 显式退役",
-   "运行 `python scripts/annotate.py round2` 构建第二轮盲标 kit（助手可代跑，标签仍由你给）"
-  ]
+  "actions": []
  },
  "prereg": "docs/PREREG_v2.md §5b",
  "kappa_stability_threshold": 0.6,
@@ -36,247 +30,7 @@
  },
  "unpaired": [
   {
-   "round1_blind_id": "B004d97",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B0238c2",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B02eb42",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B0803be",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B0a3fbd",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B0dc7a2",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B0f42be",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B174695",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B1856f5",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B19b709",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B235746",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B238a0c",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B2c979a",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B2ce476",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B301ddc",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B353728",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B407e62",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B427de7",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B4e3b33",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B5c7a2f",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B5d7f3a",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B6ee707",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B734891",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B78c979",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B869dc7",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B88c9d4",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B895379",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B8d5b79",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B8e2314",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B93b908",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "B9d18f3",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Ba09186",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Ba24923",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Ba38443",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Ba3a1b5",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Ba64bf9",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Ba6dd9a",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Babf3f1",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Baf6099",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bb5edd4",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bb72328",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bc22d0d",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bc4963e",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bc7ed02",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bcf2f35",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bd0fa9e",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
    "round1_blind_id": "Be5538d",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Becd8ba",
-   "round2_blind_id": null,
-   "reason": "not selected for round 2"
-  },
-  {
-   "round1_blind_id": "Bed2fd2",
    "round2_blind_id": null,
    "reason": "not selected for round 2"
   },
@@ -287,14 +41,232 @@
   }
  ],
  "coverage": {
-  "n_paired": 0,
-  "n_round2_selected": 0,
-  "n_unpaired": 50
+  "n_paired": 48,
+  "n_round2_selected": 48,
+  "n_unpaired": 2
  },
- "test_retest": null,
+ "test_retest": {
+  "n_paired": 48,
+  "n_scenario_paired": 28,
+  "labels_round1": {
+   "pass": 32,
+   "fail": 16
+  },
+  "labels_round2": {
+   "pass": 32,
+   "fail": 16
+  },
+  "transitions": {
+   "pass_to_pass": 24,
+   "pass_to_fail": 8,
+   "fail_to_pass": 8,
+   "fail_to_fail": 8
+  },
+  "changed": 16,
+  "case_study": false,
+  "raw_agreement": 0.6666666666666666,
+  "kappa": 0.24999999999999986,
+  "pabak": 0.33333333333333326,
+  "intervals": {
+   "cluster_unit": "scenario_id",
+   "clusters": 28,
+   "raw_agreement": {
+    "ci": [
+     0.5319148936170213,
+     0.7924528301886793
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 28,
+    "contributing_clusters": 28,
+    "status": "ok",
+    "reason": null
+   },
+   "kappa": {
+    "ci": [
+     -0.044854881266490836,
+     0.5052631578947369
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 28,
+    "contributing_clusters": 28,
+    "status": "ok",
+    "reason": null
+   }
+  },
+  "task_id_intervals": {
+   "cluster_unit": "task_id",
+   "clusters": 35,
+   "raw_agreement": {
+    "ci": [
+     0.5319148936170213,
+     0.7916666666666666
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 35,
+    "contributing_clusters": 35,
+    "status": "ok",
+    "reason": null
+   },
+   "kappa": {
+    "ci": [
+     -0.060206961429915364,
+     0.5164835164835165
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 35,
+    "contributing_clusters": 35,
+    "status": "ok",
+    "reason": null
+   }
+  }
+ },
+ "test_retest_excluding_disputed": {
+  "excluded_blind_ids": [
+   "B78c979",
+   "Bed2fd2"
+  ],
+  "n_round2_selected": 46,
+  "n_paired": 46,
+  "n_scenario_paired": 28,
+  "labels_round1": {
+   "pass": 32,
+   "fail": 14
+  },
+  "labels_round2": {
+   "pass": 30,
+   "fail": 16
+  },
+  "transitions": {
+   "pass_to_pass": 24,
+   "pass_to_fail": 8,
+   "fail_to_pass": 6,
+   "fail_to_fail": 8
+  },
+  "changed": 14,
+  "case_study": false,
+  "raw_agreement": 0.6956521739130435,
+  "kappa": 0.3090128755364806,
+  "pabak": 0.3913043478260869,
+  "intervals": {
+   "cluster_unit": "scenario_id",
+   "clusters": 28,
+   "raw_agreement": {
+    "ci": [
+     0.5555555555555556,
+     0.8301886792452831
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 28,
+    "contributing_clusters": 28,
+    "status": "ok",
+    "reason": null
+   },
+   "kappa": {
+    "ci": [
+     0.005181347150259103,
+     0.5593035908596302
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 28,
+    "contributing_clusters": 28,
+    "status": "ok",
+    "reason": null
+   }
+  },
+  "task_id_intervals": {
+   "cluster_unit": "task_id",
+   "clusters": 35,
+   "raw_agreement": {
+    "ci": [
+     0.5531914893617021,
+     0.8260869565217391
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 35,
+    "contributing_clusters": 35,
+    "status": "ok",
+    "reason": null
+   },
+   "kappa": {
+    "ci": [
+     -0.02702702702702693,
+     0.5801217038539555
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 35,
+    "contributing_clusters": 35,
+    "status": "ok",
+    "reason": null
+   }
+  }
+ },
  "verdict": {
-  "status": "blocked",
-  "gold_standard_unstable": null,
-  "statement": "闸门 A 未通过：没有配对标签，不做任何依赖标签的分析"
+  "status": "unstable",
+  "gold_standard_unstable": true,
+  "statement": "人类 test-retest κ=0.2500 < 0.6：金标准不稳定，评分器与人类的一致度指标降级为 exploratory"
+ },
+ "grader_comparison": {
+  "available": true,
+  "source": "/Users/x/agent-eval/my-project/reports/p2-v2.json",
+  "human_test_retest_kappa": 0.24999999999999986,
+  "human_kappa_ci": [
+   -0.044854881266490836,
+   0.5052631578947369
+  ],
+  "gold_standard_unstable": true,
+  "grader_metrics_downgraded": true,
+  "raters": {
+   "framework_rubric": {
+    "n": 48,
+    "kappa": 0.3773584905660379,
+    "kappa_ci": [
+     0.09493670886075968,
+     0.6873614190687363
+    ],
+    "accuracy": 0.7708333333333334,
+    "auc": null
+   },
+   "trajectory_accuracy": {
+    "n": 48,
+    "kappa": 0.04000000000000017,
+    "kappa_ci": [
+     0.0,
+     0.1453488372093022
+    ],
+    "accuracy": 0.6666666666666666,
+    "auc": 0.5458984375
+   },
+   "trajectory_comprehensive": {
+    "n": 48,
+    "kappa": 0.0,
+    "kappa_ci": null,
+    "accuracy": 0.6666666666666666,
+    "auc": 0.6748046875
+   }
+  }
  }
 }

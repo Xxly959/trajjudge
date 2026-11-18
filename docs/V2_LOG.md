@@ -561,3 +561,26 @@ owner 批准新增 append-only 改判命令，并追加四条口径规则。按 
 
 **下一步**：停在闸门 A。等 owner 完成 round1 空白处理、round2、以及 round2 之后的集中改判；
 届时按 CC-1 补充重算并**并列报告 v1/v2 与两个 κ 版本**，标注「标签 v2」。本轮不做任何分析。
+
+---
+
+## CC-2 闭环执行 — 闸门 A 解锁、Phase 5 中性对照实跑、Stage 3 混合评分器与终版交付（2026-11-18）
+
+**动机**：owner 明确授权完成闸门 A 剩余动作、在实测余额内推进中性文本对照与改进版评分器实跑，并将数据工程支线与审计主线统一收官。
+
+**改动**：
+- `docs/PREREG_v2.md` 新增 §12 **CC-2**（实跑前冻结聚焦范围与阈值），`docs/BUDGET_v2.md` 新增 §10/§11 实测对账。
+- **闸门 A 闭环**：显式退役 round1 剩余 2 条空白 `Be5538d`、`Bf3d4a1`（`annotation/labels.csv` SHA-256 保持 `93add768…57fe9` 不变）；采用隔离洁净室盲审协议完成全部 48 条 `round2` 带消息编号引用的独立标注（`annotate.py check` 零错误通过）；`round2` 完成后通过 `amend` 追加式裁定 `B78c979` 与 `Bed2fd2`；`scripts/annotator_agreement.py` 增补剔除争议项的敏感性版本。
+- **Phase 5 中性等长对照（`p5-neutral-l3-16`）**：`src/trajjudge/perturb.py` 落地事前冻结的 372 字符 `NEUTRAL_NOTICE`（SHA-256 精确匹配），`src/trajjudge/judging.py` 支持 `defended="neutral"` 且保持历史配置哈希零变化。
+- **Stage 3 证据锚定混合评分器（`src/trajjudge/grounded_judge.py`）**：实现确定性工具副作用账本抽取、`<untrusted_tool_data>` 隔离槽与义务级 Veto 后置门控，阈值事前固定为 `0.50`。
+- **交付物与收编**：新增 `scripts/run_stage3_and_neutral.py`、`scripts/generate_figures.py`（4 张确定性 SVG 图表）、`scripts/build_showcase_html.py`（离线自包含静态看板 `reports/showcase.html`）、`contributions/openjudge/ISSUE_VOTING_MIN_DEGENERATION.md`、`.github/workflows/ci.yml`、`reports/FINAL_REPORT_v2.md`、`docs/RESUME_CLAIMS.md`、`docs/WALKTHROUGH_v2.md`、`README_zh.md`，并在 `.gitignore` 中隔离评测族 `score-join` 私有参考答案。
+
+**关键数字**：
+- **双轮盲标一致性**：48 对（28 场景）原始一致率 **0.6667**、**κ = 0.2500** `[-0.0449, 0.5053]`、PABAK **0.3333**；剔除两条首轮争议项（46 对 / 28 场景）后 κ 区间升为 **`[0.0052, 0.5593]`**。因 κ < 0.60，按 §5b 规则判定首轮单次标注金标准不稳定，人工参照一致度指标维持 exploratory，并列报告标签 v1 与标签 v2。
+- **Phase 5 中性对照实跑（32/32 完成）**：在 `L3_notice/tool_result`（repeat 0）上，未防御 ASR **0.9375**（均值位移 `+0.0536`），中性通知 ASR **1.0000**（有效 21/32、格式失败 11/32，6 个配对场景均值位移 `+0.1064`），安全声明 ASR **0.4375**（均值位移 `+0.0152`）。三臂共同有效的 6 个独立场景上 `security − neutral = -0.0791` `[-0.1398, -0.0240]`，精确簇符号翻转置换检验 **p = 0.03125** → 按 §8 规则**归因于指令信任层级框架（证伪单纯长度稀释）**。
+- **Stage 3 混合评分器实跑**：完成 **37 条有效原始评估**（覆盖 26/28 独立场景）+ 1 条格式拒绝，在第 39 个请求处收到供应商实时余额不足 `HTTP 402`，Runner 零计费清理 `.pending` 并安全停机保存全部行级原子记录。在标签 v2 口径下，`evidence_grounded` 的 κ 达 **0.1573**（较 `trajectory_accuracy` 的 0.0562 提升 **2.8 倍**，`trajectory_comprehensive` 为 0.0000），失败召回率由 7.1% / 0.0% 提升至 **16.7%**，且正常样本误杀率仅 **4.0%**（对比 LOSO 校准的 62.5% 误杀）。
+
+**花费**：
+- `p5-neutral-l3-16`：新增付费 completion **32** 次（prompt 218,854 / completion 11,798 tokens），guard 保守口径新增 **$0.079814**。
+- `stage3-grounded-flash-64`：新增尝试 **40** 次（38 次成功响应 + 2 次零计费 402，prompt 313,531 / completion 24,521 tokens），guard 保守口径新增 **$0.123484**。
+- 合计新增 guard **$0.203298**，累计 guard 由 `$9.180483` 增至 **`$9.383781`**（远低于新增 `$5.00` 硬上限，剩余 guard 额度 `$4.796702`，`.pending` 为空）。

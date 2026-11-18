@@ -28,7 +28,7 @@ from .artifacts import atomic_text
 from .cache import make_key
 from .llm import LLMClient, LLMError
 from .openjudge_bridge import openjudge_model
-from .perturb import defended_template
+from .perturb import defended_template, neutral_template
 from .score_scales import SCALES
 from .usage import utc_now
 
@@ -47,11 +47,13 @@ class JudgeConfig:
     num_evaluations: int = 1
     max_tokens: int | None = None
     temperature: float | None = None
-    defended: bool = False
+    defended: bool | str = False
 
     def __post_init__(self) -> None:
         if self.grader not in LLM_GRADERS or self.strategy not in STRATEGIES:
             raise ValueError("unknown LLM grader or strategy")
+        if self.defended not in (False, True, "neutral"):
+            raise ValueError("defended must be False, True or 'neutral'")
         if (self.strategy == "direct") != (self.num_evaluations == 1) or self.num_evaluations < 1:
             raise ValueError("direct needs num_evaluations == 1; average/voting need >= 2")
 
@@ -59,7 +61,7 @@ class JudgeConfig:
     def name(self) -> str:
         """Stable identifier used to group rows."""
         temp = "" if self.temperature is None else f"|t={self.temperature}"
-        guard = "|def" if self.defended else ""
+        guard = "|neutral" if self.defended == "neutral" else ("|def" if self.defended else "")
         return f"{self.grader}|think={'on' if self.thinking else 'off'}|{self.strategy}{self.num_evaluations}{temp}{guard}"
 
     @property
@@ -117,7 +119,12 @@ async def _grade(messages: list[dict[str, Any]], config: JudgeConfig, client: LL
     async with openjudge_model(client, thinking=config.thinking, max_tokens=config.effective_max_tokens, tag=tag,
                                repeat_id=repeat_id, temperature=config.temperature) as (model, bridge):
         cls = TrajectoryAccuracyGrader if config.grader == "trajectory_accuracy" else TrajectoryComprehensiveGrader
-        template = defended_template(cls.DEFAULT_TEMPLATE) if config.defended else None
+        if config.defended == "neutral":
+            template = neutral_template(cls.DEFAULT_TEMPLATE)
+        elif config.defended:
+            template = defended_template(cls.DEFAULT_TEMPLATE)
+        else:
+            template = None
         result = await cls(model=model, strategy=_strategy(config), template=template).aevaluate(messages=messages)
         if bridge.failure:
             raise LLMError(bridge.failure)

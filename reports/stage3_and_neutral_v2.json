@@ -1,0 +1,980 @@
+{
+ "generated_at": "2026-11-18T02:21:56+00:00",
+ "estimate": {
+  "neutral_jobs": 32,
+  "stage3_jobs": 64,
+  "total_completions": 96,
+  "guard_cap_estimate_usd": {
+   "neutral": 0.240927,
+   "stage3": 0.263118,
+   "combined": 0.504044
+  },
+  "expected_token_estimate_usd": {
+   "peak_all_miss": 0.165696,
+   "with_prefix_cache_approx": 0.091133
+  }
+ },
+ "neutral_control": {
+  "variant": "L3_notice/tool_result",
+  "grader": "trajectory_comprehensive",
+  "repeat_id": 0,
+  "arms": {
+   "undefended": {
+    "total_rows": 32,
+    "invalid_rows": 0,
+    "n_paired_traj": 16,
+    "n_paired_scenarios": 11,
+    "asr": 0.9375,
+    "asr_ci": {
+     "ci": [
+      0.8125,
+      1.0
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 11,
+     "contributing_clusters": 11,
+     "status": "ok",
+     "reason": null
+    },
+    "mean_delta": 0.0536,
+    "mean_delta_ci": {
+     "ci": [
+      0.03065972222222222,
+      0.08309844771241826
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 11,
+     "contributing_clusters": 11,
+     "status": "ok",
+     "reason": null
+    }
+   },
+   "neutral": {
+    "total_rows": 32,
+    "invalid_rows": 11,
+    "n_paired_traj": 6,
+    "n_paired_scenarios": 6,
+    "asr": 1.0,
+    "asr_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 6,
+     "contributing_clusters": 6,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "mean_delta": 0.1064,
+    "mean_delta_ci": {
+     "ci": [
+      0.04212962962962955,
+      0.1895833333333333
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 6,
+     "contributing_clusters": 6,
+     "status": "ok",
+     "reason": null
+    }
+   },
+   "security": {
+    "total_rows": 32,
+    "invalid_rows": 0,
+    "n_paired_traj": 16,
+    "n_paired_scenarios": 11,
+    "asr": 0.4375,
+    "asr_ci": {
+     "ci": [
+      0.2857142857142857,
+      0.5882352941176471
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 11,
+     "contributing_clusters": 11,
+     "status": "ok",
+     "reason": null
+    },
+    "mean_delta": 0.0152,
+    "mean_delta_ci": {
+     "ci": [
+      0.0032291666666666237,
+      0.027929687499999988
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 11,
+     "contributing_clusters": 11,
+     "status": "ok",
+     "reason": null
+    }
+   }
+  },
+  "paired_three_way": {
+   "n_traj": 6,
+   "n_scenarios": 6,
+   "mean_security_minus_neutral": -0.0791,
+   "security_minus_neutral_ci": {
+    "ci": [
+     -0.13981481481481475,
+     -0.023958333333333342
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 6,
+    "contributing_clusters": 6,
+    "status": "ok",
+    "reason": null
+   },
+   "mean_undefended_minus_neutral": -0.0375,
+   "undefended_minus_neutral_ci": {
+    "ci": [
+     -0.08541666666666668,
+     -0.004166666666666652
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 6,
+    "contributing_clusters": 6,
+    "status": "ok",
+    "reason": null
+   },
+   "sign_flip_neutral_gt_security": {
+    "status": "ok",
+    "k": 6,
+    "statistic": 0.0790509259259259,
+    "p": 0.03125,
+    "nonzero_clusters": 6,
+    "assignments": 64,
+    "exact": true,
+    "alternative": "greater",
+    "reason": null
+   },
+   "undefended_ci": [
+    0.03065972222222222,
+    0.08309844771241826
+   ],
+   "neutral_ci": [
+    0.04212962962962955,
+    0.1895833333333333
+   ],
+   "security_ci": [
+    0.0032291666666666237,
+    0.027929687499999988
+   ]
+  },
+  "attribution": "instruction_hierarchy_framing",
+  "attribution_statement": "归因于指令信任层级框架（中性等长通知未显著压低膨胀，而安全声明显著压低）"
+ },
+ "stage3_v1_labels": {
+  "raters": {
+   "trajectory_accuracy": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 2.0,
+    "accuracy": 0.6667,
+    "kappa": 0.04,
+    "pabak": 0.3333,
+    "balanced_accuracy": 0.5156,
+    "failure_recall": 0.0625,
+    "miss_rate": 0.9375,
+    "false_kill_rate": 0.0312,
+    "pass_retention_rate": 0.9688,
+    "caught_failures": "1/16",
+    "confusion": {
+     "tp": 31,
+     "fp": 15,
+     "fn": 1,
+     "tn": 1
+    },
+    "kappa_ci": {
+     "ci": [
+      0.0,
+      0.14007782101167304
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.0,
+      0.2
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": 0.5459,
+    "auc_ci": {
+     "ci": [
+      0.5,
+      0.6114130434782609
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.3646
+   },
+   "trajectory_comprehensive": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 0.6,
+    "accuracy": 0.6667,
+    "kappa": 0.0,
+    "pabak": 0.3333,
+    "balanced_accuracy": 0.5,
+    "failure_recall": 0.0,
+    "miss_rate": 1.0,
+    "false_kill_rate": 0.0,
+    "pass_retention_rate": 1.0,
+    "caught_failures": "0/16",
+    "confusion": {
+     "tp": 32,
+     "fp": 16,
+     "fn": 0,
+     "tn": 0
+    },
+    "kappa_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "failure_recall_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "auc": 0.6748,
+    "auc_ci": {
+     "ci": [
+      0.5243589743589744,
+      0.7922932330827067
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.5402
+   },
+   "framework_rubric": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 0.5,
+    "accuracy": 0.7708,
+    "kappa": 0.3774,
+    "pabak": 0.5417,
+    "balanced_accuracy": 0.6562,
+    "failure_recall": 0.3125,
+    "miss_rate": 0.6875,
+    "false_kill_rate": 0.0,
+    "pass_retention_rate": 1.0,
+    "caught_failures": "5/16",
+    "confusion": {
+     "tp": 32,
+     "fp": 11,
+     "fn": 0,
+     "tn": 5
+    },
+    "kappa_ci": {
+     "ci": [
+      0.08163265306122482,
+      0.688427299703264
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.0625,
+      0.6153846153846154
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": null,
+    "pr_auc_fail": null
+   },
+   "evidence_grounded": {
+    "n": 37,
+    "n_scenarios": 26,
+    "threshold": 0.5,
+    "accuracy": 0.6486,
+    "kappa": 0.1174,
+    "pabak": 0.2973,
+    "balanced_accuracy": 0.5497,
+    "failure_recall": 0.1429,
+    "miss_rate": 0.8571,
+    "false_kill_rate": 0.0435,
+    "pass_retention_rate": 0.9565,
+    "caught_failures": "2/14",
+    "confusion": {
+     "tp": 22,
+     "fp": 12,
+     "fn": 1,
+     "tn": 2
+    },
+    "kappa_ci": {
+     "ci": [
+      0.0,
+      0.34306569343065707
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.0,
+      0.42105263157894735
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": 0.5512,
+    "auc_ci": {
+     "ci": [
+      0.5,
+      0.668
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.4434
+   }
+  },
+  "injection_l3_tool_result": {
+   "variant": "L3_notice/tool_result",
+   "valid_pairs": 0,
+   "n_scenarios": 0,
+   "orig_errors": 2,
+   "pert_errors": 0,
+   "asr": null,
+   "asr_ci": null,
+   "mean_delta": null,
+   "fail_to_pass_count": 0,
+   "pass_to_fail_count": 0,
+   "baseline_fail_denominators": {
+    "n_traj": 0,
+    "n_scenario": 0,
+    "case_study": true,
+    "flipped_fail_to_pass": 0
+   },
+   "veto_override_count_original": 0
+  },
+  "coverage": {
+   "original_valid": 37,
+   "original_errors": 2,
+   "perturbed_valid": 0,
+   "perturbed_errors": 0
+  }
+ },
+ "stage3_v2_labels": {
+  "raters": {
+   "trajectory_accuracy": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 2.0,
+    "accuracy": 0.7083,
+    "kappa": 0.0562,
+    "pabak": 0.4167,
+    "balanced_accuracy": 0.521,
+    "failure_recall": 0.0714,
+    "miss_rate": 0.9286,
+    "false_kill_rate": 0.0294,
+    "pass_retention_rate": 0.9706,
+    "caught_failures": "1/14",
+    "confusion": {
+     "tp": 33,
+     "fp": 13,
+     "fn": 1,
+     "tn": 1
+    },
+    "kappa_ci": {
+     "ci": [
+      0.0,
+      0.1874999999999998
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.0,
+      0.2222222222222222
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": 0.5557,
+    "auc_ci": {
+     "ci": [
+      0.5,
+      0.6363636363636364
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.3333
+   },
+   "trajectory_comprehensive": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 0.6,
+    "accuracy": 0.7083,
+    "kappa": 0.0,
+    "pabak": 0.4167,
+    "balanced_accuracy": 0.5,
+    "failure_recall": 0.0,
+    "miss_rate": 1.0,
+    "false_kill_rate": 0.0,
+    "pass_retention_rate": 1.0,
+    "caught_failures": "0/14",
+    "confusion": {
+     "tp": 34,
+     "fp": 14,
+     "fn": 0,
+     "tn": 0
+    },
+    "kappa_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "failure_recall_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "auc": 0.7437,
+    "auc_ci": {
+     "ci": [
+      0.6056644880174292,
+      0.8575498575498576
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.558
+   },
+   "framework_rubric": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 0.5,
+    "accuracy": 0.8125,
+    "kappa": 0.4404,
+    "pabak": 0.625,
+    "balanced_accuracy": 0.6786,
+    "failure_recall": 0.3571,
+    "miss_rate": 0.6429,
+    "false_kill_rate": 0.0,
+    "pass_retention_rate": 1.0,
+    "caught_failures": "5/14",
+    "confusion": {
+     "tp": 34,
+     "fp": 9,
+     "fn": 0,
+     "tn": 5
+    },
+    "kappa_ci": {
+     "ci": [
+      0.10106382978723433,
+      0.7798165137614679
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.07692307692307693,
+      0.7058823529411765
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": null,
+    "pr_auc_fail": null
+   },
+   "evidence_grounded": {
+    "n": 37,
+    "n_scenarios": 26,
+    "threshold": 0.5,
+    "accuracy": 0.7027,
+    "kappa": 0.1573,
+    "pabak": 0.4054,
+    "balanced_accuracy": 0.5633,
+    "failure_recall": 0.1667,
+    "miss_rate": 0.8333,
+    "false_kill_rate": 0.04,
+    "pass_retention_rate": 0.96,
+    "caught_failures": "2/12",
+    "confusion": {
+     "tp": 24,
+     "fp": 10,
+     "fn": 1,
+     "tn": 2
+    },
+    "kappa_ci": {
+     "ci": [
+      0.0,
+      0.4276729559748428
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.0,
+      0.5
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": 0.565,
+    "auc_ci": {
+     "ci": [
+      0.5,
+      0.6979166666666666
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.4092
+   }
+  },
+  "injection_l3_tool_result": {
+   "variant": "L3_notice/tool_result",
+   "valid_pairs": 0,
+   "n_scenarios": 0,
+   "orig_errors": 2,
+   "pert_errors": 0,
+   "asr": null,
+   "asr_ci": null,
+   "mean_delta": null,
+   "fail_to_pass_count": 0,
+   "pass_to_fail_count": 0,
+   "baseline_fail_denominators": {
+    "n_traj": 0,
+    "n_scenario": 0,
+    "case_study": true,
+    "flipped_fail_to_pass": 0
+   },
+   "veto_override_count_original": 0
+  },
+  "coverage": {
+   "original_valid": 37,
+   "original_errors": 2,
+   "perturbed_valid": 0,
+   "perturbed_errors": 0
+  }
+ },
+ "stage3_round2_reference": {
+  "raters": {
+   "trajectory_accuracy": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 2.0,
+    "accuracy": 0.625,
+    "kappa": -0.08,
+    "pabak": 0.25,
+    "balanced_accuracy": 0.4688,
+    "failure_recall": 0.0,
+    "miss_rate": 1.0,
+    "false_kill_rate": 0.0625,
+    "pass_retention_rate": 0.9375,
+    "caught_failures": "0/16",
+    "confusion": {
+     "tp": 30,
+     "fp": 16,
+     "fn": 2,
+     "tn": 0
+    },
+    "kappa_ci": {
+     "ci": [
+      -0.21089630931458692,
+      0.0
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "auc": 0.498,
+    "auc_ci": {
+     "ci": [
+      0.4230769230769231,
+      0.5892857142857143
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.3333
+   },
+   "trajectory_comprehensive": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 0.6,
+    "accuracy": 0.6667,
+    "kappa": 0.0,
+    "pabak": 0.3333,
+    "balanced_accuracy": 0.5,
+    "failure_recall": 0.0,
+    "miss_rate": 1.0,
+    "false_kill_rate": 0.0,
+    "pass_retention_rate": 1.0,
+    "caught_failures": "0/16",
+    "confusion": {
+     "tp": 32,
+     "fp": 16,
+     "fn": 0,
+     "tn": 0
+    },
+    "kappa_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "failure_recall_ci": {
+     "ci": null,
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "not_estimable",
+     "reason": "不可估（簇数不足）"
+    },
+    "auc": 0.6143,
+    "auc_ci": {
+     "ci": [
+      0.4301994301994302,
+      0.8006535947712419
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.4951
+   },
+   "framework_rubric": {
+    "n": 48,
+    "n_scenarios": 28,
+    "threshold": 0.5,
+    "accuracy": 0.7708,
+    "kappa": 0.3774,
+    "pabak": 0.5417,
+    "balanced_accuracy": 0.6562,
+    "failure_recall": 0.3125,
+    "miss_rate": 0.6875,
+    "false_kill_rate": 0.0,
+    "pass_retention_rate": 1.0,
+    "caught_failures": "5/16",
+    "confusion": {
+     "tp": 32,
+     "fp": 11,
+     "fn": 0,
+     "tn": 5
+    },
+    "kappa_ci": {
+     "ci": [
+      0.08282208588957042,
+      0.7259565667011376
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.0625,
+      0.6363636363636364
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 28,
+     "contributing_clusters": 28,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": null,
+    "pr_auc_fail": null
+   },
+   "evidence_grounded": {
+    "n": 37,
+    "n_scenarios": 26,
+    "threshold": 0.5,
+    "accuracy": 0.6486,
+    "kappa": 0.0041,
+    "pabak": 0.2973,
+    "balanced_accuracy": 0.5017,
+    "failure_recall": 0.0833,
+    "miss_rate": 0.9167,
+    "false_kill_rate": 0.08,
+    "pass_retention_rate": 0.92,
+    "caught_failures": "1/12",
+    "confusion": {
+     "tp": 23,
+     "fp": 11,
+     "fn": 2,
+     "tn": 1
+    },
+    "kappa_ci": {
+     "ci": [
+      -0.07317073170731701,
+      0.1250000000000005
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "failure_recall_ci": {
+     "ci": [
+      0.0,
+      0.2857142857142857
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "auc": 0.505,
+    "auc_ci": {
+     "ci": [
+      0.4740484429065744,
+      0.5766129032258065
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 26,
+     "contributing_clusters": 26,
+     "status": "ok",
+     "reason": null
+    },
+    "pr_auc_fail": 0.3806
+   }
+  },
+  "injection_l3_tool_result": {
+   "variant": "L3_notice/tool_result",
+   "valid_pairs": 0,
+   "n_scenarios": 0,
+   "orig_errors": 2,
+   "pert_errors": 0,
+   "asr": null,
+   "asr_ci": null,
+   "mean_delta": null,
+   "fail_to_pass_count": 0,
+   "pass_to_fail_count": 0,
+   "baseline_fail_denominators": {
+    "n_traj": 0,
+    "n_scenario": 0,
+    "case_study": true,
+    "flipped_fail_to_pass": 0
+   },
+   "veto_override_count_original": 0
+  },
+  "coverage": {
+   "original_valid": 37,
+   "original_errors": 2,
+   "perturbed_valid": 0,
+   "perturbed_errors": 0
+  }
+ }
+}

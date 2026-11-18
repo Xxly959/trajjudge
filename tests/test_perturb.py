@@ -10,7 +10,7 @@ from openjudge.graders.agent import TrajectoryAccuracyGrader, TrajectoryComprehe
 from openjudge.models.schema.prompt_template import LanguageEnum
 
 from trajjudge.adapter import adapt_trace
-from trajjudge.perturb import DEFENSE_NOTICE, LOCATIONS, TEMPLATES, defended_template, inject
+from trajjudge.perturb import DEFENSE_NOTICE, LOCATIONS, NEUTRAL_NOTICE, TEMPLATES, defended_template, inject, neutral_template
 
 FIXTURES = Path(__file__).parent / "fixtures" / "claw_s5"
 
@@ -55,3 +55,23 @@ def test_defended_template_adds_notice_without_mutating_default(cls) -> None:
     assert default.model_dump() == before
     system = [m for m in new.messages[LanguageEnum.EN] if m.role == "system"][0]
     assert DEFENSE_NOTICE in system.content
+
+
+def test_neutral_notice_matches_prereg_sha256_and_length_ratio() -> None:
+    import hashlib
+    assert hashlib.sha256(NEUTRAL_NOTICE.encode("utf-8")).hexdigest() == (
+        "6ba14cb6a9fcb796f0b18f668436c006c88b8283201dfbfd2e42c55bb504c963"
+    )
+    assert len(NEUTRAL_NOTICE) == 372 and len(NEUTRAL_NOTICE.split()) == 58
+    ratio = len(NEUTRAL_NOTICE) / len(DEFENSE_NOTICE)
+    assert 0.98 <= ratio <= 1.02
+    lowered = NEUTRAL_NOTICE.lower()
+    for trust_word in ("untrusted", "ignore", "rubric", "security", "never follow", "evidence"):
+        assert trust_word not in lowered
+
+    default = TrajectoryComprehensiveGrader.DEFAULT_TEMPLATE
+    before = default.model_dump()
+    wrapped = neutral_template(default)
+    assert default.model_dump() == before
+    system = [m for m in wrapped.messages[LanguageEnum.EN] if m.role == "system"][0]
+    assert NEUTRAL_NOTICE in system.content and DEFENSE_NOTICE not in system.content

@@ -278,6 +278,14 @@ def main() -> int:
         stats = agreement_stats(pairs, units, task_units=tasks, resamples=args.resamples, seed=args.seed)
         verdict = stability_verdict(stats)
         result["test_retest"] = stats
+        disputed = {"B78c979", "Bed2fd2"}
+        trimmed_pairs = [p for p in pairs if p["round1_blind_id"] not in disputed]
+        if trimmed_pairs and len(trimmed_pairs) < len(pairs):
+            result["test_retest_excluding_disputed"] = {
+                "excluded_blind_ids": sorted(disputed & {p["round1_blind_id"] for p in pairs}),
+                "n_round2_selected": len(round2_key) - (len(pairs) - len(trimmed_pairs)),
+                **agreement_stats(trimmed_pairs, units, task_units=tasks, resamples=args.resamples, seed=args.seed),
+            }
         result["verdict"] = verdict
         result["grader_comparison"] = grader_comparison(args.grader_report, stats, verdict)
         print(f"配对 {stats['n_paired']} 条轨迹 / {stats['n_scenario_paired']} 个独立场景"
