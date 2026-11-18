@@ -589,3 +589,13 @@ owner 批准新增 append-only 改判命令，并追加四条口径规则。按 
 - `stage3-grounded-flash-64`：断点续跑收官后累计 guard 新增 **$0.205163**（64/64 完成）。
 - `p6-pro-accuracy-48` + `p6-pro-grounded-48`：累计 guard 新增 **$1.285945**（含 1 次长轨迹网络超时预留上界，已按 D28 规则自动闭合记账）。
 - v2 全部实跑合计新增 guard **$1.570922**（严格控制在新增 `$5.00` 硬上限内，余量 `$3.429078`；最终累计 guard **`$10.751405`**，账户实时余额 **CNY 1.86**，`.pending` 为空）。
+
+---
+
+## 上游开源社区提交记录（2026-11-18，零模型花费）
+
+**动作**：在隔离工作副本 `.cache/openjudge-contribution`（不影响只读的 `../OpenJudge` 固定检出）将 `fix/trajectory-accuracy-raw-score` 变基到 `agentscope-ai/OpenJudge` 最新 `main`（`a850e78`），按上游 pre-commit 规范统一格式并验证 6/6 单元测试通过（提交 `276e789`），同步刷新 `contributions/openjudge/0001-preserve-trajectory-accuracy-raw-score.patch` 并推送至 `Xxly959/OpenJudge`。
+
+**外部链接（均已提交，当前状态为 OPEN / 待维护者评审，不声称已合入）**：
+- **PR**：`https://github.com/agentscope-ai/OpenJudge/pull/246`（修复 `TrajectoryAccuracyGrader` 钳制覆盖 `metadata["raw_score"]`；GitHub Actions run `44234549799` 等待首次贡献者工作流审批）。
+- **Issue**：`https://github.com/agentscope-ai/OpenJudge/issues/247`（报告 `VotingEvaluationStrategy` 在连续分评分器上因精确浮点匹配触发 `MIN` 平局规则退化为取最低分）。

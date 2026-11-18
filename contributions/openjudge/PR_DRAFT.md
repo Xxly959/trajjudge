@@ -1,9 +1,7 @@
-# Draft: preserve trajectory accuracy raw score before bounding
+# PR Record: preserve trajectory accuracy raw score before bounding
 
-Nothing in this file or patch has been submitted. Owner confirmation is required
-before any push, issue or PR. Local branch: `fix/trajectory-accuracy-raw-score` in
-`.cache/openjudge-contribution`, based on
-`7d27246484e91c6ed4a349b6ebe7bd4629d9378f`; commit `8c7490e`.
+Submitted upstream as **[agentscope-ai/OpenJudge#246](https://github.com/agentscope-ai/OpenJudge/pull/246)** (status: **OPEN**, awaiting maintainer review and workflow approval; NOT merged yet).
+Pushed branch: `Xxly959:fix/trajectory-accuracy-raw-score` (rebased onto `agentscope-ai/OpenJudge` `main` at `a850e78`, head commit `276e78966869e410586962c0175ab76002f76642`; originally prepared against `7d27246484e91c6ed4a349b6ebe7bd4629d9378f` / `8c7490e`).
 
 ## Proposed description
 
@@ -41,15 +39,16 @@ PYTHONPATH="$PWD/.cache/openjudge-contribution" .venvs/judge/bin/python -m pytes
 - [x] Base Apache-2.0 license and original headers retained; added examples are synthetic.
 - [x] Existing score semantics retained; raw metadata now preserves the model value.
 - [x] Six mock regression cases and grader documentation prepared.
-- [ ] Owner reviews scope and authorizes external action.
+- [x] Owner reviews scope and authorizes external action.
+- [x] Submitted upstream PR [agentscope-ai/OpenJudge#246](https://github.com/agentscope-ai/OpenJudge/pull/246) (`head: 276e78966869e410586962c0175ab76002f76642`, CI run `44234549799` awaiting maintainer workflow approval for first-time contributor).
 - [x] On 2026-11-10, verified the portable patch applies cleanly to upstream
   `1c0e05a5cff7b1be3e5d5613befeea31ede38858`. The isolated snapshot passed
   12 focused unit tests with two quality tests deselected and sockets blocked.
   The temporary test environment included the upstream pytest-asyncio dependency.
-- [x] Relevant existing accuracy and new unit cases: 12 passed, two quality deselected.
+- [x] Relevant existing accuracy and new unit cases: 12 passed, two quality deselected; re-verified 6/6 offline unit tests passing on rebased commit `276e789`.
 - [ ] Run wider upstream suite if requested. Discuss quality-test expectations
   for this metadata-only fix; no paid quality run is authorized.
-- [ ] Follow maintainer feedback; acceptance is an external outcome, not promised.
+- [ ] Follow maintainer feedback; acceptance/merge is an external outcome, not promised.
 
 Restore the branch later by cloning OpenJudge into a separate directory and
 applying `0001-preserve-trajectory-accuracy-raw-score.patch` with `git am`. Do not

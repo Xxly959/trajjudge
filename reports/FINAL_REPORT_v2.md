@@ -63,9 +63,9 @@
 ## 4. RQ2：重复评估稳定性与 OpenJudge 上游源码缺陷
 
 1. **稳定性试跑（[p3-v2-flash-direct-pilot.json](p3-v2-flash-direct-pilot.json)）**：10 条轨迹 × 双评分器 × 思考开关 × 3 次独立重复（119/120 有效，1 条因步骤覆盖不全被严格拦截）。39 组完整面板出现 0 次通过/失败翻转，但在 v2 簇口径下，小样本零翻转被如实改判为「簇数不足不可估区间」（修正了 v1 误报 `[0.0, 0.0]` 零宽精确区间的统计缺陷）；`Flash` 与 `Pro` Direct 在 45 对匹配判定中仅 1 对分歧。
-2. **两项可复现的上游 OpenJudge 源码缺陷（已附补丁与最小复现）**：
-   - **缺陷 1（元数据失真）**：`TrajectoryAccuracyGrader` 将越界输出（如 `99`）钳制到 `[1, 3]` 后覆写 `metadata["raw_score"] = 3`，掩盖模型异常输出。补丁与 12 项离线单测见 [PR_DRAFT.md](../contributions/openjudge/PR_DRAFT.md)。
-   - **缺陷 2（连续分投票退化）**：`VotingEvaluationStrategy` 使用精确浮点 `Counter` 众数并以 `MIN` 破平局；在连续型 `Comprehensive` 上三次得分互异导致无众数，实测 **15/22（68.2%）面板退化为取最低分（`min-of-3`）**，且共享抽样审计证实其与 `Average` 复用同批采样。复现与修复方案见 [ISSUE_VOTING_MIN_DEGENERATION.md](../contributions/openjudge/ISSUE_VOTING_MIN_DEGENERATION.md)。
+2. **两项可复现的上游 OpenJudge 源码缺陷（已提交上游 PR 与 Issue，当前处于 Open 待审状态）**：
+   - **缺陷 1（元数据失真）**：`TrajectoryAccuracyGrader` 将越界输出（如 `99`）钳制到 `[1, 3]` 后覆写 `metadata["raw_score"] = 3`，掩盖模型异常输出。已向上游提交修复 PR **[agentscope-ai/OpenJudge#246](https://github.com/agentscope-ai/OpenJudge/pull/246)**（Open 状态，详情与本地补丁见 [PR_DRAFT.md](../contributions/openjudge/PR_DRAFT.md)）。
+   - **缺陷 2（连续分投票退化）**：`VotingEvaluationStrategy` 使用精确浮点 `Counter` 众数并以 `MIN` 破平局；在连续型 `Comprehensive` 上三次得分互异导致无众数，实测 **15/22（68.2%）面板退化为取最低分（`min-of-3`）**，且共享抽样审计证实其与 `Average` 复用同批采样。已向上游提交复现 Issue **[agentscope-ai/OpenJudge#247](https://github.com/agentscope-ai/OpenJudge/issues/247)**（Open 状态，详情见 [ISSUE_VOTING_MIN_DEGENERATION.md](../contributions/openjudge/ISSUE_VOTING_MIN_DEGENERATION.md)）。
 
 ---
 

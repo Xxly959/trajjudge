@@ -1,18 +1,18 @@
-From 8c7490e15a64bbd32471dc0eb77ca6c872e9091a Mon Sep 17 00:00:00 2001
+From 276e78966869e410586962c0175ab76002f76642 Mon Sep 17 00:00:00 2001
 From: XuLiangYu <959xlyu@gmail.com>
 Date: Thu, 5 Nov 2026 09:27:46 +0800
 Subject: [PATCH] fix(grader): preserve trajectory accuracy raw score before
  bounding
 
 ---
- docs/built_in_graders/agent_graders.md        |  5 +++++
+ docs/built_in_graders/agent_graders.md        |  5 ++++
  .../agent/trajectory/trajectory_accuracy.py   |  2 +-
- .../test_trajectory_accuracy_raw_score.py     | 22 +++++++++++++++++++
- 3 files changed, 28 insertions(+), 1 deletion(-)
+ .../test_trajectory_accuracy_raw_score.py     | 28 +++++++++++++++++++
+ 3 files changed, 34 insertions(+), 1 deletion(-)
  create mode 100644 tests/graders/agent/trajectory/test_trajectory_accuracy_raw_score.py
 
 diff --git a/docs/built_in_graders/agent_graders.md b/docs/built_in_graders/agent_graders.md
-index 4a1b541..7bc8c30 100644
+index ba36931..c5c2ab5 100644
 --- a/docs/built_in_graders/agent_graders.md
 +++ b/docs/built_in_graders/agent_graders.md
 @@ -1064,6 +1064,11 @@ Each turn similarity: [0.0, 0.42857142857142855]
@@ -42,23 +42,29 @@ index 5709ab7..24128a6 100644
          return GraderScore(
 diff --git a/tests/graders/agent/trajectory/test_trajectory_accuracy_raw_score.py b/tests/graders/agent/trajectory/test_trajectory_accuracy_raw_score.py
 new file mode 100644
-index 0000000..116736a
+index 0000000..a051b2a
 --- /dev/null
 +++ b/tests/graders/agent/trajectory/test_trajectory_accuracy_raw_score.py
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,28 @@
 +# -*- coding: utf-8 -*-
 +"""Preserve unmodified model scores for downstream grader audits (offline)."""
++
 +import asyncio
 +from unittest.mock import AsyncMock, patch
 +
 +import pytest
 +
-+from openjudge.graders.agent.trajectory.trajectory_accuracy import TrajectoryAccuracyGrader
++from openjudge.graders.agent.trajectory.trajectory_accuracy import (
++    TrajectoryAccuracyGrader,
++)
 +from openjudge.graders.schema import GraderScore
 +
 +
 +@pytest.mark.unit
-+@pytest.mark.parametrize("raw_score,expected", [(-99.0, 1.0), (1.0, 1.0), (2.0, 2.0), (2.5, 2.5), (3.0, 3.0), (99.0, 3.0)])
++@pytest.mark.parametrize(
++    "raw_score,expected",
++    [(-99.0, 1.0), (1.0, 1.0), (2.0, 2.0), (2.5, 2.5), (3.0, 3.0), (99.0, 3.0)],
++)
 +def test_raw_score_retains_model_value(raw_score: float, expected: float) -> None:
 +    """Keep compatibility for score while exposing the pre-clamp value in metadata."""
 +    parsed = GraderScore(name="trajectory_accuracy", score=raw_score, reason="Synthetic offline response")
