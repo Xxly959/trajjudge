@@ -158,12 +158,12 @@
     </div>
     <div class="grid-2">
       <div class="card">
-        <h3 style="margin-top:0;">上游开源贡献 #1：OpenJudge raw_score 钳制覆盖修复</h3>
-        <p style="font-size:13.5px;">审计发现 <code>TrajectoryAccuracyGrader</code> 将模型越界返回（如 <code>99</code>）钳制到 <code>[1, 3]</code> 后，把钳制后的 <code>3</code> 写回 <code>metadata["raw_score"]</code>，导致下游审计无法识别异常输出。已制作标准 Git 补丁并通过 12 项禁网单测。</p>
+        <h3 style="margin-top:0;">上游开源贡献 #1：<a href="https://github.com/agentscope-ai/OpenJudge/pull/246" target="_blank" style="color:var(--brand);text-decoration:none;">OpenJudge PR #246（已合入官方主干 c58d1d6）</a></h3>
+        <p style="font-size:13.5px;">审计发现 <code>TrajectoryAccuracyGrader</code> 将模型越界返回（如 <code>99</code>）钳制到 <code>[1, 3]</code> 后，把钳制后的 <code>3</code> 写回 <code>metadata["raw_score"]</code>，导致下游审计无法识别异常输出。修复补丁与 6 项离线单测已提交至 <code>agentscope-ai/OpenJudge</code>，通过官方 Pre-commit CI 后一次审核合入主分支。</p>
       </div>
       <div class="card">
-        <h3 style="margin-top:0;">上游开源贡献 #2：Voting 策略连续分退化诊断</h3>
-        <p style="font-size:13.5px;">恢复逐次抽样发现 <code>VotingEvaluationStrategy</code> 用 <code>Counter</code> 做精确浮点匹配且默认 <code>tie_breaker=MIN</code>；在连续型 <code>Comprehensive</code> 上三次得分几乎互异，<b>15/22 (68.2%) 面板退化为取最低分 (min-of-3)</b>。配套工具：输入任意三次抽样验证退化行为：</p>
+        <h3 style="margin-top:0;">上游开源贡献 #2：<a href="https://github.com/agentscope-ai/OpenJudge/issues/247" target="_blank" style="color:var(--brand);text-decoration:none;">OpenJudge Issue #247（Voting 连续分退化）</a></h3>
+        <p style="font-size:13.5px;">恢复逐次抽样发现 <code>VotingEvaluationStrategy</code> 用 <code>Counter</code> 做精确浮点匹配且默认 <code>tie_breaker=MIN</code>；在连续型 <code>Comprehensive</code> 上三次得分几乎互异，<b>15/22 (68.2%) 面板退化为取最低分 (min-of-3)</b>。已提交带零成本最小复现脚本的上游 Issue <code>#247</code>。输入任意三次抽样验证退化行为：</p>
         <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
           <input id="v-d1" type="number" step="0.01" value="0.86" style="width:76px;padding:6px;border:1px solid var(--border);border-radius:6px;"/>
           <input id="v-d2" type="number" step="0.01" value="0.81" style="width:76px;padding:6px;border:1px solid var(--border);border-radius:6px;"/>

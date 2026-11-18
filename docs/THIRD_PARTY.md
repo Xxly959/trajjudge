@@ -5,8 +5,7 @@
 | Claw-Eval | 5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7 | MIT, Copyright (c) 2026 claw-eval |
 | OpenJudge | 7d27246484e91c6ed4a349b6ebe7bd4629d9378f | Apache License 2.0 |
 
-Both original worktrees remain read-only and clean. The contribution patch is
-prepared in a separate local clone. Nothing has been published externally.
+Both original worktrees remain read-only and clean. The standalone OpenJudge raw-score metadata patch was submitted and merged upstream (`agentscope-ai/OpenJudge#246`, merge commit `c58d1d6c295ad2b5c164cf8d275519c77a290e5a`), and the `VotingEvaluationStrategy` issue was filed as `agentscope-ai/OpenJudge#247`. Raw benchmark traces, labels, sidecars, and response caches stay local and unpublished.
 
 Existing structural fixtures in `tests/fixtures/claw_s5` are redacted derivatives
 of two generated task trajectories; `provenance.json` records task ids, source

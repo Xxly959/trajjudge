@@ -1,6 +1,6 @@
 # PR Record: preserve trajectory accuracy raw score before bounding
 
-Submitted upstream as **[agentscope-ai/OpenJudge#246](https://github.com/agentscope-ai/OpenJudge/pull/246)** (status: **OPEN**, awaiting maintainer review and workflow approval; NOT merged yet).
+Submitted upstream as **[agentscope-ai/OpenJudge#246](https://github.com/agentscope-ai/OpenJudge/pull/246)** (status: **MERGED** into `agentscope-ai/OpenJudge:main` by `@helloml0326` at `2026-11-18T05:43:48Z`, merge commit `c58d1d6c295ad2b5c164cf8d275519c77a290e5a`; `Pre-commit / run` CI passed).
 Pushed branch: `Xxly959:fix/trajectory-accuracy-raw-score` (rebased onto `agentscope-ai/OpenJudge` `main` at `a850e78`, head commit `276e78966869e410586962c0175ab76002f76642`; originally prepared against `7d27246484e91c6ed4a349b6ebe7bd4629d9378f` / `8c7490e`).
 
 ## Proposed description
@@ -48,7 +48,7 @@ PYTHONPATH="$PWD/.cache/openjudge-contribution" .venvs/judge/bin/python -m pytes
 - [x] Relevant existing accuracy and new unit cases: 12 passed, two quality deselected; re-verified 6/6 offline unit tests passing on rebased commit `276e789`.
 - [ ] Run wider upstream suite if requested. Discuss quality-test expectations
   for this metadata-only fix; no paid quality run is authorized.
-- [ ] Follow maintainer feedback; acceptance/merge is an external outcome, not promised.
+- [x] Pre-commit CI (`ubuntu-latest`) passed (`2m55s`); approved by `@helloml0326` and merged into upstream `main` (`c58d1d6c295ad2b5c164cf8d275519c77a290e5a`).
 
 Restore the branch later by cloning OpenJudge into a separate directory and
 applying `0001-preserve-trajectory-accuracy-raw-score.patch` with `git am`. Do not
