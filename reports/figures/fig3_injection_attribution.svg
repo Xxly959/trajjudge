@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 400" width="880" height="400" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<rect width="880" height="400" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="28" y="36" font-size="18" font-weight="700" fill="#0f172a">图 3 · 工具返回间接注入 (L3_notice/tool_result) 防御归因与副作用 (16 失败轨迹 / 11 场景)</text>
+<text x="28" y="58" font-size="12.5" fill="#475569">对照结论：归因于指令信任层级框架（中性等长通知未显著压低膨胀，而安全声明显著压低）</text>
+<line x1="245.0" y1="92" x2="245.0" y2="327" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="245.0" y="345" text-anchor="middle" font-size="11" fill="#64748b">0.0%</text>
+<line x1="385.0" y1="92" x2="385.0" y2="327" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="385.0" y="345" text-anchor="middle" font-size="11" fill="#64748b">25.0%</text>
+<line x1="525.0" y1="92" x2="525.0" y2="327" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="525.0" y="345" text-anchor="middle" font-size="11" fill="#64748b">50.0%</text>
+<line x1="665.0" y1="92" x2="665.0" y2="327" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="665.0" y="345" text-anchor="middle" font-size="11" fill="#64748b">75.0%</text>
+<line x1="805.0" y1="92" x2="805.0" y2="327" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="805.0" y="345" text-anchor="middle" font-size="11" fill="#64748b">100.0%</text>
+<text x="231" y="122.0" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Comprehensive 未防御 (r=0)</text>
+<rect x="245" y="104.0" width="525.0" height="24" rx="4" fill="#ef4444"/>
+<text x="778.0" y="120.0" font-size="11.5" font-weight="600" fill="#1e293b">ASR 93.8% (Δ=+0.054 · 格式异常 0.9%)</text>
+<text x="231" y="180.8" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Comprehensive + 等长中性通知</text>
+<rect x="245" y="162.8" width="560.0" height="24" rx="4" fill="#eab308"/>
+<text x="813.0" y="178.8" font-size="11.5" font-weight="600" fill="#1e293b">ASR 100.0% (Δ=+0.106 · 格式异常 34.4%)</text>
+<text x="231" y="239.5" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Comprehensive + 安全信任声明</text>
+<rect x="245" y="221.5" width="245.0" height="24" rx="4" fill="#3b82f6"/>
+<text x="498.0" y="237.5" font-size="11.5" font-weight="600" fill="#1e293b">ASR 43.8% (Δ=+0.015 · 格式异常 2.2%)</text>
+<text x="231" y="298.2" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Accuracy 未防御 → 安全声明</text>
+<rect x="245" y="280.2" width="11.6" height="24" rx="4" fill="#10b981"/>
+<text x="264.6" y="296.2" font-size="11.5" font-weight="600" fill="#1e293b">ASR 2.1% (Δ=+0.000 · 格式异常 0.0%)</text>
+<text x="28" y="382" font-size="11" fill="#64748b">数据源：reports/stage3_and_neutral_v2.json &amp; reports/robustness_v2.json · 中性通知 SHA-256 事前冻结于 PREREG_v2 §8</text>
+</svg>

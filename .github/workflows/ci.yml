@@ -1,0 +1,58 @@
+name: Offline Reproducibility & Secret Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  offline-audit-suite:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: my-project
+    steps:
+      - name: Checkout TrajJudge into my-project
+        uses: actions/checkout@v4
+        with:
+          path: my-project
+
+      - name: Checkout pinned OpenJudge (read-only upstream)
+        run: |
+          git clone https://github.com/agentscope-ai/OpenJudge.git ../OpenJudge
+          git -C ../OpenJudge checkout 7d27246484e91c6ed4a349b6ebe7bd4629d9378f
+
+      - name: Checkout pinned Claw-Eval (read-only upstream)
+        run: |
+          git clone https://github.com/claw-eval/claw-eval.git ../claw-eval
+          git -C ../claw-eval checkout 5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7
+
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install isolated judge environment and read-only OpenJudge
+        run: |
+          make install
+          make install-openjudge
+
+      - name: Run secret & credential guard
+        run: make secrets
+
+      - name: Run full socket-blocked offline test suite
+        run: make test
+
+      - name: Verify synthetic dataset & cross-source SWE demos offline
+        run: |
+          demo_dir=$(mktemp -d)
+          .venvs/judge/bin/python samples/dataset_demo.py "$demo_dir/p0"
+          .venvs/judge/bin/python scripts/build_dataset.py --root "$demo_dir/p0" --check
+          .venvs/judge/bin/python samples/swe_import_demo.py "$demo_dir/swe_bundle"
+          .venvs/judge/bin/python scripts/build_cross_source.py --bundle "$demo_dir/swe_bundle" --output "$demo_dir/swe_out"
+
+      - name: Verify upstream checkouts remain byte-clean
+        run: |
+          test -z "$(git -C ../OpenJudge status --porcelain)"
+          test -z "$(git -C ../claw-eval status --porcelain)"

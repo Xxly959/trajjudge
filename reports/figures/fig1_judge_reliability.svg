@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 430" width="880" height="430" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<rect width="880" height="430" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="28" y="36" font-size="18" font-weight="700" fill="#0f172a">图 1 · 轨迹评分器可靠性对比：从“打分饱和漏判”到“证据锚定门控” (n=48, 28 独立场景)</text>
+<text x="28" y="58" font-size="12.5" fill="#475569">同口径对比 Cohen's κ、真实失败召回率 (1 − 漏判率) 与均衡准确率 · 盲审复测参考 κ=0.250</text>
+<line x1="225.0" y1="86" x2="225.0" y2="361" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="225.0" y="381" text-anchor="middle" font-size="11" fill="#64748b">0.00</text>
+<line x1="375.0" y1="86" x2="375.0" y2="361" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="375.0" y="381" text-anchor="middle" font-size="11" fill="#64748b">0.25</text>
+<line x1="525.0" y1="86" x2="525.0" y2="361" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="525.0" y="381" text-anchor="middle" font-size="11" fill="#64748b">0.50</text>
+<line x1="675.0" y1="86" x2="675.0" y2="361" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="675.0" y="381" text-anchor="middle" font-size="11" fill="#64748b">0.75</text>
+<line x1="825.0" y1="86" x2="825.0" y2="361" stroke="#e2e8f0" stroke-dasharray="4,4"/>
+<text x="825.0" y="381" text-anchor="middle" font-size="11" fill="#64748b">1.00</text>
+<rect x="225" y="66" width="14" height="10" rx="2" fill="#334155" fill-opacity="1.0"/>
+<text x="245" y="75" font-size="11.5" fill="#334155">失败召回率 (Failure Recall)</text>
+<rect x="430" y="66" width="14" height="10" rx="2" fill="#334155" fill-opacity="0.55"/>
+<text x="450" y="75" font-size="11.5" fill="#334155">Cohen&#x27;s κ (一致性)</text>
+<rect x="635" y="66" width="14" height="10" rx="2" fill="#334155" fill-opacity="0.28"/>
+<text x="655" y="75" font-size="11.5" fill="#334155">均衡准确率 (Balanced Acc)</text>
+<text x="211" y="116.0" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Always-Pass 基线 (n=48)</text>
+<rect x="225" y="94.0" width="2.0" height="11" rx="3" fill="#94a3b8" fill-opacity="1.0"/>
+<text x="233.0" y="103.5" font-size="10.5" fill="#334155">召回 0.0%</text>
+<rect x="225" y="108.0" width="2.0" height="11" rx="3" fill="#94a3b8" fill-opacity="0.58"/>
+<text x="233.0" y="117.5" font-size="10.5" fill="#334155">κ=0.000</text>
+<rect x="225" y="122.0" width="300.0" height="11" rx="3" fill="#94a3b8" fill-opacity="0.28"/>
+<text x="531.0" y="131.5" font-size="10.5" fill="#334155">Bal 50.0%</text>
+<text x="211" y="171.0" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">OpenJudge Accuracy (n=48)</text>
+<rect x="225" y="149.0" width="42.8" height="11" rx="3" fill="#f97316" fill-opacity="1.0"/>
+<text x="273.8" y="158.5" font-size="10.5" fill="#334155">召回 7.1%</text>
+<rect x="225" y="163.0" width="33.7" height="11" rx="3" fill="#f97316" fill-opacity="0.58"/>
+<text x="264.7" y="172.5" font-size="10.5" fill="#334155">κ=0.056</text>
+<rect x="225" y="177.0" width="312.6" height="11" rx="3" fill="#f97316" fill-opacity="0.28"/>
+<text x="543.6" y="186.5" font-size="10.5" fill="#334155">Bal 52.1%</text>
+<text x="211" y="226.0" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">OpenJudge Comprehensive (n=48)</text>
+<rect x="225" y="204.0" width="2.0" height="11" rx="3" fill="#ef4444" fill-opacity="1.0"/>
+<text x="233.0" y="213.5" font-size="10.5" fill="#334155">召回 0.0%</text>
+<rect x="225" y="218.0" width="2.0" height="11" rx="3" fill="#ef4444" fill-opacity="0.58"/>
+<text x="233.0" y="227.5" font-size="10.5" fill="#334155">κ=0.000</text>
+<rect x="225" y="232.0" width="300.0" height="11" rx="3" fill="#ef4444" fill-opacity="0.28"/>
+<text x="531.0" y="241.5" font-size="10.5" fill="#334155">Bal 50.0%</text>
+<text x="211" y="281.0" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Evidence-Grounded 改进 (n=37)</text>
+<rect x="225" y="259.0" width="100.0" height="11" rx="3" fill="#10b981" fill-opacity="1.0"/>
+<text x="331.0" y="268.5" font-size="10.5" fill="#334155">召回 16.7%</text>
+<rect x="225" y="273.0" width="94.4" height="11" rx="3" fill="#10b981" fill-opacity="0.58"/>
+<text x="325.4" y="282.5" font-size="10.5" fill="#334155">κ=0.157</text>
+<rect x="225" y="287.0" width="338.0" height="11" rx="3" fill="#10b981" fill-opacity="0.28"/>
+<text x="569.0" y="296.5" font-size="10.5" fill="#334155">Bal 56.3%</text>
+<text x="211" y="336.0" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Claw-Eval 任务专属 Rubric (n=48)</text>
+<rect x="225" y="314.0" width="214.3" height="11" rx="3" fill="#3b82f6" fill-opacity="1.0"/>
+<text x="445.3" y="323.5" font-size="10.5" fill="#334155">召回 35.7%</text>
+<rect x="225" y="328.0" width="264.2" height="11" rx="3" fill="#3b82f6" fill-opacity="0.58"/>
+<text x="495.2" y="337.5" font-size="10.5" fill="#334155">κ=0.440</text>
+<rect x="225" y="342.0" width="407.2" height="11" rx="3" fill="#3b82f6" fill-opacity="0.28"/>
+<text x="638.2" y="351.5" font-size="10.5" fill="#334155">Bal 67.9%</text>
+<text x="28" y="408" font-size="11" fill="#64748b">数据源：reports/stage3_and_neutral_v2.json &amp; reports/p2-v2.json · 所有评分器接收完全相同的改编轨迹 messages（零隐藏 Rubric 泄漏）</text>
+</svg>
