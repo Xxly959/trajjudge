@@ -237,7 +237,7 @@
 
 **system恢复**：仅从实际UUID相同的S5首个agent请求恢复真实system；缺失时adapter明确标missing，S6 pilot入口拒绝运行，不拼造官方提示。tool.name从对应assistant.tool_use.name补齐，参数JSON字符串与原生provider一致；reasoning_content原样保留。is_error、audit_snapshot、tool_dispatch、计时/usage、未支持blocks等全部保留在原事件metadata，不声称它们都进入每个原生grader提示。
 
-**golden 来源**：T010/T002 的本地轨迹用于建立原生消息结构参考。公开测试副本保留消息角色、事件顺序及工具调用配对，提示词、回复及工具数据使用合成内容。原始轨迹和 sidecar 保留在本地，公开样本仅用于结构回归测试。
+**golden来源**：T010/T002两条真实执行轨迹，参考messages在adapter实现前由原生最后SDK请求+原生最终assistant转换得到；tool.name仅按ID补充。测试副本统一替换trace/tool IDs、邮箱、电话、宿主路径、localhost hosts。provenance记录源SHA-256与脱敏策略；fixture sidecar只选原始首个agent请求，完整保留该行，选择明确记录。结构预期不含自制质量分数或人工标签。真实评分使用本地原始轨迹，不用脱敏后轨迹替换实验输入。
 
 ---
 
@@ -366,3 +366,4 @@ blanks. The planner and report both reject a count mismatch and use the
 actual owner failure labels. Two blank items remain outside the cohort.
 The current cohort has 16 human failures. The rule-only subset report
 uses existing rows for the same cohort. The paid P4 run awaits approval.
+

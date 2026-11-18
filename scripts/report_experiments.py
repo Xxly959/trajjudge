@@ -28,8 +28,16 @@ def main() -> int:
     parser.add_argument("--repeats", type=int, help="must match the run manifest; required for legacy inputs")
     parser.add_argument("--expected-unlabeled", type=int, default=0,
                         help="P4 only: require this exact number of unlabeled traces and exclude them")
+    parser.add_argument("--ci-policy", choices=("v1", "v2"), default="v1",
+                        help="v2 applies PREREG_v2 interval rules; v1 reproduces the published reports")
+    parser.add_argument("--cluster-unit", choices=("task_id", "scenario_id"), default="task_id")
+    parser.add_argument("--scenario-map", type=Path, default=root / "reports" / "scenario_map.csv",
+                        help="task_id -> scenario_id; required for --cluster-unit scenario_id")
+    parser.add_argument("--output-suffix", default="", help="write reports/<phase><suffix>.json instead of overwriting")
     args = parser.parse_args()
     phase = args.phase
+    if args.cluster_unit == "scenario_id" and args.ci_policy != "v2":
+        parser.error("scenario clustering is a v2 policy; pass --ci-policy v2")
     if args.expected_unlabeled < 0 or (args.expected_unlabeled and phase != "p4"):
         parser.error("--expected-unlabeled requires a nonnegative count and P4")
     path = args.input or root / "outputs" / phase / f"{phase}-deepseek-flash.jsonl"
@@ -49,21 +57,33 @@ def main() -> int:
             raise ValueError("legacy stability input requires explicit --repeats")
     meta = json.loads((root / "outputs/p2/annotation_meta.json").read_text())
     tasks = {r["trace_id"]: r["task_id"] for r in meta["chosen"]}
+    scenarios: dict[str, str] = {}
+    if args.cluster_unit == "scenario_id":
+        import csv
+        with args.scenario_map.open(newline="", encoding="utf-8") as handle:
+            scenarios = {r["task_id"]: r["scenario_id"] for r in csv.DictReader(handle)}
+        missing = sorted({t for t in tasks.values() if t not in scenarios})
+        if missing:
+            raise ValueError(f"scenario map missing task_ids: {missing}")
+    clusters = {trace: scenarios[task] for trace, task in tasks.items()} if scenarios else tasks
+    cluster_kwargs = {"policy": args.ci_policy, "cluster_unit": args.cluster_unit}
     result = {"phase": phase, "status": "pending", "source": str(path.relative_to(root)) if path.is_relative_to(root) else str(path),
               "score_rows": len(grades), "selected_traces": len(tasks), "resamples": 2000,
+              "ci_policy": args.ci_policy, "cluster_unit": args.cluster_unit,
               "evaluated_traces": len({r["trace_id"] for r in grades}),
               "latest_row_usage": {"api_calls": sum(r.get("usage", {}).get("api_calls", 0) for r in grades),
                             "cached_calls": sum(r.get("usage", {}).get("cached_calls", 0) for r in grades)},
               "limitations": ["Single provider and annotator; official scores partly LLM-derived, not truth.",
                   "Failure-enriched, mixed-cap sample; not leaderboard comparable or a controlled thinking ablation.",
-                  "No significance claim; missing/error rows retained in coverage; task-cluster bootstrap CIs."]}
+                  "No significance claim; missing/error rows retained in coverage; "
+                  + ("scenario-cluster bootstrap CIs (PREREG_v2)." if args.ci_policy == "v2" else "task-cluster bootstrap CIs.")]}
     if phase == "p2":
         labels = read_labels(root / "annotation/labels.csv")
         key = json.loads((root / "outputs/annotation/key.json").read_text())
         joined = join_labels(meta["chosen"], key, labels, grades)
         result.update({k: v for k, v in joined.items() if k != "rows"})
         if joined["rows"]:
-            result["agreement"] = agreement_with_clusters(joined["rows"])
+            result["agreement"] = agreement_with_clusters(joined["rows"], scenarios=scenarios or None, **cluster_kwargs)
             result["status"] = "complete" if joined["labeled"] == joined["selected"] and not any(joined["missing_scores"].values()) else "partial"
         round2_path = root / "outputs/annotation/round2_key.json"
         if round2_path.exists():
@@ -83,10 +103,10 @@ def main() -> int:
             result["status"] = "descriptive_probe"
             result["limitations"].append("Output variety cannot prove the server honored or ignored temperature; request acceptance and distributions are distinct evidence.")
         elif phase == "p3":
-            result["analysis"] = stability_report(grades, repeats=repeats, task_ids=tasks)
+            result["analysis"] = stability_report(grades, repeats=repeats, task_ids=clusters, **cluster_kwargs)
             result["status"] = "complete" if all(g["incomplete_traces"] == 0 for g in result["analysis"]) else "partial"
         else:
-            result["analysis"] = injection_report(grades, task_ids=tasks)
+            result["analysis"] = injection_report(grades, task_ids=clusters, **cluster_kwargs)
             result["paired_change_counts"] = {grader: {
                 "paired": sum(g["paired_observations"] for g in result["analysis"] if g["grader"] == grader),
                 "changed": sum(g["changed_observations"] for g in result["analysis"] if g["grader"] == grader)}
@@ -126,7 +146,7 @@ def main() -> int:
         phase_records, load_pricing(root / "configs/pricing_p3.yaml"), load_reservations(root / "outputs/usage/usage.jsonl")),
         "unknown_attempts": sum(not r.cached and not r.usage_known for r in phase_records),
         "basis": "budget-only bounds; unknown original token usage remains unknown"}
-    atomic_text(root / "reports" / f"{phase}.json", json.dumps(result, indent=2, allow_nan=False) + "\n")
+    atomic_text(root / "reports" / f"{phase}{args.output_suffix}.json", json.dumps(result, indent=2, allow_nan=False) + "\n")
     print(json.dumps({"phase": phase, "status": result["status"], "score_rows": len(grades)}))
     return 0
 

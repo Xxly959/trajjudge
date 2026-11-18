@@ -73,7 +73,7 @@ three repeats, eight perturbations, and two defense settings. The two blank
 items were excluded. All **1,728** planned jobs produced records. Of these,
 **1,701** passed validation and **27** Comprehensive outputs failed validation.
 There were **1,496/1,536** valid original–perturbation pairs. The numeric report
-marks coverage partial. Invalid rows are retained in the local run evidence.
+marks coverage partial and retains all invalid rows.
 
 | Grader | Wrapper | Valid pairs | Score changed | Fail-to-pass among baseline-fail pairs |
 | --- | --- | ---: | ---: | ---: |
@@ -180,7 +180,7 @@ reservations for two unknown attempts, not fabricated measured tokens.
 The P3 pilot added **$0.342380 / $1.50**. Cumulative guard accounting including
 reservations reached **$4.331591** after the matched follow-up, which added
 **$0.901859 / $4.00**. Actual usage for two historical attempts remains
-unknown. The provider balance was recorded separately after the Pro run.
+unknown. The last balance snapshot was CNY 0.92 after Pro.
 P4 added **$4.848892** on the conservative guard, for **$9.180483**
 cumulative including historical reservations. The P4 usage-based estimate at
 published off-peak prices is **$0.460284** with provider prompt-cache hits

@@ -14,7 +14,7 @@ Preflight at 2026-11-06 14:42 UTC (22:42 CST), an off-peak time:
   per million; off-peak 0.15/0.60. Keep conservative peak accounting.
 - Conservative starting cumulative cost **USD 2.700680**; 960 ledger records,
   80 cached, unchanged billable tokens since recovery.
-- Read-only balance **[balance omitted]** (previous snapshot [balance omitted]). The difference
+- Read-only balance **CNY 10.60** (previous snapshot CNY 10.74). The difference
   is not explained by this unchanged project ledger; do not attribute it to a
   project run or infer an exchange rate/invoice.
 - Frozen trace hashes verified by both plan commands; owner labels untouched.
@@ -62,7 +62,7 @@ no ledger row was rewritten and no unknown attempt was treated as free.
   (Accuracy 1,024; Comprehensive 3,072), at peak/cache-miss prices. Combined
   subtotal plus estimated reserve: USD 2.773859. This is not actual recovered
   usage or a reason to bypass the guard.
-- Read-only post-run balance **[balance omitted]**; no per-request charge reconciliation.
+- Read-only post-run balance **CNY 10.41**; no per-request charge reconciliation.
 - No live runner remains. Probe was not started; both original approvals remain
   valid. Never reset the original P2 ceiling or add a fresh allowance on resume.
 
@@ -75,7 +75,7 @@ actual usage; preserve originals. Formal RQ1 still needs owner labels.
 ### 2026-11-07 continuation preparation
 
 Owner requested continuation; existing caps remain approved. Saturday is
-off-peak throughout the day; models, flash prices and [balance omitted] balance were
+off-peak throughout the day; models, flash prices and CNY10.41 balance were
 rechecked before paid execution. No new spend during repair.
 
 Implemented separate conservative budget accounting while original unknown usage
@@ -155,7 +155,7 @@ Combined approved-run conservative budget cost **$0.386672 / $1.00**. Cumulative
 reservation-inclusive guard amount **$3.087352**; ledger subtotal excluding the
 two new unknown attempts **$3.055441** (still includes the older recorded
 reconciliation estimate). Actual cumulative accounting stays UNKNOWN for two original
-attempts, separately reserved. Post-run balance **[balance omitted]**; no exact invoice or
+attempts, separately reserved. Post-run balance **CNY 9.70**; no exact invoice or
 currency reconciliation claimed. No pro/P3 full/P4 calls, external writes or
 owner-label edits were performed.
 
@@ -190,7 +190,7 @@ from cache, including the invalid completion, with zero API requests.
 - Usage: 95 new completions, 845,353 input tokens and 73,978 output tokens;
   25 cache reuses. Conservative cost $0.342380 / $1.50, with no new unknown
   attempt and no pending accounting marker. Cumulative guard accounting
-  $3.429732 includes historical reservations. Post-run balance [balance omitted] is
+  $3.429732 includes historical reservations. Post-run balance CNY 2.44 is
   a separate read-only snapshot.
 
 ## 2026-11-10 P3 matched Flash strategies and Pro Direct
@@ -229,7 +229,8 @@ all 192 stored statuses, scores and reasons, including errors, with zero API cal
   Compare Direct rows with matching trace, grader, thinking mode and repeat
   after filtering to valid rows. The report's `phase_usage` is cumulative P3
   usage at generation time, while `latest_row_usage` is scoped to that run.
-- Balance snapshots before Flash, after Flash and after Pro were recorded locally. The two batches added $0.901859 to the guard ledger,
+- Balance snapshots before Flash, after Flash and after Pro were CNY 2.15,
+  CNY 1.98 and CNY 0.92. The two batches added $0.901859 to the guard ledger,
   which totals $4.331591 including historical reservations. The two rounded
   per-batch costs differ from the combined ledger delta by $0.000001.
 

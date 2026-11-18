@@ -1,10 +1,32 @@
 # Progress
 
-## P4 results available for review — 2026-11-10 CST
+## P4 results synchronized to GitHub — 2026-11-10 CST
 
-- The live Flash Direct run recorded all 1,728 planned jobs on 16 human-labeled failures. It produced 1,701 valid verdicts, 27 Comprehensive validation errors and 1,496/1,536 valid perturbation pairs.
-- An isolated cache replay matched all 1,728 job IDs, statuses, scores and reasons with network access blocked. The public report includes aggregate coverage, costs and per-variant intervals. The raw trajectories, individual verdicts, labels and cache remain local.
-- Start with [REVIEW.md](../REVIEW.md), the [research report](../reports/FINAL_REPORT.md) and the [P4 aggregate](../reports/p4.json). Human repeat annotation and upstream patch submission remain open.
+- Public main is now `a95a4d51e083a796f8e1c65b104863ef75972f2d`. It contains the P4 aggregate and updated [review guide](https://github.com/Xxly959/trajjudge/blob/main/REVIEW.md), report, runbook and supporting documentation. The public P4 aggregate matches the local file byte-for-byte.
+- The isolated public checkout passed 180 offline tests and four credential checks. Raw evidence, owner annotations, response cache and research Git history remain local.
+- Next: independent review using the updated public review guide. Human repeat annotation, upstream submission and final wording remain separate.
+
+## P4 live batch executed and replayed — 2026-11-10 CST
+
+- All 1,728 jobs on 16 owner-labeled failures produced checkpoints. There were 1,701 valid verdicts, 27 retained Comprehensive validation errors, and 1,496/1,536 valid perturbation pairs. The numeric report marks coverage partial. The runner exited 1 because it observed validation errors. It completed the plan without an early stop.
+- An independent run with sockets denied reproduced all 1,728 stored job IDs, statuses, scores and reasons, including errors, from copied cache. The original run lock and usage pending marker are clear. P4 used 1,680 new completions and 48 local cache reads.
+- P4 guard accounting added $4.848892 / $22.50. Cumulative guard accounting including historical reservations is $9.180483. Published off-peak prices applied to reported hit/miss/output tokens yield a $0.460284 estimate.
+- The report, README, resume evidence and Chinese walkthrough now include P4 and its coverage limits. The OpenJudge patch applied to upstream `1c0e05a` and passed 12 focused offline unit tests, with two quality tests deselected.
+- Remaining owner work: two first-round labels are blank, the delayed repeat has no labels, and upstream submission and final wording await confirmation. Current findings and evidence updates are local.
+
+## P4 live launch authorized — 2026-11-10 CST
+
+- The owner explicitly asked to launch the full batch despite the read-only CNY 5.74 balance. Flash availability and the off-peak window were verified. The original $22.50 guard ceiling applies.
+- Run `p4-flash-human-fail-16`: 16 human-fail trajectories, 1,728 planned rows, two unlabeled traces excluded. Launch uses the approved runbook command with `--run --cap-usd 22.50`.
+- Before launch: 180 offline tests and four secret checks passed. In an isolated socket-denied copy, Phase 1 reproduced byte-for-byte, P2 and all three P3 reports regenerated, and P4 showed zero rows. The local label check found 48/50 with no validation problems.
+- Next: monitor checkpoints and accounting, then regenerate the P4 report from the actual named run. If the provider stops the batch, retain all results and the original budget ceiling for resume.
+
+## Public review snapshot published — 2026-11-10 CST
+
+- GitHub repository [Xxly959/trajjudge](https://github.com/Xxly959/trajjudge) is public. Remote main matches snapshot `9b62bd523537097f94991abd9869f881d522365a`, and its review guide is accessible without authentication.
+- The snapshot derives from local source `5c3dbe38c63c406ba6d2d59b0a4efe68c8d3ad90`. It includes code, tests with synthetic fixture content, aggregate reports, reproducibility docs, and the OpenJudge contribution draft. The research Git history, original traces, owner labels, provider cache, and local operation log stay in this workspace.
+- Snapshot checks passed: 180 offline tests, the four credential checks, and staged whitespace validation. No model requests or new experiment spend. The public snapshot uses an independent Git history.
+- Next: independent review via the public `REVIEW.md`. P4 paid execution remains paused. P2 delayed re-labeling and upstream submission are separate from this publication.
 
 ## P4 paused before launch — offline rehearsal, 2026-11-10 CST
 
@@ -16,7 +38,7 @@
 ## Approved P4 run — waiting for off-peak, 2026-11-10 CST
 
 - Owner confirmed the previously proposed $22.50 stage cap in chat. The run remains scoped to 16 owner-labeled failures, with two blank records excluded, 1,728 planned jobs and 48 reusable results.
-- Read-only available balance increased to [balance omitted]. Starting guard accounting is $4.331591 with no pending marker. The run ID is free. The provider may stop requests if the account balance is exhausted.
+- Read-only available balance increased to CNY 5.74. Starting guard accounting is $4.331591 with no pending marker. The run ID is free. The provider may stop requests if the account balance is exhausted.
 - The weekday peak window started at 14:00 CST. Recheck balance, pricing and model availability before the 18:00 CST off-peak launch. Use the exact P4 command in the runbook with `--run --cap-usd 22.50`.
 
 ## P4 preflight — 2026-11-10 CST
@@ -24,27 +46,27 @@
 - The plan verifies 16 human-fail trajectories and two unlabeled records. There are 1,728 logical completions, including 192 original-baseline slots. An offline replay found 48 reusable valid original results. No P4 completion requests were sent.
 - Of the reusable undefended baselines, Accuracy judged three of 24 as fail and Comprehensive judged all 24 as pass. The report now exposes the fail-to-pass count and its eligible baseline-failure denominator. A zero denominator yields a null rate. Both rule reports were regenerated.
 - Using the 32 first-repeat baselines as a token proxy, the estimated 1,680 new requests cost about CNY 16.31 at off-peak cache-miss prices, of which CNY 2.24 is output. Perturbations, caching and actual completion length can change the charge. The proposed stage guard remains $22.50.
-- Current balance snapshot: [balance omitted], with no pending accounting marker. P4 awaits sufficient balance and explicit approval of the stage cap. The funded run uses the exact P4 command in `docs/EXPERIMENT_RUNBOOK.md`. The project passed 177 offline tests.
+- Current balance snapshot: CNY 0.74, with no pending accounting marker. P4 awaits sufficient balance and explicit approval of the stage cap. The funded run uses the exact P4 command in `docs/EXPERIMENT_RUNBOOK.md`. The project passed 177 offline tests.
 
 ## P3 follow-up verified — 2026-11-10 CST
 
 - Flash strategy comparison: 144 rows, 139 valid and five errors. Pro Direct: 48 rows, 46 valid and two length-limit errors. The 192 rows replayed from cache with zero API calls.
 - On four matched traces, Flash Accuracy voting and Pro Direct Accuracy each had 1/4 complete panels flip with thinking off. Flash and Pro Direct disagreed on 1/45 valid paired verdicts. All valid Comprehensive verdicts passed in both runs.
-- 144 new requests and 240 local cache reads. New conservative guard cost $0.901859 / $4.00, cumulative $4.331591 including historical reservations. Post-run balance [balance omitted]. No active runner or pending accounting marker.
+- 144 new requests and 240 local cache reads. New conservative guard cost $0.901859 / $4.00, cumulative $4.331591 including historical reservations. Post-run balance CNY 0.92. No active runner or pending accounting marker.
 - Reports: `reports/p3-flash-strategies-4.json` and `reports/p3-pro-direct-4.json`. Exact scope, commands and raw evidence hashes are in `docs/APPROVED_RUNS.md`.
 - Next: P4 LLM experiment on the 16 human failures needs its own budget and available balance. The OpenJudge patch and draft await owner approval for external submission.
 
 ## P3 Flash verified and Pro pre-batch — 2026-11-10 CST
 
 - Flash strategies saved all 144 rows: 139 valid and five invalid. The 336 logical completions used 96 new API responses and 240 local cache reads. Offline replay matched every row from cache, including all errors.
-- Flash conservative guard cost: $0.274548 / $1.35. Current guard ledger: $3.704280. No pending accounting marker. The read-only balance after Flash was [balance omitted].
+- Flash conservative guard cost: $0.274548 / $1.35. Current guard ledger: $3.704280. No pending accounting marker. The read-only balance after Flash was CNY 1.98.
 - The approved Pro Direct batch uses the same four traces, both graders and thinking modes, with three repeats. Plan: 48 new requests, peak estimate $1.314720, one-attempt guard sum $2.600176. Stage cap $2.65 and absolute ledger ceiling $6.354280. Still off-peak.
 - Next: run the exact Pro command in the runbook, preserve errors and verify both cohorts together.
 
 ## Approved P3 follow-up — preflight, 2026-11-10 CST
 
 - Owner approved the proposed two P3 batches in chat. Caps: Flash strategies $1.35 and Pro Direct $2.65. Both model IDs were confirmed through a fresh model-list request.
-- Starting guard accounting: $3.429732 with historical reservations and no pending marker. Balance snapshot: [balance omitted]. The Flash and Pro run IDs were free.
+- Starting guard accounting: $3.429732 with historical reservations and no pending marker. Balance snapshot: CNY 2.15. The Flash and Pro run IDs were free.
 - Runbook plans: Flash 336 logical completions with 96 new requests, Pro 48 new requests. One-attempt peak guard sums are $1.270343 and $2.600176. The Flash cache includes one invalid result from the pilot.
 - Wait for the off-peak window opening at 12:00 CST. Launch Flash first and verify remaining balance before Pro. The P4 and upstream submission approvals remain separate.
 
@@ -53,7 +75,7 @@
 - `make phase2` generated the aggregate report on 48 human labels. Both judges matched 32/48, equal to always-pass. Two blanks and delayed re-labeling remain outside this result.
 - P4 now accepts an explicit exact blank count. With two blanks, the plan uses 16 owner failures. The matched rule report records 0/128 loop changes and 56/128 lexical changes.
 - Updated the research report, resume draft and Chinese walkthrough. The OpenJudge patch applies to upstream `eb34c3b94c90`. Its focused offline unit run passed 12 tests with two quality cases deselected.
-- Verification: 176 project tests passed locally and in a fresh source clone with pinned sibling links and existing dependencies. `make phase1` reproduced the existing report hash from cache. No new completion calls. Guard accounting remains $3.429732 including historical reservations. Read-only balance snapshot: [balance omitted].
+- Verification: 176 project tests passed locally and in a fresh source clone with pinned sibling links and existing dependencies. `make phase1` reproduced the existing report hash from cache. No new completion calls. Guard accounting remains $3.429732 including historical reservations. Read-only balance snapshot: CNY 2.15.
 - Next runs and proposed caps: Flash strategies $1.35, Pro Direct $2.65, P4 $22.50. See `docs/EXPERIMENT_RUNBOOK.md` for the exact offline plans and launch steps. Paid runs, upstream submission and public wording await owner approval.
 
 ## P3 Flash Direct pilot — results, 2026-11-09 CST
@@ -61,14 +83,14 @@
 - All 120 planned rows are present: 119 valid and one rejected step-coverage result. The run used 95 new completions and 25 cached results. Offline replay matched all 120, including the error, with zero API calls.
 - Across 39 complete three-repeat panels, no pass/fail verdict flipped. Accuracy scores stayed fixed in both thinking modes. Comprehensive scores varied on 8/10 complete panels with thinking off and 8/9 with thinking on; all 59 valid Comprehensive results passed.
 - Pilot summary: `reports/p3-flash-direct-pilot.json`. Run details and reproduction command: `docs/APPROVED_RUNS.md`. The paid runner exited with no early stop and its lock is clear.
-- Conservative pilot accounting: $0.342380 / $1.50; cumulative guard ledger $3.429732 including historical reservations. Read-only post-run balance was [balance omitted], a balance snapshot with no invoice reconciliation.
+- Conservative pilot accounting: $0.342380 / $1.50; cumulative guard ledger $3.429732 including historical reservations. Read-only post-run balance was CNY 2.44, a balance snapshot with no invoice reconciliation.
 - Next: interpret the pilot with the 48-label partial P2 comparison. A wider P3 grid needs a new approved budget; formal P4 still requires an eligible human-fail cohort under the annotation protocol and an approved budget.
 
 ## P3 Flash Direct pilot — pre-batch checkpoint, 2026-11-09 CST
 
 - Scope approved in chat: 10 frozen traces, two graders, thinking on/off, three repeats, Direct. Reuse 25 matching cached completions (20 P2, five probe); preflight identified 95 distinct new requests. Zero completion calls in preflight.
 - New-spend cap: $1.50. Estimated new completions $0.380543 off-peak or $0.761087 at peak, with $1.429950 summed peak request bounds at one attempt per completion. Starting guard ledger $3.087352, including historical reservations; absolute ceiling $4.587352.
-- Live preflight confirmed `deepseek-flash` in a fresh model listing, off-peak time, a free run ID, and no unreconciled pending request. Latest previously recorded balance was [balance omitted] on 2026-11-07.
+- Live preflight confirmed `deepseek-flash` in a fresh model listing, off-peak time, a free run ID, and no unreconciled pending request. Latest previously recorded balance was CNY 9.70 on 2026-11-07.
 - Next: launch the approved command below, monitor atomic checkpoints, then report coverage, verdict flips, replay and accounted cost. Formal P3 grid and P4 remain pending. P2 has 48 human labels and a separate partial offline analysis; two records remain unlabeled.
 
 ```bash
@@ -85,8 +107,8 @@
 - Owner command: `.venvs/judge/bin/python scripts/annotate.py label`; open the current blind Markdown in an editor for long traces.
 - Blockers: human labels, other phase budgets, external submission and final-claim approval. Original actual usage of two attempts remains unknown; evidence-backed budget reservations allow bounded continuation.
 - Spend: actual accounting UNKNOWN for two original attempts. Conservative run costs P2 $0.321302 +probe $0.065370 =$0.386672/$1.00; cumulative with reservations $3.087352. No new unknown attempts during continuation.
-- Balance: 2026-11-07 post-run [balance omitted] (prior balance omitted); no per-request invoice. Full record: APPROVED_RUNS.md.
-- Preservation: full backup `<local-backup>`; inherited edits committed as `10abb5e`.
+- Balance: 2026-11-07 post-run CNY 9.70 (continuation pre-run 10.41); no per-request invoice. Full record: APPROVED_RUNS.md.
+- Preservation: full backup `../my-project-backup-20261105-091258`; inherited edits committed as `10abb5e`.
 - Working tree: code, tests and delivery docs committed at handover; raw artifacts and owner labels remain ignored local assets, untouched by the agent after blank-kit creation.
 
 ## Checkpoints

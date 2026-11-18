@@ -21,6 +21,7 @@ help:
 	@echo "secrets  fail if a provider-looking key is tracked by git"
 	@echo "smoke    probe the DeepSeek endpoint (network, stage S2)"
 	@echo "phase1   regenerate reports/phase1.md from cached grader output (S7)"
+	@echo "dataset  build the private P2 trajectory dataset and quality report offline"
 
 $(VENV)/pyvenv.cfg:
 	uv venv --python 3.12 $(VENV)
@@ -62,7 +63,7 @@ phase1:
 	$(PY) scripts/run_phase1.py
 
 # These report targets read local artifacts only and never call a model.
-.PHONY: phase2 phase3 phase4 rule-controls
+.PHONY: phase2 phase3 phase4 rule-controls dataset figures showcase stage3-report pro-factorial
 phase2:
 	$(PY) scripts/report_experiments.py p2
 phase3:
@@ -72,3 +73,13 @@ phase4:
 rule-controls:
 	$(PY) scripts/experiment.py controls
 	$(PY) scripts/report_experiments.py controls
+dataset:
+	$(PY) scripts/build_dataset.py
+stage3-report:
+	$(PY) scripts/run_stage3_and_neutral.py report
+pro-factorial:
+	$(PY) scripts/run_pro_factorial.py report
+figures:
+	$(PY) scripts/generate_figures.py
+showcase:
+	$(PY) scripts/build_showcase_html.py

@@ -98,7 +98,7 @@ Problems:
 
 ## 10. Documentation: PARTIAL
 
-- README has goals, RQs, pipeline diagram, reproduction steps and limits and matches the code. `DECISIONS.md` has D1-D22; the historical local log was 1,120 lines at audit time.
+- README has goals, RQs, pipeline diagram, reproduction steps and limits and matches the code. `DECISIONS.md` has D1-D22; `notes/log.md` is 1,120 lines.
 - Missing: single provider and self-preference are not listed as limitations (constraint 7). To add.
 - Missing: a decision entry for `repeat_id`.
 - `configs/pricing.yaml` has no `deepseek-v4-pro` price, so pro calls would be refused as unpriced. I need the official figure; I won't guess. Needed before P3.

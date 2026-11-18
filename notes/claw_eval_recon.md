@@ -64,7 +64,7 @@ agent 的 max_tokens 放在 extra_body 是为了经原生 SDK 请求体传入（
 
 ```bash
 rtk proxy env PYTHONDONTWRITEBYTECODE=1 \
-  PYTHONPATH=<workspace>/claw-eval/src \
+  PYTHONPATH=/Users/x/agent-eval/claw-eval/src \
   .venvs/claw/bin/python -m claw_eval.cli batch --help
 ```
 

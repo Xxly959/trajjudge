@@ -1,4 +1,4 @@
-"""Structural S5 goldens with synthetic content."""
+"""Structural goldens from actual S5 traces; no semantic/human labels."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ FIXTURES = Path(__file__).parent / "fixtures" / "claw_s5"
 
 
 @pytest.mark.parametrize("name,tool_count", [("contact", 2), ("email", 8)])
-def test_structural_golden_and_lossless_metadata(name: str, tool_count: int) -> None:
+def test_real_run_golden_and_lossless_metadata(name: str, tool_count: int) -> None:
     path = FIXTURES / f"{name}.jsonl"
     trace = adapt_trace(path, sidecar_path=FIXTURES / f"{name}.sidecar.jsonl")
     assert trace.messages == json.loads((FIXTURES / f"{name}.messages.json").read_text())

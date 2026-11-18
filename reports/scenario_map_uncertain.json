@@ -1,0 +1,58 @@
+[
+  {
+    "task_ids": [
+      "T025zh_ambiguous_contact_email",
+      "T026_ambiguous_contact_email"
+    ],
+    "issue": "keywords_present lists differ between translation copies",
+    "recommendation": "merge: keyword lists are translated, structure agrees"
+  },
+  {
+    "task_ids": [
+      "T029zh_cross_service_meeting",
+      "T030_cross_service_meeting"
+    ],
+    "issue": "keywords_present lists differ between translation copies",
+    "recommendation": "merge: keyword lists are translated, structure agrees"
+  },
+  {
+    "task_ids": [
+      "T031zh_escalation_budget_triage",
+      "T032_escalation_budget_triage"
+    ],
+    "issue": "keywords_present lists differ between translation copies",
+    "recommendation": "merge: keyword lists are translated, structure agrees"
+  },
+  {
+    "task_ids": [
+      "T033zh_ops_review_dashboard",
+      "T034_ops_review_dashboard"
+    ],
+    "issue": "keywords_present lists differ between translation copies",
+    "recommendation": "merge: keyword lists are translated, structure agrees"
+  },
+  {
+    "task_ids": [
+      "T035zh_vendor_procurement",
+      "T036_vendor_procurement"
+    ],
+    "issue": "keywords_present lists differ between translation copies",
+    "recommendation": "merge: keyword lists are translated, structure agrees"
+  },
+  {
+    "task_ids": [
+      "T037zh_incident_postmortem",
+      "T038_incident_postmortem"
+    ],
+    "issue": "keywords_present lists differ between translation copies",
+    "recommendation": "merge: keyword lists are translated, structure agrees"
+  },
+  {
+    "task_ids": [
+      "T159zh_vip_ticket_escalation",
+      "T160_vip_ticket_escalation"
+    ],
+    "issue": "fixture data shape differs between translation copies",
+    "recommendation": "owner confirmation required: inspect the differing fixture before merging"
+  }
+]

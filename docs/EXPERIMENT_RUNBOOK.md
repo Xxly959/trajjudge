@@ -142,7 +142,7 @@ suffixes, matching the native strategies' identical evaluation arguments.
 The guard sums use peak prices and include the conservative input-byte and
 output-cap bounds. DeepSeek's off-peak rates are half its peak rates.
 Recheck scope, cache state, model availability, price and balance before launch.
-The read-only balance snapshot on 2026-11-10 was [balance omitted].
+The read-only balance snapshot on 2026-11-10 was CNY 2.15.
 
 These commands are offline cost plans. After approval, append
 `--run --cap-usd <approved cap>` to the exact command for each batch and

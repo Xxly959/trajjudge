@@ -1,0 +1,273 @@
+[
+  {
+    "id": "1",
+    "claim": "48 labels (32 pass/16 fail), 2 blanks, single round, ~30 uninformative reasons",
+    "recomputed": {
+      "rows": 50,
+      "rounds": {
+        "1": 50
+      },
+      "pass": 32,
+      "fail": 16,
+      "blanks": [
+        "Be5538d",
+        "Bf3d4a1"
+      ],
+      "reasons_len_le_4": 32,
+      "reasons_in_phrase_list": 30
+    },
+    "reported_or_claimed": {
+      "labeled": 48,
+      "pass": 32,
+      "fail": 16,
+      "blanks": 2,
+      "rounds": [
+        "1"
+      ],
+      "uninformative": 30
+    },
+    "agrees": true,
+    "evidence": "annotation/labels.csv",
+    "note": ""
+  },
+  {
+    "id": "2-trajectory_accuracy",
+    "claim": "agreement equals always-pass baseline; kappa/AUC; missed human failures",
+    "recomputed": {
+      "n": 48,
+      "agreement": 0.6666666666666666,
+      "kappa": 0.04,
+      "auc": 0.5459,
+      "missed_human_failures": 15,
+      "human_failures": 16,
+      "confusion": {
+        "tp": 31,
+        "fp": 15,
+        "fn": 1,
+        "tn": 1
+      }
+    },
+    "reported_or_claimed": {
+      "agreement": 0.6666666666666666,
+      "kappa": 0.04000000000000017,
+      "auc": 0.5458984375,
+      "confusion": {
+        "tp": 31,
+        "fp": 15,
+        "fn": 1,
+        "tn": 1
+      }
+    },
+    "agrees": true,
+    "evidence": "outputs/p2/p2-deepseek-flash.jsonl + annotation/labels.csv",
+    "note": ""
+  },
+  {
+    "id": "2-trajectory_comprehensive",
+    "claim": "agreement equals always-pass baseline; kappa/AUC; missed human failures",
+    "recomputed": {
+      "n": 48,
+      "agreement": 0.6666666666666666,
+      "kappa": 0.0,
+      "auc": 0.6748,
+      "missed_human_failures": 16,
+      "human_failures": 16,
+      "confusion": {
+        "tp": 32,
+        "fp": 16,
+        "fn": 0,
+        "tn": 0
+      }
+    },
+    "reported_or_claimed": {
+      "agreement": 0.6666666666666666,
+      "kappa": 0.0,
+      "auc": 0.6748046875,
+      "confusion": {
+        "tp": 32,
+        "fp": 16,
+        "fn": 0,
+        "tn": 0
+      }
+    },
+    "agrees": true,
+    "evidence": "outputs/p2/p2-deepseek-flash.jsonl + annotation/labels.csv",
+    "note": ""
+  },
+  {
+    "id": "3",
+    "claim": "Accuracy 92.1% top score; Comprehensive 100% >= 0.6 with min 0.635",
+    "recomputed": {
+      "accuracy_verdicts": 1085,
+      "top_score_share": 0.9207,
+      "traces_ever_scored": 50,
+      "traces_ever_non_top": 6,
+      "comprehensive_verdicts": 1035,
+      "comprehensive_min": 0.6354,
+      "comprehensive_share_ge_threshold": 1.0
+    },
+    "reported_or_claimed": {
+      "top_score_share": 0.921,
+      "comprehensive_min": 0.635,
+      "comprehensive_share_ge_threshold": 1.0
+    },
+    "agrees": true,
+    "evidence": "outputs/p2/p2-deepseek-flash.jsonl, outputs/p3/p3-flash-direct-pilot.jsonl, outputs/p3/p3-flash-strategies-4.jsonl, outputs/p3/p3-pro-direct-4.jsonl, outputs/p4/p4-flash-human-fail-16.jsonl, outputs/probe/probe-deepseek-flash.jsonl",
+    "note": ""
+  },
+  {
+    "id": "4",
+    "claim": "all P4 fail->pass flips come from one trajectory (1503ef20), n_traj=1 not 3",
+    "recomputed": {
+      "distinct_flip_traces": [
+        "1503ef20"
+      ],
+      "distinct_baseline_fail_traces": [
+        "1503ef20"
+      ],
+      "baseline_fail_paired_observations": 32
+    },
+    "reported_or_claimed": {
+      "claimed_independent_samples": 1,
+      "report_wording": "three and one distinct baseline failures"
+    },
+    "agrees": true,
+    "evidence": "outputs/p4/p4-flash-human-fail-16.jsonl",
+    "note": "report counts original evaluations (trace x repeat), not independent trajectories"
+  },
+  {
+    "id": "5",
+    "claim": "16 of 32 P4 flip_ci entries are zero-width",
+    "recomputed": {
+      "analysis_entries": 32,
+      "zero_width_flip_ci": 16
+    },
+    "reported_or_claimed": {
+      "zero_width_flip_ci": 16,
+      "analysis_entries": 32
+    },
+    "agrees": true,
+    "evidence": "reports/p4.json",
+    "note": ""
+  },
+  {
+    "id": "8",
+    "claim": "27 invalid rows, 19 under wrapper=on (non-random missingness)",
+    "recomputed": {
+      "invalid": 27,
+      "wrapper_on": 19,
+      "wrapper_off": 8,
+      "on_rate": 0.022,
+      "off_rate": 0.0093
+    },
+    "reported_or_claimed": {
+      "invalid": 27,
+      "wrapper_on": 19
+    },
+    "agrees": true,
+    "evidence": "outputs/p4/p4-flash-human-fail-16.jsonl",
+    "note": ""
+  },
+  {
+    "id": "6",
+    "claim": "bootstrap clusters on task_id; 51 task_ids are ~36 scenarios; translation copies inflate clusters",
+    "recomputed": {
+      "cluster_expression_present": true,
+      "corpus_task_ids": 51,
+      "corpus_scenarios": 36,
+      "labeled_task_ids": 35,
+      "labeled_scenarios": 28,
+      "human_fail_task_ids": 13,
+      "human_fail_scenarios": 11,
+      "p2_report_clusters": 35,
+      "p4_report_clusters": [
+        13
+      ]
+    },
+    "reported_or_claimed": {
+      "corpus_scenarios": 36,
+      "human_fail_scenarios": 11,
+      "p4_report_clusters": [
+        13
+      ]
+    },
+    "agrees": true,
+    "evidence": "src/trajjudge/analysis.py + reports/scenario_map.csv",
+    "note": ""
+  },
+  {
+    "id": "7",
+    "claim": "voting reuses average's draws (0 new calls); upstream tie_breaker defaults to MIN",
+    "recomputed": {
+      "repeat_key_expression": true,
+      "usage_by_strategy": {
+        "average|api=2|cached=1": 48,
+        "direct|api=0|cached=1": 48,
+        "voting|api=0|cached=3": 48
+      },
+      "panels_with_identical_tokens": "48/48",
+      "comprehensive_voting_below_average": "12/22",
+      "upstream_tie_breaker_default_MIN": true
+    },
+    "reported_or_claimed": {
+      "voting_api_calls": 0,
+      "voting_cached_calls": 3,
+      "tie_breaker": "MIN"
+    },
+    "agrees": true,
+    "evidence": "outputs/p3/p3-flash-strategies-4.jsonl + src/trajjudge/openjudge_bridge.py:60",
+    "note": ""
+  },
+  {
+    "id": "9",
+    "claim": "wrapper reduces positive inflation on 8/8 variants; 4/8 comprehensive CIs non-overlapping; baselines not lowered",
+    "recomputed": {
+      "grader_variant_contrasts_reduced": "16/16",
+      "comprehensive_nonoverlapping_ci_pairs": 4,
+      "unperturbed_baseline_shift": {
+        "trajectory_accuracy": {
+          "n": 48,
+          "mean_shift": 0.1042,
+          "up": 5,
+          "down": 0
+        },
+        "trajectory_comprehensive": {
+          "n": 46,
+          "mean_shift": 0.025,
+          "up": 31,
+          "down": 12
+        }
+      }
+    },
+    "reported_or_claimed": {
+      "reduced": "8/8 per grader",
+      "nonoverlapping": 4,
+      "baseline_shift": "not negative"
+    },
+    "agrees": true,
+    "evidence": "outputs/p4/p4-flash-human-fail-16.jsonl + reports/p4.json",
+    "note": "CI overlap is report-derived; means and baseline shifts recomputed from raw rows"
+  },
+  {
+    "id": "10",
+    "claim": "annotate.py blocks round2 while any round1 label is blank; no exclude subcommand",
+    "recomputed": {
+      "blank_guard_present": true,
+      "subcommands": [
+        "build",
+        "check",
+        "label",
+        "relabel"
+      ],
+      "has_exclude": false,
+      "current_blanks": 2
+    },
+    "reported_or_claimed": {
+      "deadlock": true,
+      "has_exclude": false
+    },
+    "agrees": true,
+    "evidence": "scripts/annotate.py:89",
+    "note": ""
+  }
+]

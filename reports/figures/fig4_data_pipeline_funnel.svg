@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 340" width="880" height="340" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<rect width="880" height="340" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="28" y="36" font-size="18" font-weight="700" fill="#0f172a">图 4 · 从可信评测到可验证后训练（Post-Training）轨迹数据工程管线</text>
+<text x="28" y="58" font-size="12.5" fill="#475569">统一 task / trial / outcome / judgments 四元模型，用可执行环境状态替代“嘴硬自述”筛选 SFT/DPO 样本</text>
+<rect x="28" y="88" width="190" height="185" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+<text x="42" y="120" font-size="13.5" font-weight="700" fill="#0f172a">1. 多源轨迹汇聚</text>
+<text x="42" y="160" font-size="11.5" fill="#334155">Claw-Eval 87 + SWE-bench 8</text>
+<text x="42" y="184" font-size="11.5" fill="#334155">+ 原创任务真实采集 5</text>
+<line x1="221" y1="180.5" x2="237" y2="180.5" stroke="#64748b" stroke-width="2"/>
+<polygon points="241,180.5 234,175.5 234,185.5" fill="#64748b"/>
+<rect x="240" y="88" width="190" height="185" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+<text x="254" y="120" font-size="13.5" font-weight="700" fill="#0f172a">2. 哈希指纹与无损适配</text>
+<text x="254" y="160" font-size="11.5" fill="#334155">SHA-256 冻结校验 · Sidecar 恢复</text>
+<text x="254" y="184" font-size="11.5" fill="#334155">版本化 CURRENT 原子快照</text>
+<line x1="433" y1="180.5" x2="449" y2="180.5" stroke="#64748b" stroke-width="2"/>
+<polygon points="453,180.5 446,175.5 446,185.5" fill="#64748b"/>
+<rect x="452" y="88" width="190" height="185" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="1.8"/>
+<text x="466" y="120" font-size="13.5" font-weight="700" fill="#0f172a">3. 可执行 Verifier 防刷分</text>
+<text x="466" y="160" font-size="11.5" fill="#334155">只看助手回复：误选 2/2 无产物幻觉</text>
+<text x="466" y="184" font-size="11.5" fill="#334155">核验真实产物：精准识别 16/16 检查</text>
+<line x1="645" y1="180.5" x2="661" y2="180.5" stroke="#64748b" stroke-width="2"/>
+<polygon points="665,180.5 658,175.5 658,185.5" fill="#64748b"/>
+<rect x="664" y="88" width="190" height="185" rx="10" fill="#faf5ff" stroke="#9333ea" stroke-width="1.8"/>
+<text x="678" y="120" font-size="13.5" font-weight="700" fill="#0f172a">4. 后训练语料隔离导出</text>
+<text x="678" y="160" font-size="11.5" fill="#334155">Train/Eval 任务族零交叉隔离</text>
+<text x="678" y="184" font-size="11.5" fill="#334155">TRL 0.29 SFT/DPO 模板实测通过</text>
+<text x="28" y="314" font-size="11" fill="#64748b">数据源：docs/SWE_IMPORT.md · docs/ORIGINAL_TASKS.md · docs/TRAINING_CANDIDATES.md · docs/ORIGINAL_API_PILOT.md</text>
+</svg>

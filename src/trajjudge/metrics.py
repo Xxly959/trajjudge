@@ -7,7 +7,7 @@ import math
 import random
 import statistics
 from collections import Counter
-from typing import Callable, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 
 def accuracy(a: Sequence[bool], b: Sequence[bool]) -> float:
@@ -45,6 +45,9 @@ def bootstrap_ci(stat: Callable[[Sequence[int]], float | None], n: int, *, resam
     """Percentile bootstrap CI of ``stat(indices)`` over ``n`` items; undefined resamples are dropped.
 
     Returns ``None`` if fewer than half of the resamples produced a value.
+
+    Retained for the v1 comparison path only. New reports use :func:`bootstrap_interval`,
+    which accounts for undefined draws and refuses zero-width intervals (PREREG_v2 §2).
     """
     rng = random.Random(seed)
     values = []
@@ -58,6 +61,52 @@ def bootstrap_ci(stat: Callable[[Sequence[int]], float | None], n: int, *, resam
     lo = values[int((1 - level) / 2 * (len(values) - 1))]
     hi = values[int((1 + level) / 2 * (len(values) - 1))]
     return lo, hi
+
+
+NOT_ESTIMABLE = "不可估（簇数不足）"
+
+
+def bootstrap_interval(stat: Callable[[Sequence[int]], float | None], n: int, *, resamples: int = 2000,
+                       seed: int = 0, level: float = 0.95, contributing_clusters: int | None = None,
+                       undefined_limit: float = 0.10) -> dict[str, Any]:
+    """Cluster bootstrap that reports undefined draws instead of dropping them silently.
+
+    ``contributing_clusters`` counts clusters that can actually inform the statistic
+    (for a flip rate, clusters holding a failed baseline). Fewer than two means the
+    interval cannot be estimated, whatever the resamples happen to return.
+
+    A zero-width interval is never returned: with few clusters it conveys false
+    precision rather than evidence, so it is reported as not estimable.
+    """
+    rng = random.Random(seed)
+    values: list[float] = []
+    undefined = 0
+    for _ in range(resamples):
+        value = stat([rng.randrange(n) for _ in range(n)])
+        if value is None:
+            undefined += 1
+        else:
+            values.append(value)
+    share = undefined / resamples if resamples else 1.0
+    out: dict[str, Any] = {
+        "ci": None, "resamples": resamples, "undefined_draws": undefined, "undefined_share": share,
+        "defined_draws": len(values), "clusters": n, "contributing_clusters": contributing_clusters,
+        "status": "ok", "reason": None,
+    }
+    if not values or (contributing_clusters is not None and contributing_clusters < 2):
+        out.update(status="not_estimable", reason=NOT_ESTIMABLE)
+        return out
+    if share > undefined_limit:
+        out.update(status="unreliable", reason=f"undefined bootstrap share {share:.4f} exceeds {undefined_limit}")
+        return out
+    values.sort()
+    lo = values[int((1 - level) / 2 * (len(values) - 1))]
+    hi = values[int((1 + level) / 2 * (len(values) - 1))]
+    if lo == hi:
+        out.update(status="not_estimable", reason=NOT_ESTIMABLE)
+        return out
+    out["ci"] = (lo, hi)
+    return out
 
 
 def baselines(truth: Sequence[bool], *, seed: int = 0) -> dict[str, float]:

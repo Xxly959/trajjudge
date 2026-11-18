@@ -9,7 +9,7 @@ earlier completion claims. Recovery began at `a27643b` on `main`.
   no other local/remote branches. Recorded `git reflog -20`, `git log --stat -30`
   and the last three commits' diff. Recovered these three files in `10abb5e`
   (`wip: recovered uncommitted changes from previous agent`).
-- Complete 1.5 GB backup: `<local-backup>`;
+- Complete 1.5 GB backup: `/Users/x/agent-eval/my-project-backup-20261105-091258`;
   `.git` presence verified before the recovery commit.
 - `git check-ignore -v .env`: `.gitignore:2`; no tracked `.env`.
 - `docker ps -a`: four exited, unrelated containers; no running containers.
@@ -80,7 +80,7 @@ Before this recovery: 948 ledger rows, 68 cached; 879 uncached successes
 The unknown call is an estimate, not recovered provider usage; original evidence
 is retained in `outputs/usage/reconciliation.jsonl`. Replay adds only cached rows.
 
-Read-only `GET /user/balance` returned available **[balance omitted]** on 2026-11-05 CST;
+Read-only `GET /user/balance` returned available **CNY 10.74** on 2026-11-05 CST;
 `GET /models` returned `deepseek-flash`, `deepseek-v4-pro`. No completion was sent.
 Reference: https://api-docs.deepseek.com/api/get-user-balance/ . No opening balance,
 top-up history, invoice, historical FX or other-client usage evidence is available.

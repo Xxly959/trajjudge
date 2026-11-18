@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "families": [
+    {"family": "original:event-summary", "purpose": "train", "tasks": ["event-summary"]},
+    {"family": "original:score-join", "purpose": "eval", "tasks": ["score-join"]}
+  ]
+}
