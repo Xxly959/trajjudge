@@ -21,3 +21,8 @@ Git in this continuation. Before any public dataset release, review every file
 for personal data, credentials, external-content and generated-output rights,
 retain applicable notices, and obtain the owner's release approval. Do not
 assume that a framework's software license licenses all inputs or outputs.
+
+The P1 SWE-bench submission is pinned separately from the code dependencies.
+The artifact repository has no identified artifact license in its GitHub metadata
+or pinned file tree. The input and derived traces stay in ignored local outputs.
+The repository example uses synthetic evidence. See the [import data card](SWE_IMPORT.md).

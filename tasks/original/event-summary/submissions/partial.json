@@ -1,0 +1,5 @@
+{
+  "before": "            continue  # Identical delivery is already counted.",
+  "after": "            raise ValueError(\"duplicate event ID\")",
+  "failed_check": "duplicate-delivery"
+}
