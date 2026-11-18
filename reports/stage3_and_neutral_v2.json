@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-18T02:21:56+00:00",
+ "generated_at": "2026-11-18T02:44:10+00:00",
  "estimate": {
   "neutral_jobs": 32,
   "stage3_jobs": 64,
@@ -360,93 +360,106 @@
     "pr_auc_fail": null
    },
    "evidence_grounded": {
-    "n": 37,
-    "n_scenarios": 26,
+    "n": 47,
+    "n_scenarios": 28,
     "threshold": 0.5,
-    "accuracy": 0.6486,
-    "kappa": 0.1174,
-    "pabak": 0.2973,
-    "balanced_accuracy": 0.5497,
-    "failure_recall": 0.1429,
-    "miss_rate": 0.8571,
-    "false_kill_rate": 0.0435,
-    "pass_retention_rate": 0.9565,
-    "caught_failures": "2/14",
+    "accuracy": 0.6383,
+    "kappa": 0.0339,
+    "pabak": 0.2766,
+    "balanced_accuracy": 0.5141,
+    "failure_recall": 0.125,
+    "miss_rate": 0.875,
+    "false_kill_rate": 0.0968,
+    "pass_retention_rate": 0.9032,
+    "caught_failures": "2/16",
     "confusion": {
-     "tp": 22,
-     "fp": 12,
-     "fn": 1,
+     "tp": 28,
+     "fp": 14,
+     "fn": 3,
      "tn": 2
     },
     "kappa_ci": {
      "ci": [
-      0.0,
-      0.34306569343065707
+      -0.12391304347826111,
+      0.23989218328840967
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
     "failure_recall_ci": {
      "ci": [
       0.0,
-      0.42105263157894735
+      0.4
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
-    "auc": 0.5512,
+    "auc": 0.5181,
     "auc_ci": {
      "ci": [
-      0.5,
-      0.668
+      0.45,
+      0.6243315508021391
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
-    "pr_auc_fail": 0.4434
+    "pr_auc_fail": 0.3916
    }
   },
   "injection_l3_tool_result": {
    "variant": "L3_notice/tool_result",
-   "valid_pairs": 0,
-   "n_scenarios": 0,
-   "orig_errors": 2,
+   "valid_pairs": 16,
+   "n_scenarios": 11,
+   "orig_errors": 1,
    "pert_errors": 0,
-   "asr": null,
-   "asr_ci": null,
-   "mean_delta": null,
+   "asr": 0.0625,
+   "asr_ci": {
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 11,
+    "contributing_clusters": 11,
+    "status": "ok",
+    "reason": null
+   },
+   "mean_delta": -0.0423,
    "fail_to_pass_count": 0,
-   "pass_to_fail_count": 0,
+   "pass_to_fail_count": 1,
    "baseline_fail_denominators": {
-    "n_traj": 0,
-    "n_scenario": 0,
+    "n_traj": 2,
+    "n_scenario": 1,
     "case_study": true,
     "flipped_fail_to_pass": 0
    },
    "veto_override_count_original": 0
   },
   "coverage": {
-   "original_valid": 37,
-   "original_errors": 2,
-   "perturbed_valid": 0,
+   "original_valid": 47,
+   "original_errors": 1,
+   "perturbed_valid": 16,
    "perturbed_errors": 0
   }
  },
@@ -625,93 +638,106 @@
     "pr_auc_fail": null
    },
    "evidence_grounded": {
-    "n": 37,
-    "n_scenarios": 26,
+    "n": 47,
+    "n_scenarios": 28,
     "threshold": 0.5,
-    "accuracy": 0.7027,
-    "kappa": 0.1573,
-    "pabak": 0.4054,
-    "balanced_accuracy": 0.5633,
-    "failure_recall": 0.1667,
-    "miss_rate": 0.8333,
-    "false_kill_rate": 0.04,
-    "pass_retention_rate": 0.96,
-    "caught_failures": "2/12",
+    "accuracy": 0.6809,
+    "kappa": 0.0637,
+    "pabak": 0.3617,
+    "balanced_accuracy": 0.526,
+    "failure_recall": 0.1429,
+    "miss_rate": 0.8571,
+    "false_kill_rate": 0.0909,
+    "pass_retention_rate": 0.9091,
+    "caught_failures": "2/14",
     "confusion": {
-     "tp": 24,
-     "fp": 10,
-     "fn": 1,
+     "tp": 30,
+     "fp": 12,
+     "fn": 3,
      "tn": 2
     },
     "kappa_ci": {
      "ci": [
-      0.0,
-      0.4276729559748428
+      -0.11241217798594844,
+      0.28790786948176583
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
     "failure_recall_ci": {
      "ci": [
       0.0,
-      0.5
+      0.4444444444444444
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
-    "auc": 0.565,
+    "auc": 0.5303,
     "auc_ci": {
      "ci": [
-      0.5,
-      0.6979166666666666
+      0.45714285714285713,
+      0.6666666666666666
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
-    "pr_auc_fail": 0.4092
+    "pr_auc_fail": 0.3625
    }
   },
   "injection_l3_tool_result": {
    "variant": "L3_notice/tool_result",
-   "valid_pairs": 0,
-   "n_scenarios": 0,
-   "orig_errors": 2,
+   "valid_pairs": 16,
+   "n_scenarios": 11,
+   "orig_errors": 1,
    "pert_errors": 0,
-   "asr": null,
-   "asr_ci": null,
-   "mean_delta": null,
+   "asr": 0.0625,
+   "asr_ci": {
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 11,
+    "contributing_clusters": 11,
+    "status": "ok",
+    "reason": null
+   },
+   "mean_delta": -0.0423,
    "fail_to_pass_count": 0,
-   "pass_to_fail_count": 0,
+   "pass_to_fail_count": 1,
    "baseline_fail_denominators": {
-    "n_traj": 0,
-    "n_scenario": 0,
+    "n_traj": 2,
+    "n_scenario": 1,
     "case_study": true,
     "flipped_fail_to_pass": 0
    },
    "veto_override_count_original": 0
   },
   "coverage": {
-   "original_valid": 37,
-   "original_errors": 2,
-   "perturbed_valid": 0,
+   "original_valid": 47,
+   "original_errors": 1,
+   "perturbed_valid": 16,
    "perturbed_errors": 0
   }
  },
@@ -887,93 +913,106 @@
     "pr_auc_fail": null
    },
    "evidence_grounded": {
-    "n": 37,
-    "n_scenarios": 26,
+    "n": 47,
+    "n_scenarios": 28,
     "threshold": 0.5,
-    "accuracy": 0.6486,
-    "kappa": 0.0041,
-    "pabak": 0.2973,
-    "balanced_accuracy": 0.5017,
-    "failure_recall": 0.0833,
-    "miss_rate": 0.9167,
-    "false_kill_rate": 0.08,
-    "pass_retention_rate": 0.92,
-    "caught_failures": "1/12",
+    "accuracy": 0.617,
+    "kappa": -0.0709,
+    "pabak": 0.234,
+    "balanced_accuracy": 0.4708,
+    "failure_recall": 0.0667,
+    "miss_rate": 0.9333,
+    "false_kill_rate": 0.125,
+    "pass_retention_rate": 0.875,
+    "caught_failures": "1/15",
     "confusion": {
-     "tp": 23,
-     "fp": 11,
-     "fn": 2,
+     "tp": 28,
+     "fp": 14,
+     "fn": 4,
      "tn": 1
     },
     "kappa_ci": {
      "ci": [
-      -0.07317073170731701,
-      0.1250000000000005
+      -0.17007358953393303,
+      0.033033033033032996
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
     "failure_recall_ci": {
      "ci": [
       0.0,
-      0.2857142857142857
+      0.25
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
-    "auc": 0.505,
+    "auc": 0.475,
     "auc_ci": {
      "ci": [
-      0.4740484429065744,
-      0.5766129032258065
+      0.43287037037037035,
+      0.5354938271604939
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 26,
-     "contributing_clusters": 26,
+     "clusters": 28,
+     "contributing_clusters": 28,
      "status": "ok",
      "reason": null
     },
-    "pr_auc_fail": 0.3806
+    "pr_auc_fail": 0.3645
    }
   },
   "injection_l3_tool_result": {
    "variant": "L3_notice/tool_result",
-   "valid_pairs": 0,
-   "n_scenarios": 0,
-   "orig_errors": 2,
+   "valid_pairs": 16,
+   "n_scenarios": 11,
+   "orig_errors": 1,
    "pert_errors": 0,
-   "asr": null,
-   "asr_ci": null,
-   "mean_delta": null,
+   "asr": 0.0625,
+   "asr_ci": {
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "resamples": 2000,
+    "undefined_draws": 0,
+    "undefined_share": 0.0,
+    "defined_draws": 2000,
+    "clusters": 11,
+    "contributing_clusters": 11,
+    "status": "ok",
+    "reason": null
+   },
+   "mean_delta": -0.0423,
    "fail_to_pass_count": 0,
-   "pass_to_fail_count": 0,
+   "pass_to_fail_count": 1,
    "baseline_fail_denominators": {
-    "n_traj": 0,
-    "n_scenario": 0,
+    "n_traj": 2,
+    "n_scenario": 1,
     "case_study": true,
     "flipped_fail_to_pass": 0
    },
    "veto_override_count_original": 0
   },
   "coverage": {
-   "original_valid": 37,
-   "original_errors": 2,
-   "perturbed_valid": 0,
+   "original_valid": 47,
+   "original_errors": 1,
+   "perturbed_valid": 16,
    "perturbed_errors": 0
   }
  }

@@ -46,10 +46,10 @@
 <circle cx="523" cy="268" r="5.5" fill="#dc2626"/>
 <text x="537" y="264" font-size="12" font-weight="700" fill="#0f172a">Comprehensive LOSO (≈0.80)</text>
 <text x="537" y="280" font-size="11.5" fill="#475569">失败召回 37.5% · 正常样本误杀 62.5%</text>
-<circle cx="111.5" cy="305.1" r="7.5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+<circle cx="131.8" cy="309.9" r="7.5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
 <rect x="505" y="298" width="345" height="44" rx="6" fill="#f8fafc" stroke="#10b981" stroke-width="1.4"/>
 <circle cx="523" cy="320" r="5.5" fill="#10b981"/>
 <text x="537" y="316" font-size="12" font-weight="700" fill="#0f172a">Evidence-Grounded Veto (≥0.5)</text>
-<text x="537" y="332" font-size="11.5" fill="#475569">失败召回 14.3% · 正常样本误杀 4.3%</text>
+<text x="537" y="332" font-size="11.5" fill="#475569">失败召回 12.5% · 正常样本误杀 9.7%</text>
 <text x="28" y="392" font-size="11" fill="#64748b">数据源：reports/phase4_calibration.json (28 折留一场景 LOSO) &amp; reports/stage3_and_neutral_v2.json</text>
 </svg>

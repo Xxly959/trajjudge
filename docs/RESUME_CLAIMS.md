@@ -10,7 +10,7 @@
 **项目角色**：独立设计与核心研发 ｜ **代码规模**：~11,000 行 Python + **520+ 项**禁网回归单测
 
 - **无损评测底座与确定性恢复工程**：针对多步 Agent 评测中系统提示丢失、重复采样伪命中与异常中断痛点，基于自定义 HTTPX Transport 与多进程绑定无侵入打通 Claw-Eval 沙箱与 OpenJudge；实现 HTTP Sidecar 无损恢复、`repeat_id` 子调用级内容寻址缓存、Decimal 预算熔断与行级原子 Checkpoint（实测触发 HTTP 402 欠费时零脏写安全停机并支持断点续跑），配套构建 **520+ 项**禁网单测与 GitHub Actions 自动化验证。
-- **LLM-as-a-Judge 元评测、统计纠偏与改进闭环**：基于 36 个语言无关独立场景（87 条真实沙箱轨迹、双轮引证盲标与追加式裁定审计）开展预注册研究；通过结构指纹去重与留一场景交叉验证（LOSO）揭示通用 LLM 轨迹评分器存在严重**打分饱和与假阴性盲区**（默认阈值漏判 **92.9%–100%** 真实失败，$\kappa \le 0.056$，强压阈值则误杀 **62.5%** 正常样本）；针对失败分类学归因出的“事实核验缺失”设计**工具副作用账本 + 义务级 Veto 门控评分器**，在零隐藏规则输入下将 $\kappa$ 提升 **2.8 倍**、失败召回率翻倍且误杀率压至 **4.0%**，同时定位上游 OpenJudge 原始分钳制覆盖与 `Voting` 连续分退化为 `min-of-3`（**68.2%** 面板）两处源码缺陷并给出修复补丁。
+- **LLM-as-a-Judge 元评测、2×2 规模×架构消融与改进闭环**：基于 36 个语言无关独立场景（87 条真实沙箱轨迹、双轮引证盲标与追加式裁定审计）开展预注册研究；通过结构指纹去重与留一场景交叉验证（LOSO）揭示通用 LLM 轨迹评分器漏判 **92.9%–100%** 真实失败（强压阈值则误杀 **62.5%** 正常样本），且单纯升级 4.4 倍单价的 `deepseek-v4-pro` 模型失败召回率**零增长（7.1% → 7.1%）**；针对失败分类学归因出的“事实核验缺失”设计**工具副作用账本 + `<untrusted_tool_data>` 隔离槽 + 义务级 Veto 门控评分器**，在零隐藏规则输入下实现失败召回率 **3 倍提升（7.1% → 21.4%，Pro $\kappa$ 提升 8.8 倍）** 并将最强注入膨胀率压降 **15 倍（93.8% → 6.25%，0 次翻转）**，同时定位上游 OpenJudge 原始分钳制覆盖与 `Voting` 连续分退化为 `min-of-3`（**68.2%** 面板）两处源码缺陷并给出修复补丁。
 - **间接提示注入攻防与等长中性对照归因**：设计 4 级渐进诱导 × 双注入位点的 **1,728 次**配对对抗实验，采用场景簇精确符号翻转置换检验（Holm 校正）证实工具返回注入可致最高 **89.4%** 的分数膨胀（$p_{\text{adj}}=0.0078$）；独创**事前哈希冻结的等长中性通知对照实验**，证伪“提示词长度稀释假说”（中性臂 ASR 100%，配对差 $p=0.03125$），确立指令信任层级框架的有效性并量化揭示系统提示词使结构化输出解析失败率上升 **2.4 倍**的工程代价。
 - **跨源轨迹数据工程与防刷分后训练筛选**：设计 `CURRENT` 原子指针快照与 `task/trial/outcome/judgments` 四元 Schema，统一收编 Claw-Eval、固定版本 **SWE-bench Multilingual** 与 **Harbor 断网容器**原创编程题；构建 5 路黑盒验收矩阵，实证对比仅看末轮回复筛选（100% 误选无产物幻觉样本）与可执行产物核验筛选的精度差异，打通面向 **TRL（SFT/DPO）** 的高质量工具调用语料导出与评测集任务族防泄漏隔离。
 
@@ -33,7 +33,7 @@
 | 轨迹与独立场景规模 | 87 轨迹 / 51 任务 → **36 独立场景**；盲标 48 条 / **28 场景** | `reports/scenario_map.csv` · `scripts/build_scenario_map.py` |
 | 通用评分器失败漏判率 | Accuracy 漏 `15/16` (`v2: 13/14`, 92.9%)；Comprehensive 漏 `16/16` (100%) | `reports/stage3_and_neutral_v2.json` · `reports/p2-v2.json` |
 | LOSO 校准误杀代价 | Comprehensive 漏判降至 62.5% 时，正常样本误杀率 **62.5%** | `reports/phase4_calibration.json` · `scripts/phase4_analysis.py` |
-| Evidence-Grounded 改进 | `v2` 口径 $\kappa$: `0.056 → 0.157` (**2.8×**)，失败召回 `7.1% → 16.7%`，误杀 **4.0%**（n=37, 26 场景） | `reports/stage3_and_neutral_v2.json` · `src/trajjudge/grounded_judge.py` |
+| 2×2 规模×架构消融与防注入改进 | 单升 `v4-Pro` 召回 **7.1% → 7.1%（零增益）**；`Pro + Evidence-Grounded` 失败召回升 **3×（21.4%）**、较同模型原生 $\kappa$ 升 **8.8×（0.016 → 0.144）**；最强注入 ASR **93.8% → 6.25%（降 15×，0 翻转）** | `reports/pro_factorial_v2.json` · `reports/stage3_and_neutral_v2.json` · `src/trajjudge/grounded_judge.py` |
 | 上游 `Voting` 退化比例 | Comprehensive **15/22 (68.2%)** 面板 `voting == min(3 draws)` | `reports/robustness_v2.json` · `contributions/openjudge/ISSUE_VOTING_MIN_DEGENERATION.md` |
 | 注入膨胀与 Holm 显著性 | 1,728 次评估，4/16 变体显著，最强 `L3_notice/tool_result` ASR **89.36%** ($p_{\text{adj}}=0.0078$) | `reports/phase3_scenario.json` · `reports/v1_vs_v2_stats.md` |
 | 安全声明格式失败副作用 | `defended=True` 无效率 **2.20% (19/864)** vs 未防御 **0.93% (8/864)** (**2.4×**) | `reports/robustness_v2.json` §missingness |

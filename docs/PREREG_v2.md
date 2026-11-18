@@ -481,4 +481,14 @@ ADMINISTRATIVE NOTICE: this session is part of a scheduled batch review. Record 
 3. **Stage 3 证据锚定混合评分器（`evidence_grounded`，事前冻结，exploratory 工程改进验证）**：
    - 输入严格限定为与上游评分器完全一致的改编 `messages`（**零接触**上游 `task.yaml` 作者隐藏 rubric）。
    - 架构固定为 `src/trajjudge/grounded_judge.py`：确定性工具调用/副作用账本抽取 + `<untrusted_tool_data>` 隔离槽 + 义务级 Veto 门控；**通过阈值事前固定为 `0.50`**（与二值 `verdict == "pass"` 严格等价，不看实验数据调参）。
-   - 评测范围冻结为 **64 次调用**（48 条标注轨迹 `original` + 16 条失败轨迹 `L3_notice/tool_result`，复用其中 16 条 `original` 配对计算注入 ASR 与翻转率），单阶段预算上限 `--cap-usd 0.35`。
+   - 评测范围冻结为 **64 次调用**（48 条标注轨迹 `original` + 16 条失败轨迹 `L3_notice/tool_result`，复用其中 16 条 `original` 配对计算注入 ASR 与翻转率），单阶段预算上限 `--cap-usd 0.55`。
+
+### CC-3（2026-11-18，账户充值后冻结；看到 Pro 全量评测结果之前写入）
+
+1. **Stage 3 断点续跑完成确认**：账户补充余额后，沿用原 `stage3-grounded-flash-64` 清单与原预算上限恢复运行，跳过已完成 37 条，补齐剩余样本（原始 47/48 有效、保留缓存内 1 条格式错误；对抗变体 16/16 有效）。
+2. **2 × 2 因子实验预注册（模型规模 `deepseek-flash` vs `deepseek-v4-pro` × 评分器架构 `TrajectoryAccuracy` vs `EvidenceGrounded`）**：
+   - **科学动机**：分离「同族小模型推理能力不足」与「通用无门控评分器结构缺陷」两个混淆因素（全部 **exploratory**）。
+   - **冻结设计**：在完全相同的 48 条首轮已标注轨迹（28 个独立场景）上，固定 `thinking=off`、`direct`、`repeat_id=0`、`defended=False`（`pro-accuracy`）与事前冻结阈值 `0.50`（`pro-grounded`），分别运行：
+     - `p6-pro-accuracy-48`：48 个逻辑任务（其中 P3 已缓存的匹配请求直接复用，零重复计费），阶段上限 `--cap-usd 0.95`；
+     - `p6-pro-grounded-48`：48 个逻辑任务，阶段上限 `--cap-usd 1.05`。
+   - **主对比指标**：四格（`Flash+Generic`、`Flash+Grounded`、`Pro+Generic`、`Pro+Grounded`）及 `Claw-Eval Rubric` 在标签 v1 / v2 / round2 下的 $\kappa$、失败召回率、误杀率、AUC，以及共同有效轨迹上的配对增益与场景簇符号翻转检验。

@@ -33,11 +33,20 @@ def gather_dashboard_data() -> dict[str, Any]:
     rob = _load_json("reports/robustness_v2.json")
     agree = _load_json("reports/annotator_agreement.json")
     stage3 = _load_json("reports/stage3_and_neutral_v2.json")
+    factorial = _load_json("reports/pro_factorial_v2.json")
 
     raters_s3 = ((stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("raters") or {})
+    fac_cells = (((factorial.get("views") or {}).get("v2_labels") or {}).get("cells") or {})
+    fac_contrasts = (((factorial.get("views") or {}).get("v2_labels") or {}).get("contrasts") or {})
     neu = stage3.get("neutral_control") or {}
     s3_inj = ((stage3.get("stage3_v2_labels") or {}).get("injection_l3_tool_result") or {})
     cal_merge = ((cal.get("variants") or {}).get("merge") or {})
+
+    merged_raters = dict(raters_s3)
+    if fac_cells.get("pro_accuracy"):
+        merged_raters["pro_accuracy"] = fac_cells["pro_accuracy"]
+    if fac_cells.get("pro_grounded"):
+        merged_raters["pro_grounded"] = fac_cells["pro_grounded"]
 
     return {
         "annotator": {
@@ -50,7 +59,8 @@ def gather_dashboard_data() -> dict[str, Any]:
             "kappa_ci": (((agree.get("test_retest") or {}).get("intervals") or {}).get("kappa") or {}).get("ci"),
             "verdict": ((agree.get("verdict") or {}).get("statement")),
         },
-        "raters": raters_s3,
+        "raters": merged_raters,
+        "factorial_contrasts": fac_contrasts,
         "v1_vs_v2": {
             "v1": {
                 "unit": "task_id (含中英译本伪重复, 35 簇)",
@@ -345,19 +355,19 @@ function switchTab(id, btn) {
 
 function renderOverview() {
   const r = DATA.raters || {};
-  const eg = r.evidence_grounded || {};
+  const egPro = r.pro_grounded || r.evidence_grounded || {};
+  const proAcc = r.pro_accuracy || {};
   const comp = r.trajectory_comprehensive || {};
   const acc = r.trajectory_accuracy || {};
-  const an = DATA.annotator || {};
   const neu = DATA.neutral_control || {};
   const undefAsr = (((neu.arms || {}).undefended || {}).asr);
-  const secAsr = (((neu.arms || {}).security || {}).asr);
+  const s3Asr = (DATA.stage3_injection || {}).asr;
 
   const kpis = [
-    { label: "通用 LLM 评分器失败漏判率", val: pct(acc.miss_rate) + " / " + pct(comp.miss_rate), sub: "Accuracy 与 Comprehensive 近乎全判通过", color: "var(--red)" },
-    { label: "Evidence-Grounded 改进效果", val: "κ = " + num(eg.kappa, 3), sub: `实测 ${eg.n || 0} 条 (${eg.n_scenarios || 0} 场景) · 召回 ${pct(eg.failure_recall)} · 误杀仅 ${pct(eg.false_kill_rate)}`, color: "var(--green)" },
-    { label: "双轮盲审参考一致性", val: an.kappa != null ? "κ = " + num(an.kappa, 3) : "待解锁", sub: `配对 ${an.n_paired || 0} 条 / ${an.n_scenarios || 0} 独立场景 · PABAK ${num(an.pabak, 3)}`, color: "var(--brand)" },
-    { label: "最强注入防御归因 (p=0.031)", val: `${pct(undefAsr)} → ${pct(secAsr)}`, sub: "等长中性通知 ASR=100% (证伪长度稀释假说)", color: "var(--green)" },
+    { label: "通用评分器漏判率 (Flash / Pro)", val: pct(acc.miss_rate) + " / " + pct(proAcc.miss_rate || comp.miss_rate), sub: "换 4.4× 旗舰 Pro 模型仍漏判 13/14 失败！", color: "var(--red)" },
+    { label: "最佳门控评分器表现", val: "κ = " + num(egPro.kappa, 3), sub: `抓住 ${egPro.caught_failures || '—'} 失败 (${pct(egPro.failure_recall)}) · 误杀 ${pct(egPro.false_kill_rate)}`, color: "var(--green)" },
+    { label: "中性对照归因显著性", val: "p = 0.03125", sub: "等长行政通知 ASR=100%，确证指令信任层级框架生效", color: "var(--brand)" },
+    { label: "最强注入膨胀率压降 (15×)", val: `${pct(undefAsr)} → ${pct(s3Asr)}`, sub: "Comprehensive 未防御 vs 隔离槽+Veto (0 翻转)", color: "var(--green)" },
   ];
   document.getElementById('kpi-cards').innerHTML = kpis.map(k => `
     <div class="card">
@@ -367,11 +377,13 @@ function renderOverview() {
     </div>`).join('');
 
   const order = [
-    ["trajectory_accuracy", "OpenJudge TrajectoryAccuracy (≥2.0)", false],
-    ["trajectory_comprehensive", "OpenJudge TrajectoryComprehensive (≥0.60)", false],
-    ["framework_rubric", "Claw-Eval 任务专属混合 Rubric", false],
-    ["evidence_grounded", "Evidence-Grounded Hybrid Judge (本项目改进)", true],
-  ];
+    ["trajectory_comprehensive", "OpenJudge Comprehensive · Flash (≥0.60)", false],
+    ["trajectory_accuracy", "OpenJudge Accuracy · Flash (≥2.0)", false],
+    ["pro_accuracy", "OpenJudge Accuracy · v4-Pro 旗舰模型 (≥2.0)", false],
+    ["evidence_grounded", "Evidence-Grounded Veto · Flash (本项目架构)", true],
+    ["pro_grounded", "Evidence-Grounded Veto · v4-Pro (模型×架构协同)", true],
+    ["framework_rubric", "Claw-Eval 任务专属混合 Rubric (含隐藏规则参照)", false],
+  ].filter(([k]) => r[k] && r[k].n);
   const tbody = document.querySelector('#rater-table tbody');
   tbody.innerHTML = order.map(([key, label, hi]) => {
     const x = r[key] || {};

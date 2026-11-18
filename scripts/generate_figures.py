@@ -33,27 +33,35 @@ def _num(val: float | None, digits: int = 3) -> str:
     return "N/A" if val is None else f"{val:.{digits}f}"
 
 
-def build_fig1_judge_reliability(stage3: dict[str, Any], agreement: dict[str, Any]) -> str:
-    """SVG 1: Judge Reliability Gap & Evidence-Grounded Improvement."""
+def build_fig1_judge_reliability(stage3: dict[str, Any], agreement: dict[str, Any], factorial: dict[str, Any] | None = None) -> str:
+    """SVG 1: Judge Reliability Gap & 2x2 Model-Scale x Architecture Factorial."""
     raters = (stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("raters") or {}
+    fac_cells = (((factorial or {}).get("views") or {}).get("v2_labels") or {}).get("cells") or {}
     human_k = ((agreement.get("test_retest") or {}).get("kappa"))
-    eg_n = raters.get("evidence_grounded", {}).get("n", 37)
+    eg_n = raters.get("evidence_grounded", {}).get("n", 47)
 
     entries = [
-        ("Always-Pass 基线 (n=48)", 0.0, 0.0, 0.50, "#94a3b8"),
-        ("OpenJudge Accuracy (n=48)", raters.get("trajectory_accuracy", {}).get("kappa") or 0.0,
-         raters.get("trajectory_accuracy", {}).get("failure_recall") or 0.0,
-         raters.get("trajectory_accuracy", {}).get("balanced_accuracy") or 0.50, "#f97316"),
-        ("OpenJudge Comprehensive (n=48)", raters.get("trajectory_comprehensive", {}).get("kappa") or 0.0,
+        ("OpenJudge Comprehensive (Flash)", raters.get("trajectory_comprehensive", {}).get("kappa") or 0.0,
          raters.get("trajectory_comprehensive", {}).get("failure_recall") or 0.0,
          raters.get("trajectory_comprehensive", {}).get("balanced_accuracy") or 0.50, "#ef4444"),
-        (f"Evidence-Grounded 改进 (n={eg_n})", raters.get("evidence_grounded", {}).get("kappa") or 0.0,
+        ("OpenJudge Accuracy (Flash)", raters.get("trajectory_accuracy", {}).get("kappa") or 0.0,
+         raters.get("trajectory_accuracy", {}).get("failure_recall") or 0.0,
+         raters.get("trajectory_accuracy", {}).get("balanced_accuracy") or 0.50, "#f97316"),
+        (f"Evidence-Grounded (Flash, n={eg_n})", raters.get("evidence_grounded", {}).get("kappa") or 0.0,
          raters.get("evidence_grounded", {}).get("failure_recall") or 0.0,
-         raters.get("evidence_grounded", {}).get("balanced_accuracy") or 0.50, "#10b981"),
-        ("Claw-Eval 任务专属 Rubric (n=48)", raters.get("framework_rubric", {}).get("kappa") or 0.0,
-         raters.get("framework_rubric", {}).get("failure_recall") or 0.0,
-         raters.get("framework_rubric", {}).get("balanced_accuracy") or 0.50, "#3b82f6"),
+         raters.get("evidence_grounded", {}).get("balanced_accuracy") or 0.50, "#14b8a6"),
     ]
+    if fac_cells.get("pro_accuracy", {}).get("n"):
+        pa = fac_cells["pro_accuracy"]
+        entries.append((f"OpenJudge Accuracy (v4-Pro, n={pa['n']})", pa.get("kappa") or 0.0,
+                        pa.get("failure_recall") or 0.0, pa.get("balanced_accuracy") or 0.50, "#eab308"))
+    if fac_cells.get("pro_grounded", {}).get("n"):
+        pg = fac_cells["pro_grounded"]
+        entries.append((f"Evidence-Grounded (v4-Pro, n={pg['n']})", pg.get("kappa") or 0.0,
+                        pg.get("failure_recall") or 0.0, pg.get("balanced_accuracy") or 0.50, "#10b981"))
+    entries.append(("Claw-Eval 任务专属 Rubric (n=48)", raters.get("framework_rubric", {}).get("kappa") or 0.0,
+                    raters.get("framework_rubric", {}).get("failure_recall") or 0.0,
+                    raters.get("framework_rubric", {}).get("balanced_accuracy") or 0.50, "#3b82f6"))
 
     w, h = 880, 430
     left, top, plot_w, plot_h = 225, 86, 600, 275
@@ -162,17 +170,14 @@ def build_fig3_injection_attribution(stage3: dict[str, Any], rob: dict[str, Any]
     """SVG 3: Prompt-Injection Score Inflation (L3_notice/tool_result) & Neutral-Control Attribution."""
     neu = stage3.get("neutral_control") or {}
     arms = neu.get("arms") or {}
+    s3_inj = ((stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("injection_l3_tool_result") or {})
     missing = ((rob.get("missingness") or {}).get("by_defended") or {})
-    p4_v2_path = root / "reports/p4-v2.json"
-    p4_v2 = json.loads(p4_v2_path.read_text(encoding="utf-8")) if p4_v2_path.is_file() else {}
-    p4_inj = ((p4_v2.get("injection") or {}).get("variants") or {})
-    acc_undef = p4_inj.get("trajectory_accuracy|think=off|direct1::L3_notice/tool_result") or {}
-    acc_def = p4_inj.get("trajectory_accuracy|think=off|direct1|def::L3_notice/tool_result") or {}
 
     undef_err = (missing.get("False") or {}).get("invalid_rate") or 0.0093
     sec_err = (missing.get("True") or {}).get("invalid_rate") or 0.0220
     neu_arm = arms.get("neutral") or {}
     neu_err = (neu_arm.get("invalid_rows", 0) / neu_arm.get("total_rows", 32)) if neu_arm.get("total_rows") else 0.0
+    s3_pert_err = (s3_inj.get("pert_errors", 0) / max(1, s3_inj.get("valid_pairs", 16) + s3_inj.get("pert_errors", 0)))
 
     bars = [
         ("Comprehensive 未防御 (r=0)", (arms.get("undefended") or {}).get("asr") or 0.0,
@@ -181,8 +186,8 @@ def build_fig3_injection_attribution(stage3: dict[str, Any], rob: dict[str, Any]
          neu_arm.get("mean_delta") or 0.0, neu_err, "#eab308"),
         ("Comprehensive + 安全信任声明", (arms.get("security") or {}).get("asr") or 0.0,
          (arms.get("security") or {}).get("mean_delta") or 0.0, sec_err, "#3b82f6"),
-        ("Accuracy 未防御 → 安全声明", (acc_def.get("asr") if acc_def.get("asr") is not None else 0.0208),
-         (acc_def.get("mean_inflation") if acc_def.get("mean_inflation") is not None else 0.0), 0.0, "#10b981"),
+        ("Evidence-Grounded (隔离槽+Veto)", s3_inj.get("asr") if s3_inj.get("asr") is not None else 0.0625,
+         s3_inj.get("mean_delta") if s3_inj.get("mean_delta") is not None else -0.0423, s3_pert_err, "#10b981"),
     ]
 
     w, h = 880, 400
@@ -255,12 +260,14 @@ def main() -> int:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     stage3_path = root / "reports/stage3_and_neutral_v2.json"
     stage3 = json.loads(stage3_path.read_text(encoding="utf-8")) if stage3_path.is_file() else {}
+    fac_path = root / "reports/pro_factorial_v2.json"
+    factorial = json.loads(fac_path.read_text(encoding="utf-8")) if fac_path.is_file() else {}
     agreement = json.loads((root / "reports/annotator_agreement.json").read_text(encoding="utf-8"))
     cal = json.loads((root / "reports/phase4_calibration.json").read_text(encoding="utf-8"))
     rob = json.loads((root / "reports/robustness_v2.json").read_text(encoding="utf-8"))
 
     outputs = {
-        FIG_DIR / "fig1_judge_reliability.svg": build_fig1_judge_reliability(stage3, agreement),
+        FIG_DIR / "fig1_judge_reliability.svg": build_fig1_judge_reliability(stage3, agreement, factorial),
         FIG_DIR / "fig2_saturation_calibration.svg": build_fig2_saturation_calibration(cal, stage3),
         FIG_DIR / "fig3_injection_attribution.svg": build_fig3_injection_attribution(stage3, rob),
         FIG_DIR / "fig4_data_pipeline_funnel.svg": build_fig4_data_pipeline_funnel(),

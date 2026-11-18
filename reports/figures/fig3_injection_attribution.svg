@@ -21,8 +21,8 @@
 <text x="231" y="239.5" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Comprehensive + 安全信任声明</text>
 <rect x="245" y="221.5" width="245.0" height="24" rx="4" fill="#3b82f6"/>
 <text x="498.0" y="237.5" font-size="11.5" font-weight="600" fill="#1e293b">ASR 43.8% (Δ=+0.015 · 格式异常 2.2%)</text>
-<text x="231" y="298.2" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Accuracy 未防御 → 安全声明</text>
-<rect x="245" y="280.2" width="11.6" height="24" rx="4" fill="#10b981"/>
-<text x="264.6" y="296.2" font-size="11.5" font-weight="600" fill="#1e293b">ASR 2.1% (Δ=+0.000 · 格式异常 0.0%)</text>
+<text x="231" y="298.2" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">Evidence-Grounded (隔离槽+Veto)</text>
+<rect x="245" y="280.2" width="35.0" height="24" rx="4" fill="#10b981"/>
+<text x="288.0" y="296.2" font-size="11.5" font-weight="600" fill="#1e293b">ASR 6.2% (Δ=-0.042 · 格式异常 0.0%)</text>
 <text x="28" y="382" font-size="11" fill="#64748b">数据源：reports/stage3_and_neutral_v2.json &amp; reports/robustness_v2.json · 中性通知 SHA-256 事前冻结于 PREREG_v2 §8</text>
 </svg>
