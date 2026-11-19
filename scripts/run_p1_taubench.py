@@ -268,6 +268,7 @@ def _run_grounded_batch(
     ablation: str,
     prompt_variant: str,
     workers: int = 4,
+    max_tokens: int = 2048,
 ) -> dict[str, int]:
     from concurrent.futures import ThreadPoolExecutor
     import threading
@@ -281,7 +282,7 @@ def _run_grounded_batch(
         "variant": "original",
         "repeat_id": 0,
         "input_sha256": make_key({"messages": t["messages"]}),
-        "max_tokens": 1280,
+        "max_tokens": max_tokens,
     } for t in traces]
     keys = [make_key(d) for d in descriptors]
     plan = {
@@ -341,7 +342,9 @@ def _run_grounded_batch(
             row = grade_trajectory_grounded(
                 tr["trace_id"], tr["messages"], client,
                 repeat_id=0, variant="original", phase=phase,
+                max_tokens=max_tokens,
                 commit=commit, ablation=ablation, prompt_variant=prompt_variant,
+                schema_retries=1,
             )
             row["job_id"] = k
             row["provider"] = client.settings.provider
@@ -535,6 +538,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--prompt-variant", default="v0", choices=PROMPT_VARIANTS)
     parser.add_argument("--limit", type=int, default=0, help="Optional prefix limit for small pilot checks (0 = all 200)")
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--max-tokens", type=int, default=None, help="Override completion max_tokens (e.g. 8192 for always-thinking relays)")
     parser.add_argument("--cap-usd", type=float)
     parser.add_argument("--offline", action="store_true")
     parser.add_argument("--run-prefix", default="p1")
@@ -594,9 +598,10 @@ def main(argv: list[str] | None = None) -> int:
                 traces, client, out_jsonl, run_dir,
                 phase=args.run_prefix, ablation=args.ablation,
                 prompt_variant=args.prompt_variant, workers=args.workers,
+                max_tokens=args.max_tokens or 2048,
             )
         else:
-            cfg = JudgeConfig(g, False, "direct", 1, defended=False)
+            cfg = JudgeConfig(g, False, "direct", 1, max_tokens=args.max_tokens, defended=False)
             jobs = [(t["trace_id"], t["messages"], cfg, 0, "original") for t in traces]
             counts = run_jobs(jobs, client, out_jsonl, workers=args.workers, run_dir=run_dir, phase=args.run_prefix, schema_retries=1)
         print(json.dumps({"run_id": run_id, "grader": g, **counts}))

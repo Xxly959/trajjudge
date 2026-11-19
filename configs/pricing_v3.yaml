@@ -16,6 +16,16 @@ models:
     off_peak_input_per_mtok: 0.66
     off_peak_output_per_mtok: 1.98
     off_peak_input_cache_hit_per_mtok: 0.022
+  # Relay models on api.hubcore.cn (conservative DeepSeek-equivalent budget guard rates, not invoice)
+  deepseek-v4.1-flash-1017:
+    input_per_mtok: 0.30
+    output_per_mtok: 1.20
+  deepseek-v4.1-flash:
+    input_per_mtok: 0.30
+    output_per_mtok: 1.20
+  deepseek-v4-flash:
+    input_per_mtok: 0.30
+    output_per_mtok: 1.20
   qwen-plus:
     input_per_mtok: null
     output_per_mtok: null

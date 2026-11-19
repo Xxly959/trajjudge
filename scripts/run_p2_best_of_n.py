@@ -154,6 +154,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--n-tasks", type=int, default=60)
     parser.add_argument("--graders", nargs="+", default=["trajectory_comprehensive", GRADER_NAME])
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--max-tokens", type=int, default=None)
     parser.add_argument("--cap-usd", type=float)
     parser.add_argument("--offline", action="store_true")
     args = parser.parse_args(argv)
@@ -208,9 +209,10 @@ def main(argv: list[str] | None = None) -> int:
             counts = drv._run_grounded_batch(
                 cand_traces, client, out_jsonl, run_dir,
                 phase="p2bon", ablation="full", prompt_variant="v0", workers=args.workers,
+                max_tokens=args.max_tokens or 2048,
             )
         else:
-            cfg = JudgeConfig(g, False, "direct", 1, defended=False)
+            cfg = JudgeConfig(g, False, "direct", 1, max_tokens=args.max_tokens, defended=False)
             jobs = [(t["trace_id"], t["messages"], cfg, 0, "original") for t in cand_traces]
             counts = run_jobs(jobs, client, out_jsonl, workers=args.workers, run_dir=run_dir, phase="p2bon", schema_retries=1)
         print(json.dumps({"run_id": run_id, **counts}))

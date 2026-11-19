@@ -107,6 +107,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--graders", nargs="+", default=["trajectory_comprehensive", GRADER_NAME])
     parser.add_argument("--ablation", default="full", choices=("full", "no_quarantine"))
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--max-tokens", type=int, default=None)
     parser.add_argument("--cap-usd", type=float)
     parser.add_argument("--offline", action="store_true")
     args = parser.parse_args(argv)
@@ -199,7 +200,8 @@ def main(argv: list[str] | None = None) -> int:
                     return
                 row = grade_trajectory_grounded(
                     tid, msgs, client, repeat_id=rep_id, variant=var,
-                    phase="p15", commit=commit, ablation=args.ablation,
+                    phase="p15", max_tokens=args.max_tokens or 2048, commit=commit, ablation=args.ablation,
+                    schema_retries=1,
                 )
                 row["job_id"] = k
                 with lock:
@@ -215,7 +217,7 @@ def main(argv: list[str] | None = None) -> int:
                 list(pool.map(work, todo))
             counts["stopped_early"] = int(stop.is_set())
         else:
-            cfg = JudgeConfig(g, False, "direct", 1, defended=False)
+            cfg = JudgeConfig(g, False, "direct", 1, max_tokens=args.max_tokens, defended=False)
             jobs = [(tid, msgs, cfg, rep_id, var) for tid, msgs, var, rep_id in items]
             counts = run_jobs(jobs, client, out_jsonl, workers=args.workers, run_dir=run_dir, phase="p15", schema_retries=1)
         print(json.dumps({"run_id": run_id, **counts}))

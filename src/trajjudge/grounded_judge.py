@@ -477,6 +477,7 @@ def grade_trajectory_grounded(
     commit: str = "local",
     ablation: str = "full",
     prompt_variant: str = "v0",
+    schema_retries: int = 0,
 ) -> dict[str, Any]:
     """Run the Evidence-Grounded Hybrid Judge once and return a standard grader row."""
     if ablation not in ABLATION_MODES:
@@ -512,34 +513,49 @@ def grade_trajectory_grounded(
         ledger, ablation=ablation, prompt_variant=prompt_variant, raw_messages=messages,
     )
     tag = f"{phase}/{trace_id}/{variant}/{config_name}/{repeat_id}"
-    try:
-        result = client.complete(
-            prompt_messages,
-            thinking=thinking,
-            max_tokens=max_tokens,
-            response_format={"type": "json_object"},
-            repeat_id=f"{repeat_id}.0",
-            tag=tag,
-        )
-    except LLMError as exc:
-        return {**row, "status": "error", "reason": str(exc), "fatal": True}
-    except Exception as exc:
-        return {**row, "status": "error", "reason": f"{type(exc).__name__}: {str(exc)[:200]}"}
+    total_usage = {"api_calls": 0, "cached_calls": 0, "prompt_tokens": 0, "completion_tokens": 0}
+    last_error = ""
+    evaluated: dict[str, Any] | None = None
 
-    row["usage"] = {
-        "api_calls": int(not result.cached),
-        "cached_calls": int(result.cached),
-        "prompt_tokens": result.prompt_tokens,
-        "completion_tokens": result.completion_tokens,
-    }
-    choices = (result.raw_response or {}).get("choices") or []
-    if not choices or choices[0].get("finish_reason") != "stop":
-        return {**row, "status": "error", "reason": "incomplete completion (finish_reason != stop)"}
-    try:
-        parsed = json.loads(result.text)
-        evaluated = validate_and_score_grounded(parsed, ledger, apply_veto=(ablation != "no_veto"))
-    except (ValueError, TypeError, json.JSONDecodeError) as exc:
-        return {**row, "status": "error", "reason": f"invalid grounded verdict: {exc}"[:300]}
+    for attempt in range(schema_retries + 1):
+        rep_key = f"{repeat_id}.0" if attempt == 0 else f"{repeat_id}.retry{attempt}"
+        try:
+            result = client.complete(
+                prompt_messages,
+                thinking=thinking,
+                max_tokens=max_tokens,
+                response_format={"type": "json_object"},
+                repeat_id=rep_key,
+                tag=tag,
+            )
+        except LLMError as exc:
+            return {**row, "usage": total_usage, "status": "error", "reason": str(exc), "fatal": True}
+        except Exception as exc:
+            last_error = f"{type(exc).__name__}: {str(exc)[:200]}"
+            continue
+
+        total_usage["api_calls"] += int(not result.cached)
+        total_usage["cached_calls"] += int(result.cached)
+        total_usage["prompt_tokens"] += result.prompt_tokens
+        total_usage["completion_tokens"] += result.completion_tokens
+
+        choices = (result.raw_response or {}).get("choices") or []
+        if not choices or choices[0].get("finish_reason") != "stop":
+            last_error = "incomplete completion (finish_reason != stop)"
+            continue
+        try:
+            parsed = json.loads(result.text)
+            evaluated = validate_and_score_grounded(parsed, ledger, apply_veto=(ablation != "no_veto"))
+            if attempt > 0:
+                row["schema_retry_attempts"] = attempt
+            break
+        except (ValueError, TypeError, json.JSONDecodeError) as exc:
+            last_error = f"invalid grounded verdict: {exc}"[:300]
+            continue
+
+    row["usage"] = total_usage
+    if evaluated is None:
+        return {**row, "status": "error", "reason": last_error}
 
     row.update(
         score=evaluated["score"],

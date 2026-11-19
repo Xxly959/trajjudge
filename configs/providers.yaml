@@ -30,6 +30,30 @@ providers:
       judge: false
       agent: false
 
+  hubcore_flash:
+    api_key_env: HUBCORE_API_KEY
+    base_url_env: HUBCORE_BASE_URL
+    base_url: https://api.hubcore.cn/v1
+    thinking_style: deepseek
+    models:
+      judge: deepseek-v4.1-flash-1017
+      agent: deepseek-v4.1-flash-1017
+    thinking:
+      judge: false
+      agent: false
+
+  hubcore_pro:
+    api_key_env: HUBCORE_API_KEY
+    base_url_env: HUBCORE_BASE_URL
+    base_url: https://api.hubcore.cn/v1
+    thinking_style: deepseek
+    models:
+      judge: deepseek-v4-pro
+      agent: deepseek-v4-pro
+    thinking:
+      judge: false
+      agent: false
+
   qwen:
     api_key_env: DASHSCOPE_API_KEY
     base_url_env: DASHSCOPE_BASE_URL
