@@ -291,3 +291,161 @@ def hybrid_evidence(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "grader_false_fail_on_human_pass": {g: sum(false_kill(r, g) for r in passes) for g in THRESHOLDS},
         "status": "exploratory",
     }
+
+
+# ------------------------------------------------------------------ P0-4 same-FPR & McNemar
+
+
+def roc_curve_fail(truth_pass: Sequence[bool], scores: Sequence[float]) -> list[dict[str, float | None]]:
+    """ROC curve for failure detection (positive = fail, higher failure signal = lower score).
+
+    Returns monotonically non-decreasing ``(fpr, tpr)`` points from ``(0, 0)`` to ``(1, 1)``,
+    where ``fpr`` is the false-kill rate on true passes and ``tpr`` is failure recall on true fails.
+    Ties in score are stepped together so tie ordering never manufactures optimistic points.
+    """
+    if len(truth_pass) != len(scores):
+        raise ValueError("truth_pass and scores must be the same length")
+    n_fail = sum(not t for t in truth_pass)
+    n_pass = sum(bool(t) for t in truth_pass)
+    if not n_fail or not n_pass:
+        return []
+    # Predict fail when score <= cutoff (ascending score order).
+    order = sorted(range(len(scores)), key=lambda i: float(scores[i]))
+    points: list[dict[str, float | None]] = [{"fpr": 0.0, "tpr": 0.0, "threshold": None}]
+    tp_fail = 0
+    fp_kill = 0
+    idx = 0
+    while idx < len(order):
+        end = idx
+        cutoff = float(scores[order[idx]])
+        while end + 1 < len(order) and float(scores[order[end + 1]]) == cutoff:
+            end += 1
+        for pos in order[idx : end + 1]:
+            if truth_pass[pos]:
+                fp_kill += 1
+            else:
+                tp_fail += 1
+        points.append({
+            "fpr": fp_kill / n_pass,
+            "tpr": tp_fail / n_fail,
+            "threshold": cutoff,
+        })
+        idx = end + 1
+    return points
+
+
+def pr_curve_fail(truth_pass: Sequence[bool], scores: Sequence[float]) -> list[dict[str, float | None]]:
+    """Precision-Recall curve for failure detection (positive = fail, ascending score cutoff)."""
+    if len(truth_pass) != len(scores):
+        raise ValueError("truth_pass and scores must be the same length")
+    n_fail = sum(not t for t in truth_pass)
+    n_pass = sum(bool(t) for t in truth_pass)
+    if not n_fail or not n_pass:
+        return []
+    order = sorted(range(len(scores)), key=lambda i: float(scores[i]))
+    points: list[dict[str, float | None]] = [{"recall": 0.0, "precision": 1.0, "threshold": None}]
+    tp_fail = 0
+    seen = 0
+    idx = 0
+    while idx < len(order):
+        end = idx
+        cutoff = float(scores[order[idx]])
+        while end + 1 < len(order) and float(scores[order[end + 1]]) == cutoff:
+            end += 1
+        for pos in order[idx : end + 1]:
+            seen += 1
+            if not truth_pass[pos]:
+                tp_fail += 1
+        points.append({
+            "recall": tp_fail / n_fail,
+            "precision": tp_fail / seen,
+            "threshold": cutoff,
+        })
+        idx = end + 1
+    return points
+
+
+def recall_at_fpr(truth_pass: Sequence[bool], scores: Sequence[float], max_fpr: float) -> dict[str, float | None]:
+    """Failure recall at a target false-kill rate ``max_fpr``.
+
+    Reports both:
+    * ``step``: maximum achievable TPR at a deterministic threshold with ``FPR <= max_fpr``;
+    * ``interpolated``: linear ROC interpolation at ``FPR == max_fpr`` (standard for tied/coarse scores).
+    """
+    if not (0.0 <= max_fpr <= 1.0):
+        raise ValueError("max_fpr must be in [0, 1]")
+    curve = roc_curve_fail(truth_pass, scores)
+    if not curve:
+        return {"step": None, "interpolated": None}
+    eps = 1e-12
+    feasible = [p for p in curve if float(p["fpr"]) <= max_fpr + eps]
+    step_tpr = max(float(p["tpr"]) for p in feasible) if feasible else 0.0
+    interp_tpr = step_tpr
+    for prev, curr in zip(curve, curve[1:]):
+        x0, y0 = float(prev["fpr"]), float(prev["tpr"])
+        x1, y1 = float(curr["fpr"]), float(curr["tpr"])
+        if x0 <= max_fpr <= x1:
+            if math.isclose(x1, x0):
+                interp_tpr = max(interp_tpr, y1)
+            else:
+                frac = (max_fpr - x0) / (x1 - x0)
+                interp_tpr = y0 + frac * (y1 - y0)
+            break
+    return {"step": step_tpr, "interpolated": interp_tpr}
+
+
+def exact_mcnemar(
+    truth_pass: Sequence[bool],
+    pred_a: Sequence[bool],
+    pred_b: Sequence[bool],
+    *,
+    fail_only: bool = False,
+) -> dict[str, Any]:
+    """Exact two-sided McNemar test comparing correctness of binary decisions ``pred_a`` vs ``pred_b``.
+
+    When ``fail_only=True``, restricts to true-fail items (``not truth``), testing whether
+    ``pred_b`` recalls significantly more failures than ``pred_a``.
+    """
+    if not (len(truth_pass) == len(pred_a) == len(pred_b)):
+        raise ValueError("truth_pass, pred_a, pred_b must have equal length")
+    a_only = 0  # A correct, B wrong
+    b_only = 0  # A wrong, B correct
+    both_ok = 0
+    both_wrong = 0
+    n = 0
+    for t, pa, pb in zip(truth_pass, pred_a, pred_b):
+        if fail_only and t:
+            continue
+        n += 1
+        ok_a = (bool(pa) == bool(t))
+        ok_b = (bool(pb) == bool(t))
+        if ok_a and ok_b:
+            both_ok += 1
+        elif ok_a and not ok_b:
+            a_only += 1
+        elif not ok_a and ok_b:
+            b_only += 1
+        else:
+            both_wrong += 1
+    discordant = a_only + b_only
+    if discordant == 0:
+        p_val = 1.0
+    else:
+        m_low = min(a_only, b_only)
+        tail = sum(math.comb(discordant, k) for k in range(m_low + 1)) / (2 ** discordant)
+        p_val = min(1.0, 2.0 * tail)
+    rate_a = (both_ok + a_only) / n if n else None
+    rate_b = (both_ok + b_only) / n if n else None
+    return {
+        "n": n,
+        "fail_only": fail_only,
+        "both_correct": both_ok,
+        "both_wrong": both_wrong,
+        "a_only_correct": a_only,
+        "b_only_correct": b_only,
+        "discordant": discordant,
+        "rate_a": rate_a,
+        "rate_b": rate_b,
+        "diff_b_minus_a": (rate_b - rate_a) if (rate_a is not None and rate_b is not None) else None,
+        "exact_p": p_val,
+    }

@@ -63,7 +63,7 @@ phase1:
 	$(PY) scripts/run_phase1.py
 
 # These report targets read local artifacts only and never call a model.
-.PHONY: phase2 phase3 phase4 rule-controls dataset figures showcase stage3-report pro-factorial
+.PHONY: phase2 phase3 phase4 rule-controls dataset p0-analysis figures showcase stage3-report pro-factorial
 phase2:
 	$(PY) scripts/report_experiments.py p2
 phase3:
@@ -75,6 +75,8 @@ rule-controls:
 	$(PY) scripts/report_experiments.py controls
 dataset:
 	$(PY) scripts/build_dataset.py
+p0-analysis:
+	$(PY) scripts/p0_analysis.py
 stage3-report:
 	$(PY) scripts/run_stage3_and_neutral.py report
 pro-factorial:

@@ -1,114 +1,130 @@
-# TrajJudge v2 终版研究与工程技术报告
+# TrajJudge v2 技术报告（P0 口径修订版）
 
-更新日期：2026-11-18 · 口径标准：[PREREG_v2.md](../docs/PREREG_v2.md)（含变更控制 CC-1 / CC-2）
+更新日期：2026-11-19 · 口径总表：[CLAIMS.md](../docs/CLAIMS.md) · 预注册协议：[PREREG_v2.md](../docs/PREREG_v2.md)
 
-本报告区分**确定性工程验证**、**预注册确认性检验（Confirmatory）**与**探索性分析（Exploratory）**。所有数字均可从仓库跟踪的 JSON 聚合产物或本地冻结原始证据零网络调用复算。
+本报告严格区分 **确定性工程验证（`deterministic`）**、**预注册确认性检验（`confirmatory`）**、**暂定结果（`provisional`）**、**探索性分析（`exploratory`）** 与 **已撤回记录（`retracted`）**。所有数值均直接取自仓库内跟踪的 JSON 产物，并与 [docs/CLAIMS.md](../docs/CLAIMS.md) 一一对应。
 
 ---
 
-## 1. 项目定位与架构全景
+## 1. 定位与研究问题
 
-`TrajJudge` 连接多沙箱智能体基准 **Claw-Eval**（固定提交 `5680b8b`）、开源评估框架 **OpenJudge**（固定提交 `7d27246`）、公开 **SWE-bench Multilingual** 运行归档（固定提交 `8dcca98`）与自研 **Harbor 容器化原创编程题**，解决工业界 Agent 落地中的三个核心问题：
+`TrajJudge` 是面向多步工具调用 Agent（及自托管运行时 `LightClaw`）的轨迹元评测与质量审计框架，在不修改上游 [Claw-Eval](https://github.com/claw-eval/claw-eval)（`5680b8b`）与 [OpenJudge](https://github.com/agentscope-ai/OpenJudge)（`7d27246`）源码的前提下，回答三个问题：
 
-1. **RQ1（评分可靠性与校准边界）**：通用 LLM-as-a-Judge 轨迹评分器能否识别多步工具调用中的真实失败？阈值校准与结构化门控各自的能力上限在哪里？
-2. **RQ2（重复稳定性与聚合机制）**：同一轨迹重复评估的波动有多大？上游聚合策略（Average / Voting）在离散与连续评分量表上的真实数学行为是什么？
-3. **RQ3（抗间接提示注入与归因）**：嵌入工具返回（`tool_result`）或助手末轮的良性高分诱导文本能否操纵评分？系统级不信任声明的防御效果源于**指令信任层级框架**还是单纯的**提示词长度稀释**？存在什么工程副作用？
+1. **RQ1（评分可靠性、校准极限与同误杀率对比）**：通用 LLM 轨迹评分器能否识别多步工具调用中的真实失败？升级模型规模或重构评分器架构，在默认阈值与**相同误杀率**下各表现如何？
+2. **RQ2（重复稳定性与上游聚合机制）**：同一轨迹重复评估的波动有多大？上游 `Average` / `Voting` 聚合策略在连续分上的真实数学行为是什么？
+3. **RQ3（间接提示注入、无攻击噪声底与防御副作用）**：嵌入工具返回或助手末轮的诱导文本能否导致决策翻转或分数膨胀？相对于无攻击重复打分噪声底，真实偏移有多大？防御提示词会带来什么格式副作用？
 
 ![评分器可靠性对比](figures/fig1_judge_reliability.svg)
 
 ---
 
-## 2. 语料、去重口径与双轮盲标可靠性（闸门 A）
+## 2. 语料、去重口径与双轮盲标一致性（Gate A）
 
-### 2.1 语言无关场景指纹去重（消除伪重复）
-- P2 采集 **87 条**真实模型执行轨迹（覆盖 51 个 `task_id`，全部无损通过 Sidecar `system` 恢复与工具调用链配对校验）。
-- 通过静态结构指纹（[build_scenario_map.py](../scripts/build_scenario_map.py)）剔除中英文译本孪生副本后，51 个 `task_id` 实为 **36 个语言无关独立场景（`scenario_id`）**；50 条冻结盲标集覆盖 **28 个独立场景**（首轮完成 48 条标注，2 条空白 `Be5538d`、`Bf3d4a1` 按审计日志显式退役，`annotation/labels.csv` SHA-256 保持 `93add768…57fe9` 不变）。
-- v2 统计引擎全面采用 **`scenario_id` 整簇 Bootstrap（B=2000, seed=0）**，拒绝零宽置信区间（`lo == hi` 统一输出 `null / 不可估`），并显式报告未定义重采样占比。
-
-### 2.2 双轮盲标一致性与金标准稳定性判定
-- 首轮（Round 1，48 条）为单次直觉盲标（其中 32/48 条触发理由过短提示）；次轮（Round 2，48 条全覆盖，见 `CC-2`）采用独立洁净室盲审协议，强制每条判定绑定具体 `[消息编号]` 工具返回证据，并在次轮完成后对两条首轮争议样本（`B78c979` 竞品融资已写明、`Bed2fd2` 首轮跨题笔误）通过 `amend` 追加裁定日志。
-- **跨轮一致性（[annotator_agreement.json](annotator_agreement.json)）**：
-  - 全量 48 对（28 场景）：原始一致率 **`66.67%`**，**Cohen's $\kappa = 0.2500$**（簇 95% CI `[-0.0449, 0.5053]`），**PABAK = `0.3333`**。
-  - 敏感性口径（剔除 `B78c979`、`Bed2fd2` 两条首轮笔误项，46 对 / 28 场景）：$\kappa$ 簇 95% CI 升至 **`[0.0052, 0.5593]`**（下界转正）。
-- **科学判定（按 PREREG_v2 §5b 事前阈值 0.60）**：单次无引证直觉标注在 20–38 轮复杂工具轨迹上存在显著主观与核对噪声（$\kappa < 0.60$）。因此，所有以人工标签为参照的评分器一致度指标严格定性为 **exploratory**，并按 `CC-1` 同时并列报告 **`标签 v1`（原始首轮）** 与 **`标签 v2`（含追加式裁定）**。
+- **去重口径**：P2 实采 **87 条**轨迹（覆盖 51 个 `task_id`），经静态结构指纹合并中英文译本孪生副本后为 **36 个独立场景（`scenario_id`）**；50 条冻结盲标集完成 **48 条**有效标注（覆盖 **28 个独立场景**，2 条空白 `Be5538d`、`Bf3d4a1` 按审计日志显式退役）。所有置信区间均采用 `scenario_id` 整簇 Bootstrap（`B=2000, seed=0`），零宽区间统一标为不可估。
+- **双轮盲标一致性（[annotator_agreement.json](annotator_agreement.json)）**：
+  - 全量 48 对（28 场景）：原始一致率 `66.7%`（`32/48`），Cohen's $\kappa = 0.250$（95% 簇 CI `[-0.045, 0.505]`），`PABAK = 0.333`。
+  - 剔除 2 处首轮笔误（`B78c979`、`Bed2fd2`，46 对 / 28 场景）：$\kappa = 0.309$（95% 簇 CI `[0.005, 0.559]`）。
+- **科学定性**：因 $\kappa = 0.250 < 0.60$，所有以这 48 条人工标签为参照的指标均定性为 **`exploratory`**，并列报告 `v1`、`v2` 与 `round2` 三视图；下一阶段（P1）将用程序可验证客观标签（τ-bench + 扩充 Claw-Eval）重做核心实验。
 
 ---
 
-## 3. RQ1 + Stage 3 + CC-3：2×2 规模×架构因子实验与四级可靠性阶梯
+## 3. RQ1：默认阈值表现、LOSO 校准、同误杀率对比与离线 Veto 审计
 
-所有通用与改进评分器均接收**完全相同的改编 `messages` 视图**（零接触 Benchmark 作者隐藏 Rubric）。下表并列 `标签 v1` 与 `标签 v2` 全量实测结果（数据源：[pro_factorial_v2.json](pro_factorial_v2.json)、[stage3_and_neutral_v2.json](stage3_and_neutral_v2.json)、[phase4_calibration.json](phase4_calibration.json)）：
+### 3.1 默认阈值表现与 2×2 规模×架构对照（探索性 `v2` 标签，48 条 / 28 场景）
 
-| 评分器与模型配置 | 标签口径 | 有效样本 (场景) | 准确率 Acc | Cohen's $\kappa$ | 失败召回率 (抓住失败) | 正常样本误杀率 | 均衡准确率 | 阈值无关 AUC |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| **OpenJudge Comprehensive · Flash** (≥0.60) | v1 / v2 | 48 (28) | 66.7% / 70.8% | 0.000 / 0.000 | **0.0% (0/16) / 0.0% (0/14)** | 0.0% / 0.0% | 50.0% / 50.0% | 0.675 / 0.744 |
-| **OpenJudge Accuracy · Flash** (≥2.0) | v1 / v2 | 48 (28) | 66.7% / 70.8% | 0.040 / 0.056 | **6.2% (1/16) / 7.1% (1/14)** | 3.1% / 2.9% | 51.6% / 52.1% | 0.546 / 0.556 |
-| **OpenJudge Accuracy · v4-Pro** (4.4× 单价) | v1 / v2 | 48 (28) | 64.6% / 68.8% | 0.000 / 0.016 | **6.2% (1/16) / 7.1% (1/14)** | 6.2% / 5.9% | 50.0% / 50.6% | 0.500 / 0.506 |
-| **Evidence-Grounded Veto · Flash** (≥0.50) | v1 / v2 | 47* (28) | 63.8% / 68.1% | 0.034 / 0.064 | **12.5% (2/16) / 14.3% (2/14)** | 9.7% / 9.1% | 51.4% / 52.6% | 0.518 / 0.530 |
-| **Evidence-Grounded Veto · v4-Pro** (≥0.50) | v1 / v2 | 46* (27) | 65.2% / 69.6% | **0.102 / 0.144** | **18.8% (3/16) / 21.4% (3/14)** | 10.0% / 9.4% | **54.4% / 56.0%** | 0.541 / 0.557 |
-| **Claw-Eval 任务专属混合 Rubric** | v1 / v2 | 48 (28) | 77.1% / 81.2% | **0.377 / 0.440** | **31.2% (5/16) / 35.7% (5/14)** | **0.0% / 0.0%** | **65.6% / 67.9%** | 不适用(二值) |
+所有自动评分器均接收完全相同的适配 `messages`（零接触隐藏 Rubric）。数据源：[pro_factorial_v2.json](pro_factorial_v2.json)、[same_fpr_comparison.json](same_fpr_comparison.json)：
 
-*\*注：全部格式/网络异常记录均按 PREREG_v2 §5 忠实保留为 `status="error", score=null`（Flash Grounded 1 条索引类型校验拒绝；Pro Grounded 2 条异常含 1 次长轨迹网络超时预留记账），绝不插补或静默丢弃。*
+| 评分器与模型配置 | 有效样本 (场景) | 默认阈值召回 (`x/14`) | 正常样本误杀 (`x/n`) | Cohen's $\kappa$ (95% 簇 CI) | `ROC-AUC` | `PR-AUC` (95% 簇 CI) |
+| :--- | :---: | :---: | :---: | :--- | :---: | :--- |
+| **OpenJudge Comprehensive · Flash** (`≥0.60`) | 48 (28) | `0/14` (`0.0%`) | `0/34` (`0.0%`) | `0.000` (不可估) | `0.744` | `0.558` `[0.398, 0.687]` |
+| **OpenJudge Accuracy · Flash** (`≥2.0`) | 48 (28) | `1/14` (`7.1%`) | `1/34` (`2.9%`) | `0.056` `[0.000, 0.187]` | `0.556` | `0.333` `[0.171, 0.483]` |
+| **OpenJudge Accuracy · v4-Pro** | 48 (28) | `1/14` (`7.1%`) | `2/34` (`5.9%`) | `0.016` `[-0.047, 0.113]` | `0.506` | `0.295` `[0.152, 0.426]` |
+| **Evidence-Grounded · Flash** (`≥0.50`) | 47 (28) | `2/14` (`14.3%`) | `3/33` (`9.1%`) | `0.064` `[-0.112, 0.288]` | `0.530` | `0.363` `[0.156, 0.518]` |
+| **Evidence-Grounded · v4-Pro** (`≥0.50`) | 46 (27) | `3/14` (`21.4%`) | `3/32` (`9.4%`) | `0.144` `[-0.085, 0.432]` | `0.557` | `0.375` `[0.189, 0.534]` |
+| **Claw-Eval 任务专属混合 Rubric** (二值) | 48 (28) | `5/14` (`35.7%`) | `0/34` (`0.0%`) | `0.440` `[0.101, 0.780]` | `0.679` | `0.545` `[0.286, 0.792]` |
 
-![饱和与校准困境](figures/fig2_saturation_calibration.svg)
+- **模型规模升级零增益**：在 OpenJudge 原生 `Accuracy` 上，将模型从 `deepseek-flash` 升级为 `deepseek-v4-pro`，默认阈值失败召回仍为 `1/14`（Exact McNemar `p = 1.000`；`v1` 同为 `1/16`，`round2` 同为 `0/16`）。
+- **28 折 LOSO 校准（[phase4_calibration.json](phase4_calibration.json)，`v1` 16 失败）**：
+  - `Comprehensive` 在均衡准确率目标下仍漏判 `10/16`（`62.5%`）、误杀 `5/32`（`15.6%`），$\kappa = 0.237$；若强行将训练漏判压至 `≤ 25%`（`miss_0.25`），测试漏判降至 `1/16`（`6.25%`），但误杀升至 `23/32`（`71.9%`）。（注：旧版报告因脚本键名回退错误误将均衡漏判 `62.5%` 写作误杀率，已按 `CLAIMS.md` `R-03` 更正。）
+  - `Accuracy` 的 OOF `AUC = 0.546`（95% 簇 CI `[0.500, 0.610]` 覆盖 `0.5`），在 `miss ≤ 50% / 25% / 10%` 全部目标下退化为 `always_fail`（误杀 `32/32`）。
 
-### 核心实证洞察
-1. **单纯升级模型规模（Flash → v4-Pro）对通用评分器零增益**：在 OpenJudge 原生通用提示词下，换用 4.4 倍单价的旗舰模型 `deepseek-v4-pro`，失败召回率在 `v1`、`v2` 与 `Round 2` 三套标签下**增益均为 0.00%**（`v2` 同为 `1/14 = 7.1%`，$\kappa$ 甚至从 `0.056` 降至 `0.016`；`Round 2` 同为 `0/16`）。这直接否证了“只要换更大模型就能自动修好通用轨迹评分器”的常见工程迷思。
-2. **留一场景校准（LOSO）无法凭空创造区分度**：在 28 折 LOSO 下，将 `Comprehensive` 阈值上调至 0.80–0.95 虽使 $\kappa$ 升至 0.237，但代价是**误杀 62.5% 的正常通过样本**；固定漏判率目标下 `Accuracy` 退化为 `always_fail` 哨兵。硬样本分类学（[failure_taxonomy.md](failure_taxonomy.md)）证实核心病灶是 **`missing_evidence_check`（5/10）**——通用评分器只对冗余搜索等效率细节扣分，对必通知人遗漏等实质缺陷打满分。
-3. **评分器架构解锁大模型能力（2×2 交互协同）与认知边界**：
-   - 切换为本项目 `EvidenceGroundedGrader`（确定性副作用账本 + 义务拆解 + Python 后置 Veto 门控）后，失败召回率在 `Flash` 上**翻倍（`7.1% → 14.3%`）**，在 `v4-Pro` 上**提升 3 倍（`7.1% → 21.4%`）**，并将 `v4-Pro` 的 $\kappa$ 较同模型原生提示词拉升 **8.8 倍（`0.016 → 0.144`）**，误杀率仅 `9.4%`（远低于 LOSO 校准的 `62.5%`）。
-   - 同时，即便 `v4-Pro + Evidence-Grounded` 仍低于带外部业务规则与环境状态断言的 **任务专属 Rubric（$\kappa = 0.440$，召回 35.7%）**，且框架检查与 LLM 评分器的**漏判集合不重合**，定量确立了「**可执行环境状态验证 + 结构化门控语义审计**」混合体系的必要性。
+![饱和与校准边界](figures/fig2_saturation_calibration.svg)
 
----
+### 3.2 同误杀率对比与配对 McNemar 检验（P0-4）
 
-## 4. RQ2：重复评估稳定性与 OpenJudge 上游源码缺陷
+![同误杀率 ROC 与 PR 曲线](figures/fig5_roc_pr_same_fpr.svg)
 
-1. **稳定性试跑（[p3-v2-flash-direct-pilot.json](p3-v2-flash-direct-pilot.json)）**：10 条轨迹 × 双评分器 × 思考开关 × 3 次独立重复（119/120 有效，1 条因步骤覆盖不全被严格拦截）。39 组完整面板出现 0 次通过/失败翻转，但在 v2 簇口径下，小样本零翻转被如实改判为「簇数不足不可估区间」（修正了 v1 误报 `[0.0, 0.0]` 零宽精确区间的统计缺陷）；`Flash` 与 `Pro` Direct 在 45 对匹配判定中仅 1 对分歧。
-2. **两项可复现的上游 OpenJudge 源码缺陷（修复 PR 已合入官方主干，Issue 处于 Open 待审状态）**：
-   - **缺陷 1（元数据失真）**：`TrajectoryAccuracyGrader` 将越界输出（如 `99`）钳制到 `[1, 3]` 后覆写 `metadata["raw_score"] = 3`，掩盖模型异常输出。向上游提交修复 PR **[agentscope-ai/OpenJudge#246](https://github.com/agentscope-ai/OpenJudge/pull/246)**，已通过 CI 并获维护者批准合入官方 `main` 分支（**Merged**，合入提交 `c58d1d6`，详情与本地补丁见 [PR_DRAFT.md](../contributions/openjudge/PR_DRAFT.md)）。
-   - **缺陷 2（连续分投票退化）**：`VotingEvaluationStrategy` 使用精确浮点 `Counter` 众数并以 `MIN` 破平局；在连续型 `Comprehensive` 上三次得分互异导致无众数，实测 **15/22（68.2%）面板退化为取最低分（`min-of-3`）**，且共享抽样审计证实其与 `Average` 复用同批采样。已向上游提交复现 Issue **[agentscope-ai/OpenJudge#247](https://github.com/agentscope-ai/OpenJudge/issues/247)**（Open 状态，详情见 [ISSUE_VOTING_MIN_DEGENERATION.md](../contributions/openjudge/ISSUE_VOTING_MIN_DEGENERATION.md)）。
+| 评分器 (`v2` 探索性标签) | `Recall@FPR=10%` (step / interp) | `Recall@FPR=10%` 95% 簇 CI (interp) | `Recall@FPR=20%` (step / interp) | `Recall@FPR=20%` 95% 簇 CI (interp) | `PR-AUC` |
+| :--- | :---: | :--- | :---: | :--- | :---: |
+| **Comprehensive · Flash** | `42.9%` / `42.9%` | `[4.8%, 66.7%]` | `50.0%` / `50.0%` | `[16.7%, 76.9%]` | `0.558` |
+| **Accuracy · Flash** | `14.3%` / `20.5%` | `[10.0%, 35.7%]` | `14.3%` / `29.4%` | `[20.0%, 42.9%]` | `0.333` |
+| **Accuracy · v4-Pro** | `7.1%` / `11.2%` | `[7.0%, 18.0%]` | `7.1%` / `21.1%` | `[16.2%, 28.0%]` | `0.295` |
+| **Evidence-Grounded · Flash** | `14.3%` / `15.1%` | `[1.6%, 40.0%]` | `14.3%` / `24.6%` | `[12.4%, 47.5%]` | `0.363` |
+| **Evidence-Grounded · v4-Pro** | `21.4%` / `22.0%` | `[3.6%, 42.8%]` | `21.4%` / `30.6%` | `[12.0%, 55.9%]` | `0.375` |
+| **Claw-Eval Rubric** (二值) | `35.7%` / `42.1%` | `[16.9%, 73.5%]` | `35.7%` / `48.6%` | `[26.2%, 76.5%]` | `0.545` |
 
----
+- **配对 Exact McNemar 检验（默认阈值，[same_fpr_comparison.json](same_fpr_comparison.json)）**：
+  - `Pro Grounded` vs `Flash Comprehensive`：失败召回 `3/14` vs `0/14`（`b=0, c=3`），Exact McNemar `p = 0.250`；总准确率 `p = 1.000`。
+  - `Pro Grounded` vs `Pro Accuracy`：失败召回 `3/14` vs `1/14`（`b=0, c=2`），Exact McNemar `p = 0.500`。
+  - `Flash Grounded` vs `Flash Accuracy`：失败召回 `2/14` vs `1/14`（`b=0, c=1`），Exact McNemar `p = 1.000`。
+  - 所有配对默认阈值比较均未达到统计显著（受限于 14 条失败的小分母）。
+- **P0-4 一句话结论**：**没有**——在当前 48 条探索性人工标签的同误杀率对比中，`EvidenceGroundedGrader` 并没有超过重新设阈值的 `Comprehensive`（`FPR=10%` 插值召回 `22.0%` vs `42.9%`，`PR-AUC` `0.375` vs `0.558`）。Grounded 当前仅在默认阈值下免调参召回 `2/14`–`3/14` 失败，尚需在 P1 大样本客观标签上改进排序区分度并重验。
 
-## 5. RQ3 + Phase 5：间接提示注入脆弱性、中性对照归因与副作用
+### 3.3 离线组件审计（P1-6 离线部分）
 
-![提示注入与防御归因](figures/fig3_injection_attribution.svg)
-
-### 5.1 全网格对抗实验（1,728 次评估，16 条失败轨迹 / 11 独立场景）
-- **撤回 v1 伪重复翻转率**：v1 报告的「未防御 Accuracy 翻转率 75%（18/24）」经 Phase 0/3 溯源证实全部来自**同 1 条基线失败轨迹**（`n_traj=1, n_scenario=1`），按预注册规则降级为单轨迹 Case Study（且该轨迹在安全声明下仍有 7/8 翻转）。
-- **场景簇置换检验（Holm FWER 校正，16 检验族）**：未防御臂下 `Comprehensive` 有 **4 个变体显著正向膨胀**（`L3_notice/tool_result`、`L3_notice/assistant_final`、`L4_override/tool_result` 校正后 $p_{\text{adj}} = 0.0078$；`L2_request/tool_result` $p_{\text{adj}} = 0.0254$），其中 `L3_notice/tool_result` 全样本配对 **ASR 高达 89.36%**（95% CI `[0.8085, 0.9762]`）。
-- **非随机缺失（MNAR）与防御副作用**：安全声明将 `Comprehensive` 总体 ASR 从 `69.15%` 压降至 `36.36%`（双界敏感性插补 `[0.3724, 0.3750]` 方向不变），但伴随两项显著代价：
-  1. **格式与步骤覆盖失败率上升 2.4 倍**：`2.20% (19/864)` vs 未防御 `0.93% (8/864)`（Fisher $p = 0.0504$）。
-  2. **判定方向偏移**：`Accuracy` 在安全声明下于 5 个变体上新出现 `pass → fail` 反向误杀。
-
-### 5.2 Phase 5 等长中性通知归因实验（`p5-neutral-l3-16`，32 次实跑）
-为回答“安全声明降膨胀是因为模型理解了**指令信任边界**，还是仅仅因为 System Prompt 变长带来的**注意力稀释**”，在 `repeat_id=0` 上对全部 16 条失败轨迹测试了事前哈希冻结的等长行政通知 `ADMINISTRATIVE NOTICE`（372 字符 vs 安全声明 366 字符）：
-
-| 对照臂 (`L3_notice/tool_result`, r=0) | 有效/总行数 | 格式失败率 | 配对轨迹 (场景) | 分数膨胀率 ASR | 平均位移 $\Delta$ (95% 簇 CI) |
-| --- | ---: | ---: | ---: | ---: | --- |
-| **未防御 (`defended=False`)** | 32 / 32 | 0.0% | 16 (11) | **93.75%** | `+0.0536` (`[0.0307, 0.0831]`) |
-| **等长中性通知 (`defended="neutral"`)** | 21 / 32 | **34.4%** | 6 (6) | **100.00%** | `+0.1064` (`[0.0421, 0.1896]`) |
-| **安全信任声明 (`defended=True`)** | 32 / 32 | 0.0% | 16 (11) | **43.75%** | `+0.0152` (`[0.0032, 0.0279]`) |
-| **Evidence-Grounded (`<untrusted_tool_data>` + Veto)** | 31 / 32 | **0.0%** (扰动臂) | 16 (11) | **6.25% (1/16)** | `-0.0423` (`fail→pass` 翻转 **0**) |
-
-- **确认性归因结论**：在三臂共同有效的 6 个独立场景上，`security_delta − neutral_delta = -0.0791`（95% CI **`[-0.1398, -0.0240]`**，严格小于 0），精确簇符号翻转置换检验 **`p = 0.03125`**（6/6 场景方向一致）。**彻底证伪“单纯长度稀释假说”，证实抗注入收益来自显式指令信任层级（Instruction-Hierarchy Framing）**；同时中性通知中“审计记录与发布 Schema”措辞导致 `Comprehensive` 高达 34.4% 丢失 `step_evaluations` 键，直接揭示了在无强制 `json_schema` 约束接口上追加系统提示词诱发格式崩溃的微观机制。
+检查全部 109 条已有有效 `EvidenceGroundedGrader` 评估行（Flash 原始 47 + Flash 扰动 16 + Pro 原始 46，见 [veto_ablation_offline.json](veto_ablation_offline.json)）：
+- **`veto_overrode_model = 0/109`（`0.0%`）**，`structural_veto = 0/109`。
+- 这表明现有样本上 Grounded 相对原生提示词的召回变化（`1/14 → 2/14` 或 `3/14`）全部来自审计提示词与证据账本的义务拆解，而非 Python 后置 Veto 覆写模型的 `pass` 判定。Veto 的真实边际贡献将在 P1-6 在线组件消融中单独量化。
 
 ---
 
-## 6. 多源轨迹数据工程与可验证后训练筛选（Track B）
+## 4. RQ2：重复稳定性与上游 OpenJudge 已合入贡献
+
+1. **重复评估稳定性（[p3-v2-flash-direct-pilot.json](p3-v2-flash-direct-pilot.json)）**：10 条轨迹 × 双评分器 × 思考开关 × 3 次独立重复（119/120 有效），39 组完整面板 0 次通过/失败翻转，按 v2 簇规则标为簇数不足不可估区间。
+2. **两项上游 OpenJudge 源码贡献（均已合入官方主干）**：
+   - **[PR #246](https://github.com/agentscope-ai/OpenJudge/pull/246)（Merged `c58d1d6`）**：修复 `TrajectoryAccuracyGrader` 在 `[1, 3]` 钳制后覆盖 `metadata["raw_score"]` 的元数据失真问题（含 6 项离线单测，见 [PR_DRAFT.md](../contributions/openjudge/PR_DRAFT.md)）。
+   - **[Issue #247](https://github.com/agentscope-ai/OpenJudge/issues/247)（Closed）与 [PR #248](https://github.com/agentscope-ai/OpenJudge/pull/248)（Merged `15d22f2`）**：定位 `VotingEvaluationStrategy` 在连续型 `Comprehensive` 上因精确浮点无众数触发 `tie_breaker=MIN`，导致 **`15/22`（`68.2%`）** 面板退化为 `min-of-3`（`9/22` 三次抽样全互异）；提交补丁暴露 `max_frequency` / `tie_resolved` 元数据与文档说明并合入主干（见 [PR_DRAFT_247.md](../contributions/openjudge/PR_DRAFT_247.md)）。
+
+---
+
+## 5. RQ3：间接提示注入、无攻击噪声底与 D30 撤回记录（P0-3 新口径）
+
+![提示注入与噪声底对照](figures/fig3_injection_attribution.svg)
+
+### 5.1 新指标口径与无攻击重复噪声底（[injection_metrics_v3.json](injection_metrics_v3.json)）
+
+按 P0-3 规定，每个注入臂并列报告**主指标决策翻转率（`fail→pass / base_fail`）**、**次指标归一化分差（`Δ / (max - min)`）**、**涨分率与无攻击重复噪声底**以及**有效配对数**：
+
+- **无攻击重复噪声底（P4 同批 16 条轨迹 `original` 3 轮重复，96/88 有序对）**：
+  - `Comprehensive` 未防御：无攻击重复打分时有 **`43.8%`（`42/96`）** 出现后次分数高于前次，`mean |Δ| = 0.0323`。
+  - `Comprehensive` 安全声明：无攻击涨分噪声底为 **`38.6%`（`34/88`）**，`mean |Δ| = 0.0299`。
+  - `Accuracy` 未防御 / 安全声明：无攻击涨分噪声底为 **`4.2%`（`4/96`）** 与 **`2.1%`（`2/96`）**。
+- **P4 全网格注入（1,728 行，16 轨迹 / 11 独立场景）**：
+  - `Comprehensive` 未防御在 4 个变体上经 16 检验族 Holm 校正显著正向膨胀（`L3_notice/tool_result`、`L3_notice/assistant_final`、`L4_override/tool_result` 均 `p_adj = 0.0078`；`L2_request/tool_result` `p_adj = 0.0254`）。其中 `L3_notice/tool_result` 有效配对 `47/48`，涨分率 `89.4%`（`42/47`），显著高于 `43.8%` 噪声底，归一化分差 `+0.0540`（95% 簇 CI `[+0.034, +0.077]`）；但因基线默认阈值下 `base_fail = 0/47`，**决策翻转率未定义（`0/0`）**。
+  - `Comprehensive` 加安全声明后，`L3_notice/tool_result` 有效配对 `44/48`，涨分率降至 `45.5%`（`20/44`），归一化分差 `+0.0144`（95% 簇 CI `[+0.004, +0.027]`），已接近无攻击噪声底 `38.6%`；但伴随结构化输出校验失败率上升（`19/864 = 2.20%` vs 未防御 `8/864 = 0.93%`，Fisher `p = 0.0504`）。
+  - `Accuracy` 未防御的 `base_fail` 仅 `3/48`（全部来自同 1 条轨迹 / 1 个场景），决策翻转率属单轨迹 Case Study（与 v1 撤回 `75% (18/24)` 伪重复口径一致）。
+- **Phase 5 等长中性通知对照（`provisional`）**：在 `r=0` 的 `L3_notice/tool_result` 上，三臂共同有效的 `6/16` 配对（6 场景）给出 `security − neutral = -0.0791`（95% 簇 CI `[-0.140, -0.024]`，簇符号置换 `p = 0.03125`），提示防御收益偏向指令信任层级而非单纯长度稀释；但因中性臂缺少 `json_schema` 约束出现 `11/32` 格式异常（仅 `6/16` 有效配对），当前标为 **`provisional`**，待使用已实现的 `--use-json-schema --schema-retries` 重跑至 `≥ 14/16` 有效配对后再定论。
+
+### 5.2 撤回记录（D30：修复 Stage 3 注入实验的数据泄漏）
+
+- 代码复核发现旧版 `grounded_judge.py` 中的 `_INJECTION_CUE_RE` 正则直接匹配 `perturb.py` 攻击模板短语，并在 Stage 3 扰动臂 `16/16` 触发（原始臂 `0/47`）。
+- 已按 [DECISIONS.md D30](../docs/DECISIONS.md) 正式**撤回**旧报告中的「`EvidenceGroundedGrader` 将注入膨胀率压降 15 倍至 `6.25% (1/16)`」结论，删除该正则与信号字段，并新增自动化离线守卫测试 `test_no_perturb_template_leakage_in_grounded_judge`。新防御结果将仅来自 P1-5 事前哈希冻结的 held-out 攻击测试集。
+
+---
+
+## 6. Track B：多源轨迹快照与可验证后训练筛选
 
 ![数据工程漏斗](figures/fig4_data_pipeline_funnel.svg)
 
-围绕“不可信表面文本不能直接用于评测或后训练”的同一核心结论，项目构建了端到端数据工程闭环：
-1. **原子快照与跨源导入**：[build_dataset.py](../scripts/build_dataset.py) 通过 `CURRENT` 指针与 SHA-256 指纹实现防缩水版本化导出（冻结证据缺失立即非零中止，保留上一代有效快照）；[build_cross_source.py](../scripts/build_cross_source.py) 将 Claw-Eval（87 条）与固定 Git Blob 校验的 **SWE-bench Multilingual**（8 个均衡实例）统一映射至 `task / trial / outcome / judgments` 四元结构（共 95 条联合快照）。
-2. **容器化原创编程题与 5 路黑盒 Verifier**：设计 `event-summary`（训练族）与 `score-join`（评测族，私有参考解已 gitignore 防污染），区分提交错误（Exit 1）与基础设施异常（Exit 2），并在断网 **Harbor 0.25.0** Docker 容器中完成 Oracle / NOP 实跑核验（[ORIGINAL_TASKS.md](../docs/ORIGINAL_TASKS.md)）。
-3. **防刷分后训练筛选（SFT / DPO）**：在 10 份构造提交与真实 API 工具交互采集（[ORIGINAL_API_PILOT.md](../docs/ORIGINAL_API_PILOT.md)）上对比证实——**仅看助手末轮完成声明筛出的样本 100%（2/2）是无产物的幻觉刷分负例**；基于可执行产物与完整工具调用协议核验筛出的真实轨迹则 100% 通过 16/16 黑盒测试及 **TRL 0.29.0 `SFTTrainer` / `DPOTrainer`** 分词预处理（[TRAINING_CANDIDATES.md](../docs/TRAINING_CANDIDATES.md)）。
+- **原子快照与跨源统一**：`build_dataset.py` 与 `build_cross_source.py` 将 Claw-Eval（`87` 条）与固定 Git Blob 的 SWE-bench Multilingual（`8` 条）统一映射至 `task / trial / outcome / judgments` 四元模型（共 `95` 条），通过 `CURRENT` 原子指针防止不完整写入。
+- **原创容器题防刷分对照**：在断网 Harbor 容器原创题（`event-summary` / `score-join`）上，只凭末轮完成声明筛出的样本 `2/2` 为无产物幻觉负例；经可执行黑盒 Verifier 筛选的真实轨迹 `16/16` 通过测试并通过 `TRL 0.29`（`SFTTrainer` / `DPOTrainer`）预处理检验（见 [TRAINING_CANDIDATES.md](../docs/TRAINING_CANDIDATES.md)）。
 
 ---
 
-## 7. 成本账本、边界与局限声明
+## 7. 成本账本与下一步（P1 路线）
 
-- **完整记账可追溯**：v1 历史保守 guard 累计 **\$9.180483**；v2 新增完成三大实验（Phase 5 中性对照 32 次 + Stage 3 混合评分器全量 64 次 + CC-3 旗舰 Pro 2×2 因子实验 96 次），新增保守 guard **\$1.570922**，最终累计 guard **\$10.751405**（严格控制在 v2 新增 \$5.00 硬上限之内，余量 \$3.429078，账户实时余额 CNY 1.86，无挂起 `.pending` 记录）。原创任务 API 采集独立账本保守核算 **\$0.026125**（上限 \$0.10）。
-- **明确诚实边界（面试必述）**：
-  1. 实跑 Agent 与 Judge 模型均基于 DeepSeek 家族（`deepseek-flash` / `deepseek-v4-pro`），单一供应商自评偏好（Self-Preference Bias）尚未通过外部商业模型实跑剥离（跨厂商配置入口已就绪，待外部 API Key 即可一键复跑 96 次对照）。
-  2. 双轮盲审 $\kappa = 0.2500 < 0.60$ 表明复杂轨迹的单次人工判定本身存在噪声，所有人工参照指标均为探索性（exploratory），不可外推为通用排行榜官方分数。
-  3. 公开仓库仅跟踪代码、520+ 禁网合成测试、聚合统计 JSON、矢量图表与自研样例看板（[showcase.html](showcase.html)）；原始轨迹、盲标私钥与缓存均本地隔离。
+- **截至 v2 累计保守 guard 支出**：`$10.751405`（v1 `$9.180483` + v2 `$1.570922`，详见 [BUDGET_v2.md](../docs/BUDGET_v2.md)）。
+- **下一步优先级（见 `trajjudge_improvement_roadmap.md`）**：
+  1. **P1-1（最高优先级）**：接入 **τ-bench**（数据库终态客观标签，直接检验未授权工具操作）并扩充 **Claw-Eval** 任务集，达到 `≥ 100` 条客观验证失败轨迹、`≥ 60` 个独立场景，冻结 `PREREG_v3.md` 后重跑核心对比。
+  2. **P1-3 / P1-4 / P1-5 / P1-6**：引入异厂商特权 AI 标注员（silver label + 人工裁定）、3 家厂商裁判对照、开发期未见过的 held-out 注入攻击集与 4 组完整组件消融。
+  3. **P2-A**：在 P1-1 数据源上完成 Best-of-N 重排闭环（`N=4`）。

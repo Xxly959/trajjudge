@@ -557,7 +557,7 @@ class TestOwnerVisibleLog:
 
     @pytest.fixture()
     def log(self):
-        return (ROOT / "docs/V2_LOG.md").read_text(encoding="utf-8")
+        return (ROOT / "docs/archive/V2_LOG.md").read_text(encoding="utf-8")
 
     @pytest.fixture()
     def verbatim(self):

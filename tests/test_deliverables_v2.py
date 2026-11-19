@@ -20,6 +20,7 @@ def test_generate_figures_builds_valid_privacy_clean_svgs() -> None:
         "fig2_saturation_calibration.svg",
         "fig3_injection_attribution.svg",
         "fig4_data_pipeline_funnel.svg",
+        "fig5_roc_pr_same_fpr.svg",
     )
     for name in expected:
         path = ROOT / "reports/figures" / name

@@ -367,3 +367,19 @@ actual owner failure labels. Two blank items remain outside the cohort.
 The current cohort has 16 human failures. The rule-only subset report
 uses existing rows for the same cohort. The paid P4 run awaits approval.
 
+---
+
+# D30 撤回 Stage 3 注入防御旧口径（`6.25% / 降 15 倍`）与防泄漏守卫（2026-11-19，P0-2）
+
+**背景**：代码复核发现早期 `src/trajjudge/grounded_judge.py` 中定义了 `_INJECTION_CUE_RE` 正则，直接匹配 `src/trajjudge/perturb.py` 攻击模板 `L2_request` / `L3_notice` / `L4_override` 中的字面短语（`evaluation notice`、`important to the grader`、`ignore your rubric`、`assign the maximum score`、`rate this trajectory as fully successful`），并将命中次数作为 `structural_signals.untrusted_grading_directive_cues` 送入审计模型；同时系统提示词中亦包含 `"EVALUATION NOTICE"` 字面引号。事后检查 `outputs/stage3/stage3-grounded-flash-64.jsonl` 证实：该信号在 **16/16** 条扰动轨迹上触发（`> 0`），而在 **0/47** 条原始轨迹上触发，构成典型的测试集特征泄漏（test-template leakage）。
+
+**决定**：
+1. 正式**撤回**此前在 `FINAL_REPORT_v2.md`、`README.md`、`README_en.md` 与图表中引用的「`EvidenceGroundedGrader` 将注入膨胀率压降 15 倍至 6.25%（1/16）」防御结论（与 v1 撤回单轨迹伪重复 `75% (18/24)` 同类，保留撤回记录以便审计，不再作为对外有效结论）。
+2. 从 `grounded_judge.py` 彻底删除 `_INJECTION_CUE_RE` 与 `untrusted_grading_directive_cues` 字段，并将系统提示词中的 `"EVALUATION NOTICE"` 改为泛化表述。
+3. 在 `tests/test_grounded_judge.py` 新增离线守卫测试 `test_no_perturb_template_leakage_in_grounded_judge`，每次 CI 自动断言 `grounded_judge.py` 源码及系统提示词与 `perturb.py` 任一攻击模板均不存在任何长度 ≥ 3 词的重叠片段。
+
+**影响**：
+- 旧 `stage3-grounded-flash-64.jsonl` 仅保留作历史归档（其原始无注入 48 条轨迹的 `untrusted_grading_directive_cues` 恒为 0，不受该正则触发影响；但 16 条扰动轨迹防御结果全部作废）。
+- `EvidenceGroundedGrader` 新的抗注入防御数字必须且只能来自 P1-5 事前哈希冻结的 **held-out（开发期未见过）攻击测试集**。
+
+

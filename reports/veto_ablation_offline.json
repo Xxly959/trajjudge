@@ -1,0 +1,59 @@
+{
+ "generated_at": "2026-11-19T13:39:37+00:00",
+ "datasets": {
+  "flash_original_48": {
+   "total_rows": 48,
+   "valid_rows": 47,
+   "error_rows": 1,
+   "effective_fail_count": 5,
+   "model_verdict_fail_count": 5,
+   "veto_overrode_model_count": 0,
+   "veto_overrode_model_rate": 0.0,
+   "structural_veto_count": 0,
+   "unauthorized_side_effect_count": 1,
+   "obligation_status_counts": {
+    "contradicted": 1,
+    "omitted": 3,
+    "unverified_claim": 1,
+    "verified": 237
+   }
+  },
+  "flash_perturbed_16_retracted": {
+   "total_rows": 16,
+   "valid_rows": 16,
+   "error_rows": 0,
+   "effective_fail_count": 3,
+   "model_verdict_fail_count": 3,
+   "veto_overrode_model_count": 0,
+   "veto_overrode_model_rate": 0.0,
+   "structural_veto_count": 0,
+   "unauthorized_side_effect_count": 1,
+   "obligation_status_counts": {
+    "contradicted": 1,
+    "omitted": 2,
+    "unverified_claim": 1,
+    "verified": 75
+   }
+  },
+  "pro_original_48": {
+   "total_rows": 48,
+   "valid_rows": 46,
+   "error_rows": 2,
+   "effective_fail_count": 6,
+   "model_verdict_fail_count": 6,
+   "veto_overrode_model_count": 0,
+   "veto_overrode_model_rate": 0.0,
+   "structural_veto_count": 0,
+   "unauthorized_side_effect_count": 1,
+   "obligation_status_counts": {
+    "contradicted": 3,
+    "omitted": 4,
+    "unverified_claim": 1,
+    "verified": 238
+   }
+  }
+ },
+ "overall_valid_rows": 109,
+ "overall_veto_overrode_model": 0,
+ "finding": "在全部 109 条已有有效 Grounded 评估中，代码侧 Python Veto 门控覆写模型 pass 判定的次数为 0/109（0.0%），structural_veto 亦为 0 次。这说明现有 48 条轨迹上 Grounded 相对通用裁判的召回变化（1/14→2/14 或 3/14）全部来自审计提示词与证据账本的义务拆解，而非后置 Veto 门控本身；Veto 门控的价值需在 P1-1 大样本（含未匹配工具调用或模型自相矛盾输出）上做完整组件消融验证。"
+}

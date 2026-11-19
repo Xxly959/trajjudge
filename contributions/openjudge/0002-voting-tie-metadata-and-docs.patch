@@ -1,0 +1,150 @@
+From 7dc3955297dc9dcaad3248617a8fe2c988b60422 Mon Sep 17 00:00:00 2001
+From: XuLiangYu <959xlyu@gmail.com>
+Date: Tue, 17 Nov 2026 22:43:39 -0800
+Subject: [PATCH] fix(strategy): expose voting tie metadata and document
+ distinct ties
+
+---
+ docs/get_started/core_concepts.md             |  2 +-
+ .../voting_evaluation_strategy.py             | 20 ++++++--
+ .../test_voting_evaluation_strategy.py        | 46 +++++++++++++++++++
+ 3 files changed, 62 insertions(+), 6 deletions(-)
+
+diff --git a/docs/get_started/core_concepts.md b/docs/get_started/core_concepts.md
+index 84311b3..f9c4025 100644
+--- a/docs/get_started/core_concepts.md
++++ b/docs/get_started/core_concepts.md
+@@ -85,7 +85,7 @@ An [Evaluation Strategy](https://github.com/modelscope/OpenJudge/blob/main/openj
+ Available strategies include:
+ 
+ - **DirectEvaluationStrategy**: Executes the evaluation once and returns the result directly. This is the default strategy when no strategy is specified.
+-- **VotingEvaluationStrategy**: Runs the evaluation multiple times and aggregates results using voting mechanisms (e.g., taking the most frequent score for categorical outputs).
++- **VotingEvaluationStrategy**: Runs the evaluation multiple times and aggregates results using exact-score voting (e.g., taking the most frequent score for discrete outputs). When all sampled scores are distinct, every score ties for first and the default `tie_breaker="min"` selects the lowest score (`metadata` exposes `max_frequency` and `tie_resolved`); use `AverageEvaluationStrategy` when averaging repeated continuous scores.
+ - **AverageEvaluationStrategy**: Runs the evaluation multiple times and averages the numerical results to reduce noise and improve reliability.
+ 
+ ### Understanding Results
+diff --git a/openjudge/evaluation_strategy/voting_evaluation_strategy.py b/openjudge/evaluation_strategy/voting_evaluation_strategy.py
+index cf96317..fa16542 100644
+--- a/openjudge/evaluation_strategy/voting_evaluation_strategy.py
++++ b/openjudge/evaluation_strategy/voting_evaluation_strategy.py
+@@ -25,9 +25,12 @@ class VotingEvaluationStrategy(BaseEvaluationStrategy):
+     It's particularly useful for reducing noise in stochastic evaluations.
+ 
+     Tips:
+-        To avoid ties, consider using an odd number for num_votes. For example:
+-        - 3, 5, 7... votes reduce chance of ties in binary outcomes
+-        - In case of a tie, tie_breaker controls which score is selected
++        Voting aggregates by exact float equality. To avoid ties on discrete
++        scales, consider using an odd number for num_votes (e.g., 3, 5, 7).
++        When all sampled scores are distinct (common with continuous-valued
++        graders), every score ties for first place and the default
++        ``tie_breaker="min"`` selects the lowest score. When you want the mean
++        of repeated continuous scores, prefer AverageEvaluationStrategy.
+ 
+     Attributes:
+         num_votes (int): Number of times to execute the evaluation function.
+@@ -102,6 +105,8 @@ class VotingEvaluationStrategy(BaseEvaluationStrategy):
+         Returns:
+             Any: The most frequent result from all executions.
+                  In case of a tie among most frequent results, tie_breaker resolves it.
++                 ``metadata`` includes ``original_results``, ``max_frequency``, and
++                 ``tie_resolved`` so callers can tell whether a tie-breaker was used.
+         """
+         results: List[Any] = []
+         coroutines = []
+@@ -130,6 +135,7 @@ class VotingEvaluationStrategy(BaseEvaluationStrategy):
+         # Filter to get all items with the highest frequency
+         highest_freq_values = [item[0] for item in most_common_items if item[1] == max_frequency]
+ 
++        tie_resolved = len(highest_freq_values) > 1
+         most_common_value = self._resolve_tie(highest_freq_values, values)
+ 
+         name = ""
+@@ -138,10 +144,14 @@ class VotingEvaluationStrategy(BaseEvaluationStrategy):
+                 name = r.name
+                 break
+ 
+-        # Find the first result matching the most common value
++        # Return aggregated score along with tie-resolution metadata
+         return GraderScore(
+             name=name,
+             score=most_common_value,
+             reason=f"Vote from {self.num_votes} evaluations.",
+-            metadata={"original_results": results},
++            metadata={
++                "original_results": results,
++                "max_frequency": max_frequency,
++                "tie_resolved": tie_resolved,
++            },
+         )
+diff --git a/tests/evaluation_strategy/test_voting_evaluation_strategy.py b/tests/evaluation_strategy/test_voting_evaluation_strategy.py
+index e18059e..95c7091 100644
+--- a/tests/evaluation_strategy/test_voting_evaluation_strategy.py
++++ b/tests/evaluation_strategy/test_voting_evaluation_strategy.py
+@@ -156,6 +156,8 @@ class TestVotingEvaluationStrategy:
+ 
+         result = await strategy.execute(mock_call_fn)
+         assert result.score == 3.0
++        assert result.metadata["max_frequency"] == 2
++        assert result.metadata["tie_resolved"] is True
+ 
+     @pytest.mark.asyncio
+     async def test_execute_tie_breaker_max(self):
+@@ -188,6 +190,8 @@ class TestVotingEvaluationStrategy:
+ 
+         result = await strategy.execute(mock_call_fn)
+         assert result.score == 3.0
++        assert result.metadata["max_frequency"] == 2
++        assert result.metadata["tie_resolved"] is True
+ 
+     @pytest.mark.asyncio
+     async def test_execute_tie_breaker_callable(self):
+@@ -232,3 +236,45 @@ class TestVotingEvaluationStrategy:
+             match="Custom tie_breaker must return one of the tie candidates.",
+         ):
+             await strategy.execute(mock_call_fn)
++
++    @pytest.mark.asyncio
++    async def test_execute_all_distinct_scores_reports_tie_and_selects_min(self):
++        """Test all-distinct continuous scores tie for first, select min, and report tie metadata."""
++        strategy = VotingEvaluationStrategy(num_votes=3)
++        scores = [0.85, 0.80, 0.72]
++        call_count = 0
++
++        async def mock_call_fn():
++            nonlocal call_count
++            result = scores[call_count % len(scores)]
++            call_count += 1
++            return GraderScore(name="trajectory_comprehensive", score=result, reason="step mean")
++
++        result = await strategy.execute(mock_call_fn)
++        assert result.score == 0.72
++        assert result.metadata["max_frequency"] == 1
++        assert result.metadata["tie_resolved"] is True
++        assert len(result.metadata["original_results"]) == 3
++
++    @pytest.mark.asyncio
++    async def test_execute_clear_winner_needs_no_tie_breaker(self):
++        """Test clear mode winner skips tie resolution and reports tie_resolved=False."""
++
++        def fail_if_called(candidates, all_scores):
++            raise AssertionError(f"tie_breaker should not be called: {candidates}, {all_scores}")
++
++        for tie_breaker in (MIN, fail_if_called):
++            strategy = VotingEvaluationStrategy(num_votes=3, tie_breaker=tie_breaker)
++            scores = [0.85, 0.80, 0.85]
++            call_count = 0
++
++            async def mock_call_fn():
++                nonlocal call_count
++                result = scores[call_count % len(scores)]
++                call_count += 1
++                return GraderScore(name="trajectory_comprehensive", score=result, reason="step mean")
++
++            result = await strategy.execute(mock_call_fn)
++            assert result.score == 0.85
++            assert result.metadata["max_frequency"] == 2
++            assert result.metadata["tie_resolved"] is False
+-- 
+2.54.0
+

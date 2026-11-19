@@ -21,7 +21,7 @@ from .llm import LLMClient, LLMError, LLMResult
 class SharedCompletionTransport:
     """Route SDK JSON bodies through the shared client without logging headers."""
 
-    def __init__(self, client: LLMClient, tag: str = "s3/weather", repeat_id: int | None = None) -> None:
+    def __init__(self, client: LLMClient, tag: str = "s3/weather", repeat_id: int | str | None = None) -> None:
         self.client = client
         self.tag = tag
         self.repeat_id = repeat_id
@@ -74,14 +74,30 @@ class SharedCompletionTransport:
 
 
 class DeepSeekOpenJudgeModel(OpenAIChatModel):
-    """Use DeepSeek JSON objects while retaining native prompts and parsing."""
+    """Use JSON object or JSON schema output while retaining native prompts and parsing."""
+
+    def __init__(self, *args: Any, use_json_schema: bool = False, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._use_json_schema = use_json_schema
 
     async def achat(self, messages: list[Any], tools: list[dict[str, Any]] | None = None,
                     tool_choice: str | None = None, structured_model: Any = None,
                     callback: Any = None, **kwargs: Any) -> Any:
+        if structured_model is None:
+            wire_format: Any = None
+        elif self._use_json_schema and isinstance(structured_model, type) and hasattr(structured_model, "model_json_schema"):
+            wire_format = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": structured_model.__name__,
+                    "schema": structured_model.model_json_schema(),
+                },
+            }
+        else:
+            wire_format = {"type": "json_object"}
         response = await super().achat(
             messages=messages, tools=tools, tool_choice=tool_choice,
-            structured_model={"type": "json_object"} if structured_model is not None else None,
+            structured_model=wire_format,
             callback=None, **kwargs,
         )
         if isinstance(structured_model, type) and hasattr(structured_model, "model_validate"):
@@ -99,7 +115,8 @@ class DeepSeekOpenJudgeModel(OpenAIChatModel):
 @asynccontextmanager
 async def openjudge_model(client: LLMClient, *, thinking: bool = False,
                           max_tokens: int = 768, tag: str = "s3/weather",
-                          repeat_id: int | None = None, temperature: float | None = None) -> AsyncIterator[tuple[DeepSeekOpenJudgeModel, SharedCompletionTransport]]:
+                          repeat_id: int | str | None = None, temperature: float | None = None,
+                          use_json_schema: bool = False) -> AsyncIterator[tuple[DeepSeekOpenJudgeModel, SharedCompletionTransport]]:
     """Provide the native upstream chat path with local JSON adaptation and transport."""
     bridge = SharedCompletionTransport(client, tag=tag, repeat_id=repeat_id)
     http_client = DefaultAsyncHttpxClient(transport=bridge)
@@ -109,6 +126,7 @@ async def openjudge_model(client: LLMClient, *, thinking: bool = False,
         base_url=client.settings.base_url, stream=False, max_retries=0, timeout=60,
         client_args={"http_client": http_client}, max_tokens=max_tokens,
         extra_body={"thinking": {"type": "enabled" if thinking else "disabled"}},
+        use_json_schema=use_json_schema,
         **({"temperature": temperature} if temperature is not None else {}),
     )
     try:

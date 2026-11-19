@@ -34,12 +34,14 @@ def gather_dashboard_data() -> dict[str, Any]:
     agree = _load_json("reports/annotator_agreement.json")
     stage3 = _load_json("reports/stage3_and_neutral_v2.json")
     factorial = _load_json("reports/pro_factorial_v2.json")
+    same_fpr = _load_json("reports/same_fpr_comparison.json")
+    inj_v3 = _load_json("reports/injection_metrics_v3.json")
+    veto_off = _load_json("reports/veto_ablation_offline.json")
 
     raters_s3 = ((stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("raters") or {})
     fac_cells = (((factorial.get("views") or {}).get("v2_labels") or {}).get("cells") or {})
     fac_contrasts = (((factorial.get("views") or {}).get("v2_labels") or {}).get("contrasts") or {})
     neu = stage3.get("neutral_control") or {}
-    s3_inj = ((stage3.get("stage3_v2_labels") or {}).get("injection_l3_tool_result") or {})
     cal_merge = ((cal.get("variants") or {}).get("merge") or {})
 
     merged_raters = dict(raters_s3)
@@ -82,7 +84,9 @@ def gather_dashboard_data() -> dict[str, Any]:
             "loso": ((cal_merge.get("loso_balanced") or {}).get("calibrated_only") or {}),
         },
         "neutral_control": neu,
-        "stage3_injection": s3_inj,
+        "same_fpr": ((same_fpr.get("views") or {}).get("v2_labels") or {}),
+        "injection_v3": inj_v3,
+        "veto_offline": veto_off,
         "missingness": (rob.get("missingness") or {}),
         "voting_audit": (rob.get("shared_draws") or {}),
     }
@@ -198,7 +202,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <p style="font-size:13.5px;color:var(--muted);">在 28 折留一场景交叉验证（LOSO，严禁测试集调参）下：</p>
         <ul style="font-size:13.5px;">
           <li><b>TrajectoryAccuracy</b>：92.1% 样本打满分 3.0，OOF AUC = <code>0.5459</code>（95% CI <code>[0.5000, 0.6103]</code> 覆盖 0.5），无统计可用区分度；固定漏判率目标下退化为 <code>always_fail</code> 哨兵。</li>
-          <li><b>TrajectoryComprehensive</b>：100% 样本 ≥ 默认阈值 0.60（最低分 0.6354）。LOSO 将阈值拉高至 0.80–0.95 后，虽然 κ 从 0.00 升至 0.237，但代价是<b>误杀 62.5% 的正常通过轨迹</b>。</li>
+          <li><b>TrajectoryComprehensive</b>：48/48 样本均 ≥ 默认阈值 0.60（最低分 0.6354）。28 折 LOSO 均衡准确率目标下，κ 升至 0.237，但仍漏判 <b>10/16 (62.5%)</b> 失败并误杀 <b>5/32 (15.6%)</b> 正常轨迹；若强压漏判率至 ≤25%（<code>miss_0.25</code>），则需误杀 <b>23/32 (71.9%)</b> 正常轨迹。</li>
           <li><b>核心根因</b>：逐步打分取均值（Step-Averaging）让前序常规查询步骤的高分稀释了末轮关键事实遗漏或幻觉。</li>
         </ul>
       </div>
@@ -252,8 +256,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <p style="font-size:13.5px;">审计发现 <code>TrajectoryAccuracyGrader</code> 将模型越界返回（如 <code>99</code>）钳制到 <code>[1, 3]</code> 后，把钳制后的 <code>3</code> 写回 <code>metadata["raw_score"]</code>，导致下游审计无法识别异常输出。修复补丁与 6 项离线单测已提交至 <code>agentscope-ai/OpenJudge</code>，通过官方 Pre-commit CI 后一次审核合入主分支。</p>
       </div>
       <div class="card">
-        <h3 style="margin-top:0;">上游开源贡献 #2：<a href="https://github.com/agentscope-ai/OpenJudge/issues/247" target="_blank" style="color:var(--brand);text-decoration:none;">OpenJudge Issue #247（Voting 连续分退化）</a></h3>
-        <p style="font-size:13.5px;">恢复逐次抽样发现 <code>VotingEvaluationStrategy</code> 用 <code>Counter</code> 做精确浮点匹配且默认 <code>tie_breaker=MIN</code>；在连续型 <code>Comprehensive</code> 上三次得分几乎互异，<b>15/22 (68.2%) 面板退化为取最低分 (min-of-3)</b>。已提交带零成本最小复现脚本的上游 Issue <code>#247</code>。输入任意三次抽样验证退化行为：</p>
+        <h3 style="margin-top:0;">上游开源贡献 #2：<a href="https://github.com/agentscope-ai/OpenJudge/pull/248" target="_blank" style="color:var(--brand);text-decoration:none;">OpenJudge PR #248（已合入主干 15d22f2，关闭 Issue #247）</a></h3>
+        <p style="font-size:13.5px;">恢复逐次抽样发现 <code>VotingEvaluationStrategy</code> 用 <code>Counter</code> 做精确浮点匹配且默认 <code>tie_breaker=MIN</code>；在连续型 <code>Comprehensive</code> 上三次得分几乎互异，<b>15/22 (68.2%) 面板退化为取最低分 (min-of-3)</b>。先提交零成本复现 Issue <code>#247</code>，再提交修复 PR <code>#248</code> 暴露平局元数据与文档说明，已合入官方主干并关闭 Issue <code>#247</code>。输入任意三次抽样验证退化行为：</p>
         <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
           <input id="v-d1" type="number" step="0.01" value="0.86" style="width:76px;padding:6px;border:1px solid var(--border);border-radius:6px;"/>
           <input id="v-d2" type="number" step="0.01" value="0.81" style="width:76px;padding:6px;border:1px solid var(--border);border-radius:6px;"/>
@@ -359,15 +363,16 @@ function renderOverview() {
   const proAcc = r.pro_accuracy || {};
   const comp = r.trajectory_comprehensive || {};
   const acc = r.trajectory_accuracy || {};
-  const neu = DATA.neutral_control || {};
-  const undefAsr = (((neu.arms || {}).undefended || {}).asr);
-  const s3Asr = (DATA.stage3_injection || {}).asr;
+  const sfRaters = ((DATA.same_fpr || {}).raters) || {};
+  const compR10 = ((((sfRaters.flash_comprehensive || {}).recall_at_fpr || {}).fpr_10 || {}).recall_interpolated);
+  const pgR10 = ((((sfRaters.pro_grounded || {}).recall_at_fpr || {}).fpr_10 || {}).recall_interpolated);
+  const nf = ((((DATA.injection_v3 || {}).p4_full_grid || {}).noise_floors || {})["trajectory_comprehensive|defended=False"] || {}).score_inflation_noise_floor;
 
   const kpis = [
-    { label: "通用评分器漏判率 (Flash / Pro)", val: pct(acc.miss_rate) + " / " + pct(proAcc.miss_rate || comp.miss_rate), sub: "换 4.4× 旗舰 Pro 模型仍漏判 13/14 失败！", color: "var(--red)" },
-    { label: "最佳门控评分器表现", val: "κ = " + num(egPro.kappa, 3), sub: `抓住 ${egPro.caught_failures || '—'} 失败 (${pct(egPro.failure_recall)}) · 误杀 ${pct(egPro.false_kill_rate)}`, color: "var(--green)" },
-    { label: "中性对照归因显著性", val: "p = 0.03125", sub: "等长行政通知 ASR=100%，确证指令信任层级框架生效", color: "var(--brand)" },
-    { label: "最强注入膨胀率压降 (15×)", val: `${pct(undefAsr)} → ${pct(s3Asr)}`, sub: "Comprehensive 未防御 vs 隔离槽+Veto (0 翻转)", color: "var(--green)" },
+    { label: "通用裁判默认阈值漏判 (Flash / Pro)", val: "13/14 · 14/14", sub: "Accuracy 升级 Pro 仍漏判 13/14（探索性，n=48/28 场景）", color: "var(--red)" },
+    { label: "同误杀率 FPR=10% 插值召回", val: `${pct(compR10)} vs ${pct(pgR10)}`, sub: "Comprehensive 调阈值 vs Pro Grounded（Grounded 尚未反超）", color: "var(--amber)" },
+    { label: "中性对照归因 (仅 6/16 配对)", val: "p = 0.03125", sub: "待 json_schema 重跑至 ≥14/16 配对后确认", color: "var(--brand)" },
+    { label: "无攻击重复打分噪声底", val: pct(nf), sub: "Comprehensive 未防御重测即有 43.8% 涨分；旧 Grounded 6.25% 已撤回 (D30)", color: "var(--slate)" },
   ];
   document.getElementById('kpi-cards').innerHTML = kpis.map(k => `
     <div class="card">
@@ -402,25 +407,26 @@ function renderOverview() {
 
 function renderInjection() {
   const arms = ((DATA.neutral_control || {}).arms) || {};
-  const s3 = DATA.stage3_injection || {};
+  const nfMap = (((DATA.injection_v3 || {}).p4_full_grid || {}).noise_floors) || {};
+  const nfUndef = (nfMap["trajectory_comprehensive|defended=False"] || {}).score_inflation_noise_floor;
+  const nfSec = (nfMap["trajectory_comprehensive|defended=True"] || {}).score_inflation_noise_floor;
   const rows = [
-    ["Comprehensive 未防御 (Undefended, r=0)", (arms.undefended || {}).asr, (arms.undefended || {}).mean_delta, "#dc2626"],
-    ["Comprehensive + 等长中性行政通知 (Neutral Control, r=0)", (arms.neutral || {}).asr, (arms.neutral || {}).mean_delta, "#d97706"],
-    ["Comprehensive + 安全不信任声明 (Security Wrapper, r=0)", (arms.security || {}).asr, (arms.security || {}).mean_delta, "#2563eb"],
+    ["Comprehensive 未防御 (Undefended, r=0, 16/16 配对)", (arms.undefended || {}).asr, (arms.undefended || {}).mean_delta, nfUndef, "#dc2626"],
+    ["Comprehensive + 等长中性通知 (Neutral, r=0, 仅 6/16 配对)", (arms.neutral || {}).asr, (arms.neutral || {}).mean_delta, nfUndef, "#d97706"],
+    ["Comprehensive + 安全不信任声明 (Security, r=0, 16/16 配对)", (arms.security || {}).asr, (arms.security || {}).mean_delta, nfSec, "#2563eb"],
   ];
-  if (s3.asr != null) {
-    rows.push(["Evidence-Grounded (<untrusted_tool_data> + Veto)", s3.asr, s3.mean_delta, "#059669"]);
-  }
-  document.getElementById('injection-bars').innerHTML = rows.map(([name, asr, delta, color]) => `
+  document.getElementById('injection-bars').innerHTML = rows.map(([name, asr, delta, nf, color]) => `
     <div class="bar-row">
       <div class="bar-meta">
         <span>${name}</span>
-        <span>ASR: ${pct(asr)} · 平均分数位移 Δ = ${delta != null ? (delta >= 0 ? '+' : '') + num(delta, 4) : '—'}</span>
+        <span>膨胀率: ${pct(asr)} · 归一化 Δ = ${delta != null ? (delta >= 0 ? '+' : '') + num(delta, 4) : '—'} · 无攻击噪声底: ${pct(nf)}</span>
       </div>
       <div class="bar-track"><div class="bar-fill" style="width:${Math.max(1, (asr || 0) * 100)}%;background:${color};"></div></div>
     </div>`).join('');
   const stmt = (DATA.neutral_control || {}).attribution_statement || "等待运行结果";
-  document.getElementById('attribution-verdict').innerHTML = `<b>预注册判读结论 (PREREG_v2 §8)</b>：${stmt}`;
+  document.getElementById('attribution-verdict').innerHTML =
+    `<b>预注册判读结论 (PREREG_v2 §8，待中性臂补齐至 ≥14/16 配对复验)</b>：${stmt}` +
+    `<br/><span style="color:#9a3412;"><b>撤回记录 (D30)</b>：旧 Stage 3 Evidence-Grounded 的 6.25% (1/16) 防御数字因存在正则模板泄漏已正式撤回，新防御数字将仅来自 P1-5 held-out 攻击集。</span>`;
 }
 
 function setPolicy(mode) {

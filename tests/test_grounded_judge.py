@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import inspect
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 import pytest
 
+import trajjudge.grounded_judge as grounded_judge_mod
 from trajjudge.adapter import adapt_trace
 from trajjudge.config import Settings
 from trajjudge.grounded_judge import (
+    EVIDENCE_GROUNDED_SYSTEM_PROMPT,
     GRADER_NAME,
     PASS_THRESHOLD,
     build_audit_messages,
@@ -20,7 +24,7 @@ from trajjudge.grounded_judge import (
 )
 from trajjudge.judging import JudgeConfig
 from trajjudge.llm import LLMClient
-from trajjudge.perturb import inject
+from trajjudge.perturb import TEMPLATES, inject
 
 FIXTURES = Path(__file__).parent / "fixtures" / "claw_s5"
 
@@ -45,17 +49,40 @@ def _mock_reply(payload: dict[str, Any], *, finish_reason: str = "stop") -> dict
     }
 
 
-def test_ledger_extracts_tools_quarantines_outputs_and_detects_injection_cues(sample_messages: list[dict[str, Any]]) -> None:
+def test_ledger_extracts_tools_and_quarantines_outputs_without_cue_leakage(sample_messages: list[dict[str, Any]]) -> None:
     ledger = extract_evidence_ledger(sample_messages)
     assert ledger["structural_signals"]["total_tool_calls"] >= 1
     assert ledger["structural_signals"]["unmatched_tool_calls"] == 0
     assert ledger["structural_signals"]["has_final_assistant_reply"] is True
     assert all("<untrusted_tool_data" in ev["quarantined_data"] for ev in ledger["tool_events"])
-    assert ledger["structural_signals"]["untrusted_grading_directive_cues"] == 0
+    assert "untrusted_grading_directive_cues" not in ledger["structural_signals"]
 
     injected, _ = inject(sample_messages, "L3_notice", "tool_result")
     injected_ledger = extract_evidence_ledger(injected)
-    assert injected_ledger["structural_signals"]["untrusted_grading_directive_cues"] >= 1
+    assert "untrusted_grading_directive_cues" not in injected_ledger["structural_signals"]
+
+
+def test_no_perturb_template_leakage_in_grounded_judge() -> None:
+    """P0-2 guard: judge code and prompt must share zero >=3-word spans with perturb.py templates."""
+    def _words(text: str) -> list[str]:
+        return re.findall(r"[a-z0-9]+", text.lower())
+
+    source_text = inspect.getsource(grounded_judge_mod)
+    targets = {
+        "grounded_judge.py": " ".join(_words(source_text)),
+        "EVIDENCE_GROUNDED_SYSTEM_PROMPT": " ".join(_words(EVIDENCE_GROUNDED_SYSTEM_PROMPT)),
+    }
+    for template in TEMPLATES:
+        tokens = _words(template.text)
+        for i in range(len(tokens) - 2):
+            trigram = " ".join(tokens[i : i + 3])
+            for target_name, normalized in targets.items():
+                assert trigram not in normalized, (
+                    f"Data leakage: 3-word span {trigram!r} from perturb template "
+                    f"{template.template_id!r} found in {target_name}"
+                )
+    assert "evaluation notice" not in targets["grounded_judge.py"]
+    assert not hasattr(grounded_judge_mod, "_INJECTION_CUE_RE")
 
 
 def test_veto_gate_overrides_model_pass_when_any_obligation_unverified() -> None:

@@ -538,6 +538,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cap-usd", type=float)
     parser.add_argument("--neutral-run-id", default="p5-neutral-l3-16")
     parser.add_argument("--stage3-run-id", default="stage3-grounded-flash-64")
+    parser.add_argument("--use-json-schema", action="store_true", help="Send json_schema response_format for neutral control arm (P0-3)")
+    parser.add_argument("--schema-retries", type=int, default=0, help="Retry count on non-fatal schema validation failures (P0-3)")
     args = parser.parse_args(argv)
 
     traces = load_frozen_traces(root)
@@ -569,7 +571,10 @@ def main(argv: list[str] | None = None) -> int:
         neu_dir = root / "runs" / args.neutral_run_id
         neu_settings = _apply_budget_guard(settings, neu_dir, args.cap_usd) if args.run else settings
         neu_client = LLMClient(neu_settings, offline=args.offline, max_attempts=2)
-        neu_counts = run_jobs(neu_jobs, neu_client, neu_out, workers=2, run_dir=neu_dir, phase="p5")
+        neu_counts = run_jobs(
+            neu_jobs, neu_client, neu_out, workers=2, run_dir=neu_dir, phase="p5",
+            use_json_schema=args.use_json_schema, schema_retries=args.schema_retries,
+        )
         print(json.dumps({"stage": "neutral", **neu_counts}))
 
     if args.target in ("all", "stage3") and (args.run or args.offline):

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 450" width="920" height="450" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<rect width="920" height="450" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 5 · 同误杀率对比：失败检测 ROC 与 PR 曲线（n=48 / 28 场景，探索性 v2 标签）</text>
+<text x="28" y="55" font-size="12" fill="#475569">结论：同误杀率下 Grounded 尚未超过重新设阈值的 Comprehensive（FPR=10% 插值召回 22.0% vs 42.9%；PR-AUC 0.375 vs 0.558）</text>
+<text x="249.5" y="76" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">ROC 曲线（正类 = 真实失败）</text>
+<rect x="72" y="86" width="355" height="250" fill="#f8fafc" stroke="#cbd5e1"/>
+<line x1="72.0" y1="86" x2="72.0" y2="336" stroke="#e2e8f0"/>
+<line x1="72" y1="336.0" x2="427" y2="336.0" stroke="#e2e8f0"/>
+<text x="72.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">0%</text>
+<text x="65" y="339.5" text-anchor="end" font-size="10" fill="#64748b">0%</text>
+<line x1="143.0" y1="86" x2="143.0" y2="336" stroke="#e2e8f0"/>
+<line x1="72" y1="286.0" x2="427" y2="286.0" stroke="#e2e8f0"/>
+<text x="143.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">20%</text>
+<text x="65" y="289.5" text-anchor="end" font-size="10" fill="#64748b">20%</text>
+<line x1="214.0" y1="86" x2="214.0" y2="336" stroke="#e2e8f0"/>
+<line x1="72" y1="236.0" x2="427" y2="236.0" stroke="#e2e8f0"/>
+<text x="214.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">40%</text>
+<text x="65" y="239.5" text-anchor="end" font-size="10" fill="#64748b">40%</text>
+<line x1="285.0" y1="86" x2="285.0" y2="336" stroke="#e2e8f0"/>
+<line x1="72" y1="186.0" x2="427" y2="186.0" stroke="#e2e8f0"/>
+<text x="285.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">60%</text>
+<text x="65" y="189.5" text-anchor="end" font-size="10" fill="#64748b">60%</text>
+<line x1="356.0" y1="86" x2="356.0" y2="336" stroke="#e2e8f0"/>
+<line x1="72" y1="136.0" x2="427" y2="136.0" stroke="#e2e8f0"/>
+<text x="356.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">80%</text>
+<text x="65" y="139.5" text-anchor="end" font-size="10" fill="#64748b">80%</text>
+<line x1="427.0" y1="86" x2="427.0" y2="336" stroke="#e2e8f0"/>
+<line x1="72" y1="86.0" x2="427" y2="86.0" stroke="#e2e8f0"/>
+<text x="427.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">100%</text>
+<text x="65" y="89.5" text-anchor="end" font-size="10" fill="#64748b">100%</text>
+<text x="249.5" y="368" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">正常样本误杀率 FPR →</text>
+<text x="30" y="211.0" text-anchor="middle" font-size="11" font-weight="600" fill="#334155" transform="rotate(-90 30 211.0)">失败召回率 TPR →</text>
+<text x="692.5" y="76" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">Precision-Recall 曲线（正类 = 真实失败）</text>
+<rect x="515" y="86" width="355" height="250" fill="#f8fafc" stroke="#cbd5e1"/>
+<line x1="515.0" y1="86" x2="515.0" y2="336" stroke="#e2e8f0"/>
+<line x1="515" y1="336.0" x2="870" y2="336.0" stroke="#e2e8f0"/>
+<text x="515.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">0%</text>
+<text x="508" y="339.5" text-anchor="end" font-size="10" fill="#64748b">0%</text>
+<line x1="586.0" y1="86" x2="586.0" y2="336" stroke="#e2e8f0"/>
+<line x1="515" y1="286.0" x2="870" y2="286.0" stroke="#e2e8f0"/>
+<text x="586.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">20%</text>
+<text x="508" y="289.5" text-anchor="end" font-size="10" fill="#64748b">20%</text>
+<line x1="657.0" y1="86" x2="657.0" y2="336" stroke="#e2e8f0"/>
+<line x1="515" y1="236.0" x2="870" y2="236.0" stroke="#e2e8f0"/>
+<text x="657.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">40%</text>
+<text x="508" y="239.5" text-anchor="end" font-size="10" fill="#64748b">40%</text>
+<line x1="728.0" y1="86" x2="728.0" y2="336" stroke="#e2e8f0"/>
+<line x1="515" y1="186.0" x2="870" y2="186.0" stroke="#e2e8f0"/>
+<text x="728.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">60%</text>
+<text x="508" y="189.5" text-anchor="end" font-size="10" fill="#64748b">60%</text>
+<line x1="799.0" y1="86" x2="799.0" y2="336" stroke="#e2e8f0"/>
+<line x1="515" y1="136.0" x2="870" y2="136.0" stroke="#e2e8f0"/>
+<text x="799.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">80%</text>
+<text x="508" y="139.5" text-anchor="end" font-size="10" fill="#64748b">80%</text>
+<line x1="870.0" y1="86" x2="870.0" y2="336" stroke="#e2e8f0"/>
+<line x1="515" y1="86.0" x2="870" y2="86.0" stroke="#e2e8f0"/>
+<text x="870.0" y="351" text-anchor="middle" font-size="10" fill="#64748b">100%</text>
+<text x="508" y="89.5" text-anchor="end" font-size="10" fill="#64748b">100%</text>
+<text x="692.5" y="368" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">失败召回率 Recall →</text>
+<text x="473" y="211.0" text-anchor="middle" font-size="11" font-weight="600" fill="#334155" transform="rotate(-90 473 211.0)">失败精确率 Precision →</text>
+<line x1="72" y1="336" x2="427" y2="86" stroke="#94a3b8" stroke-dasharray="4,4"/>
+<line x1="107.5" y1="86" x2="107.5" y2="336" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="3,3"/>
+<text x="107.5" y="98" text-anchor="middle" font-size="9.5" font-weight="600" fill="#4f46e5">FPR=10%</text>
+<line x1="143.0" y1="86" x2="143.0" y2="336" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="3,3"/>
+<text x="143.0" y="98" text-anchor="middle" font-size="9.5" font-weight="600" fill="#4f46e5">FPR=20%</text>
+<line x1="515" y1="263.1" x2="870" y2="263.1" stroke="#94a3b8" stroke-dasharray="4,4"/>
+<text x="866" y="259.1" text-anchor="end" font-size="9.5" fill="#64748b">基线失败率 29.2%</text>
+<polyline fill="none" stroke="#ef4444" stroke-width="2.6" points="72.0,336.0 72.0,318.1 82.4,318.1 92.9,318.1 92.9,300.3 92.9,282.4 92.9,264.6 92.9,246.7 92.9,228.9 103.3,228.9 113.8,228.9 124.2,211.0 134.6,211.0 166.0,211.0 176.4,211.0 186.9,211.0 197.3,211.0 207.7,211.0 207.7,193.1 218.2,193.1 218.2,175.3 228.6,103.9 239.1,103.9 270.4,103.9 280.8,103.9 291.3,103.9 322.6,86.0 333.0,86.0 353.9,86.0 406.1,86.0 427.0,86.0"/>
+<polyline fill="none" stroke="#ef4444" stroke-width="2.6" points="515.0,86.0 540.4,86.0 540.4,211.0 540.4,252.7 565.7,211.0 591.1,186.0 616.4,169.3 641.8,157.4 667.1,148.5 667.1,169.3 667.1,186.0 692.5,190.2 692.5,201.4 692.5,226.6 692.5,233.1 692.5,238.8 692.5,243.9 692.5,248.5 717.9,240.8 717.9,245.1 743.2,238.2 844.6,219.9 844.6,223.9 844.6,234.4 844.6,237.5 844.6,240.4 870.0,243.9 870.0,246.3 870.0,250.6 870.0,259.9 870.0,263.1"/>
+<polyline fill="none" stroke="#10b981" stroke-width="2.4" points="72.0,336.0 72.0,318.1 83.1,318.1 105.3,318.1 105.3,300.3 105.3,282.4 427.0,86.0"/>
+<polyline fill="none" stroke="#10b981" stroke-width="2.4" points="515.0,86.0 540.4,86.0 540.4,211.0 540.4,273.5 565.7,236.0 591.1,211.0 870.0,259.9"/>
+<polyline fill="none" stroke="#14b8a6" stroke-width="2.0" stroke-dasharray="6,3" points="72.0,336.0 72.0,318.1 93.5,300.3 104.3,300.3 427.0,86.0"/>
+<polyline fill="none" stroke="#14b8a6" stroke-width="2.0" stroke-dasharray="6,3" points="515.0,86.0 540.4,86.0 565.7,211.0 565.7,236.0 870.0,261.5"/>
+<polyline fill="none" stroke="#f97316" stroke-width="1.8" stroke-dasharray="4,3" points="72.0,336.0 82.4,318.1 82.4,300.3 427.0,86.0"/>
+<polyline fill="none" stroke="#f97316" stroke-width="1.8" stroke-dasharray="4,3" points="515.0,86.0 540.4,211.0 565.7,169.3 870.0,263.1"/>
+<polyline fill="none" stroke="#eab308" stroke-width="1.8" stroke-dasharray="2,3" points="72.0,336.0 92.9,318.1 427.0,86.0"/>
+<polyline fill="none" stroke="#eab308" stroke-width="1.8" stroke-dasharray="2,3" points="515.0,86.0 540.4,252.7 870.0,263.1"/>
+<circle cx="72.0" cy="246.7" r="5.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+<text x="80.0" y="250.7" font-size="10" font-weight="600" fill="#1d4ed8">Rubric (5/14, 0% FPR)</text>
+<circle cx="641.8" cy="92.0" r="5.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+<line x1="28" y1="378" x2="48" y2="378" stroke="#ef4444" stroke-width="2.5"/>
+<text x="54" y="382" font-size="10.5" fill="#1e293b">Comprehensive (Flash): AUC=0.744 · PR=0.558 · R@10%=42.9%</text>
+<line x1="325" y1="378" x2="345" y2="378" stroke="#10b981" stroke-width="2.5"/>
+<text x="351" y="382" font-size="10.5" fill="#1e293b">Grounded (v4-Pro): AUC=0.557 · PR=0.375 · R@10%=22.0%</text>
+<line x1="622" y1="378" x2="642" y2="378" stroke="#14b8a6" stroke-width="2.5" stroke-dasharray="6,3"/>
+<text x="648" y="382" font-size="10.5" fill="#1e293b">Grounded (Flash): AUC=0.530 · PR=0.362 · R@10%=15.1%</text>
+<line x1="28" y1="398" x2="48" y2="398" stroke="#f97316" stroke-width="2.5" stroke-dasharray="4,3"/>
+<text x="54" y="402" font-size="10.5" fill="#1e293b">Accuracy (Flash): AUC=0.556 · PR=0.333 · R@10%=20.5%</text>
+<line x1="325" y1="398" x2="345" y2="398" stroke="#eab308" stroke-width="2.5" stroke-dasharray="2,3"/>
+<text x="351" y="402" font-size="10.5" fill="#1e293b">Accuracy (v4-Pro): AUC=0.506 · PR=0.295 · R@10%=11.2%</text>
+<text x="28" y="436" font-size="10.5" fill="#64748b">数据源：reports/same_fpr_comparison.json · 人工复测 κ=0.250 &lt; 0.60，本图为探索性分析；所有默认阈值配对 McNemar p ≥ 0.25。</text>
+</svg>

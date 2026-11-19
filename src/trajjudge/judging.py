@@ -115,9 +115,11 @@ def check_raw(grader: str, raw: dict[str, Any], *, expected_steps: int | None = 
                 raise ValueError("step scores must be integers 1-5")
 
 
-async def _grade(messages: list[dict[str, Any]], config: JudgeConfig, client: LLMClient, repeat_id: int, tag: str) -> tuple[Any, Any]:
+async def _grade(messages: list[dict[str, Any]], config: JudgeConfig, client: LLMClient,
+                 repeat_id: int | str, tag: str, *, use_json_schema: bool = False) -> tuple[Any, Any]:
     async with openjudge_model(client, thinking=config.thinking, max_tokens=config.effective_max_tokens, tag=tag,
-                               repeat_id=repeat_id, temperature=config.temperature) as (model, bridge):
+                               repeat_id=repeat_id, temperature=config.temperature,
+                               use_json_schema=use_json_schema) as (model, bridge):
         cls = TrajectoryAccuracyGrader if config.grader == "trajectory_accuracy" else TrajectoryComprehensiveGrader
         if config.defended == "neutral":
             template = neutral_template(cls.DEFAULT_TEMPLATE)
@@ -132,34 +134,56 @@ async def _grade(messages: list[dict[str, Any]], config: JudgeConfig, client: LL
 
 
 def judge_once(trace_id: str, messages: list[dict[str, Any]], config: JudgeConfig, client: LLMClient,
-               repeat_id: int, commit: str, variant: str = "original", phase: str = "p3") -> dict[str, Any]:
-    """Grade one trajectory once; failures become error rows with a null score, never zeros."""
+               repeat_id: int, commit: str, variant: str = "original", phase: str = "p3", *,
+               use_json_schema: bool = False, schema_retries: int = 0) -> dict[str, Any]:
+    """Grade one trajectory once; failures become error rows with a null score, never zeros.
+
+    When ``schema_retries > 0``, non-fatal parse/validation failures retry with distinct cache
+    keys (``f"{repeat_id}.retry{attempt}"``) and aggregate usage across attempts.
+    """
     row = base_row(trace_id, config, client.settings.judge_model, repeat_id, commit, variant=variant)
     tag = f"{phase}/{trace_id}/{variant}/{config.name}/{repeat_id}"
-    try:
-        result, bridge = asyncio.run(_grade(messages, config, client, repeat_id, tag))
-    except LLMError as exc:
-        return {**row, "status": "error", "reason": str(exc), "fatal": True}
-    except Exception as exc:  # grader/parse failure: keep the row explicit
-        return {**row, "status": "error", "reason": f"{type(exc).__name__}: {str(exc)[:200]}"}
-    results = bridge.results
-    row["usage"] = {"api_calls": sum(not r.cached for r in results), "cached_calls": sum(r.cached for r in results),
-                    "prompt_tokens": sum(r.prompt_tokens for r in results),
-                    "completion_tokens": sum(r.completion_tokens for r in results)}
+    total_usage = {"api_calls": 0, "cached_calls": 0, "prompt_tokens": 0, "completion_tokens": 0}
+    last_error = ""
     low, high = SCALES[config.grader]
-    if not isinstance(result, GraderScore) or not math.isfinite(result.score) or not low <= result.score <= high or not result.reason.strip():
-        return {**row, "status": "error", "reason": f"no valid score: {getattr(result, 'error', result)!s}"[:300]}
-    if len(results) != config.num_evaluations or any(
-            not r.raw_response.get("choices") or r.raw_response["choices"][0].get("finish_reason") != "stop" for r in results):
-        return {**row, "status": "error", "reason": "incomplete completions or wrong number of evaluations"}
-    try:
-        for completion in results:
-            check_raw(config.grader, json.loads(completion.text), expected_steps=sum(
-                bool(m.get("tool_calls")) for m in messages if m.get("role") == "assistant"))
-    except (ValueError, TypeError, KeyError, AttributeError) as exc:
-        return {**row, "status": "error", "reason": f"raw verdict invalid (upstream may have clamped it): {exc}"[:300]}
-    row.update(score=float(result.score), reason=result.reason)
-    return row
+    expected_steps = sum(bool(m.get("tool_calls")) for m in messages if m.get("role") == "assistant")
+
+    for attempt in range(schema_retries + 1):
+        rep_key: int | str = repeat_id if attempt == 0 else f"{repeat_id}.retry{attempt}"
+        try:
+            result, bridge = asyncio.run(
+                _grade(messages, config, client, rep_key, tag, use_json_schema=use_json_schema)
+            )
+        except LLMError as exc:
+            return {**row, "usage": total_usage, "status": "error", "reason": str(exc), "fatal": True}
+        except Exception as exc:  # grader/parse failure: keep explicit or retry
+            last_error = f"{type(exc).__name__}: {str(exc)[:200]}"
+            continue
+        results = bridge.results
+        total_usage["api_calls"] += sum(not r.cached for r in results)
+        total_usage["cached_calls"] += sum(r.cached for r in results)
+        total_usage["prompt_tokens"] += sum(r.prompt_tokens for r in results)
+        total_usage["completion_tokens"] += sum(r.completion_tokens for r in results)
+        if not isinstance(result, GraderScore) or not math.isfinite(result.score) or not low <= result.score <= high or not result.reason.strip():
+            last_error = f"no valid score: {getattr(result, 'error', result)!s}"[:300]
+            continue
+        if len(results) != config.num_evaluations or any(
+                not r.raw_response.get("choices") or r.raw_response["choices"][0].get("finish_reason") != "stop" for r in results):
+            last_error = "incomplete completions or wrong number of evaluations"
+            continue
+        try:
+            for completion in results:
+                check_raw(config.grader, json.loads(completion.text), expected_steps=expected_steps)
+        except (ValueError, TypeError, KeyError, AttributeError) as exc:
+            last_error = f"raw verdict invalid (upstream may have clamped it): {exc}"[:300]
+            continue
+        row["usage"] = total_usage
+        if attempt > 0:
+            row["schema_retry_attempts"] = attempt
+        row.update(score=float(result.score), reason=result.reason)
+        return row
+
+    return {**row, "usage": total_usage, "status": "error", "reason": last_error}
 
 
 def rule_row(trace_id: str, messages: list[dict[str, Any]], name: str, commit: str, variant: str = "original") -> dict[str, Any]:
@@ -194,15 +218,21 @@ def latest_rows(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def run_jobs(jobs: Sequence[tuple[str, list[dict[str, Any]], JudgeConfig, int, str]], client: LLMClient, output: Path,
-             *, workers: int = 8, run_dir: Path | None = None, phase: str = "p3") -> dict[str, int]:
+             *, workers: int = 8, run_dir: Path | None = None, phase: str = "p3",
+             use_json_schema: bool = False, schema_retries: int = 0) -> dict[str, int]:
     """Run (trace_id, messages, config, repeat_id, variant) jobs concurrently, appending rows to ``output``.
 
     Existing ok rows are skipped (error rows are retried; use ``latest_rows`` to read). A fatal (budget) error stops scheduling new jobs.
     """
     commit = openjudge_commit()
+    extra_desc: dict[str, Any] = {}
+    if use_json_schema:
+        extra_desc["use_json_schema"] = True
+    if schema_retries > 0:
+        extra_desc["schema_retries"] = schema_retries
     descriptors = [{"trace_id": j[0], "input_sha256": make_key({"messages": j[1]}),
                     "config": asdict(j[2]), "max_tokens": j[2].effective_max_tokens,
-                    "repeat_id": j[3], "variant": j[4]} for j in jobs]
+                    "repeat_id": j[3], "variant": j[4], **extra_desc} for j in jobs]
     keys = [make_key(d) for d in descriptors]
     logical_keys = [(j[0], j[4], j[2].name, j[3]) for j in jobs]
     if len(set(logical_keys)) != len(jobs):
@@ -234,14 +264,16 @@ def run_jobs(jobs: Sequence[tuple[str, list[dict[str, Any]], JudgeConfig, int, s
                 if row.get("job_id") != key:
                     raise ValueError("atomic row identity mismatch")
                 stored[key] = row
-        return _run_checkpointed(jobs, client, output, workers, run_dir, plan, identity, keys, stored, commit, phase)
+        return _run_checkpointed(jobs, client, output, workers, run_dir, plan, identity, keys, stored, commit, phase,
+                                 use_json_schema=use_json_schema, schema_retries=schema_retries)
     finally:
         active.unlink(missing_ok=True)
 
 
 def _run_checkpointed(jobs: Sequence[Any], client: LLMClient, output: Path, workers: int,
                       run_dir: Path, plan: dict[str, Any], identity: str, keys: list[str],
-                      stored: dict[str, Any], commit: str, phase: str) -> dict[str, int]:
+                      stored: dict[str, Any], commit: str, phase: str, *,
+                      use_json_schema: bool = False, schema_retries: int = 0) -> dict[str, int]:
     """Run under the exclusive run lock; per-job files are authoritative on recovery."""
     def checkpoint() -> None:
         atomic_text(output, "".join(json.dumps(stored[k], ensure_ascii=False, allow_nan=False) + "\n"
@@ -259,7 +291,8 @@ def _run_checkpointed(jobs: Sequence[Any], client: LLMClient, output: Path, work
         trace_id, messages, config, repeat_id, variant = job
         if stop.is_set():
             return
-        row = judge_once(trace_id, messages, config, client, repeat_id, commit, variant, phase)
+        row = judge_once(trace_id, messages, config, client, repeat_id, commit, variant, phase,
+                         use_json_schema=use_json_schema, schema_retries=schema_retries)
         row["job_id"] = key
         with lock:
             atomic_text(run_dir / "rows" / f"{key}.json", json.dumps(row, ensure_ascii=False, allow_nan=False))

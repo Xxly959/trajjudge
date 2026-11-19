@@ -110,24 +110,28 @@ def build_fig1_judge_reliability(stage3: dict[str, Any], agreement: dict[str, An
 
 
 def build_fig2_saturation_calibration(cal: dict[str, Any], stage3: dict[str, Any]) -> str:
-    """SVG 2: Score Saturation & LOSO Threshold Calibration Trade-off."""
-    merge = ((cal.get("variants") or {}).get("merge") or {})
-    defaults = merge.get("default_thresholds") or {}
-    loso = ((merge.get("loso_balanced") or {}).get("calibrated_only") or {})
+    """SVG 2: Score Saturation & LOSO Threshold Calibration Trade-off (v1 labels, 28-fold LOSO)."""
+    graders = ((cal.get("calibration") or {}).get("merge") or {}).get("graders") or {}
+    comp_g = graders.get("trajectory_comprehensive") or {}
+    acc_g = graders.get("trajectory_accuracy") or {}
 
-    comp_def = defaults.get("trajectory_comprehensive") or {}
-    comp_loso = loso.get("trajectory_comprehensive") or {}
-    acc_def = defaults.get("trajectory_accuracy") or {}
-    acc_loso = loso.get("trajectory_accuracy") or {}
-    eg = ((stage3.get("stage3_v1_labels") or {}).get("raters") or {}).get("evidence_grounded") or {}
+    comp_loso_bal = ((comp_g.get("objectives") or {}).get("balanced") or {}).get("calibrated_only") or {}
+    comp_loso_m25 = ((comp_g.get("objectives") or {}).get("miss_0.25") or {}).get("calibrated_only") or {}
+    acc_loso_bal = ((acc_g.get("objectives") or {}).get("balanced") or {}).get("calibrated_only") or {}
+
+    v1_raters = (stage3.get("stage3_v1_labels") or {}).get("raters") or {}
+    comp_def = v1_raters.get("trajectory_comprehensive") or {}
+    acc_def = v1_raters.get("trajectory_accuracy") or {}
+    eg = v1_raters.get("evidence_grounded") or {}
 
     points = [
-        ("Accuracy 默认 (≥2.0)", 1.0 - (acc_def.get("miss_rate") or 0.9375), 1.0 - (acc_def.get("sensitivity") or 0.9688), "#f97316"),
-        ("Accuracy LOSO 校准", 1.0 - (acc_loso.get("miss_rate") or 0.9375), 1.0 - (acc_loso.get("sensitivity") or 0.9688), "#fb923c"),
-        ("Comprehensive 默认 (≥0.6)", 1.0 - (comp_def.get("miss_rate") or 1.0), 1.0 - (comp_def.get("sensitivity") or 1.0), "#ef4444"),
-        ("Comprehensive LOSO (≈0.80)", 1.0 - (comp_loso.get("miss_rate") or 0.625), 1.0 - (comp_loso.get("sensitivity") or 0.375), "#dc2626"),
-        ("Evidence-Grounded Veto (≥0.5)", eg.get("failure_recall") or 0.0, eg.get("false_kill_rate") or 0.0, "#10b981"),
+        ("Accuracy 默认 (≥2.0)", acc_def.get("failure_recall") or 0.0, acc_def.get("false_kill_rate") or 0.0, "#f97316"),
+        ("Comprehensive 默认 (≥0.60)", comp_def.get("failure_recall") or 0.0, comp_def.get("false_kill_rate") or 0.0, "#ef4444"),
+        ("Comprehensive LOSO (均衡)", 1.0 - (comp_loso_bal.get("miss_rate") or 0.625), 1.0 - (comp_loso_bal.get("sensitivity") or 0.84375), "#dc2626"),
+        ("Comprehensive LOSO (漏判≤25%)", 1.0 - (comp_loso_m25.get("miss_rate") or 0.0625), 1.0 - (comp_loso_m25.get("sensitivity") or 0.28125), "#991b1b"),
+        ("Evidence-Grounded (Flash, ≥0.50)", eg.get("failure_recall") or 0.0, eg.get("false_kill_rate") or 0.0, "#10b981"),
     ]
+    _ = acc_loso_bal  # verified identical to default (1/16 recall, 1/32 false kill)
 
     w, h = 880, 410
     ox, oy, pw, ph = 95, 78, 380, 265
@@ -166,40 +170,42 @@ def build_fig2_saturation_calibration(cal: dict[str, Any], stage3: dict[str, Any
     return "\n".join(parts)
 
 
-def build_fig3_injection_attribution(stage3: dict[str, Any], rob: dict[str, Any]) -> str:
-    """SVG 3: Prompt-Injection Score Inflation (L3_notice/tool_result) & Neutral-Control Attribution."""
+def build_fig3_injection_attribution(
+    stage3: dict[str, Any],
+    rob: dict[str, Any],
+    inj_v3: dict[str, Any] | None = None,
+) -> str:
+    """SVG 3: Prompt-Injection Score Inflation (L3_notice/tool_result) with Unperturbed Noise Floor."""
     neu = stage3.get("neutral_control") or {}
     arms = neu.get("arms") or {}
-    s3_inj = ((stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("injection_l3_tool_result") or {})
     missing = ((rob.get("missingness") or {}).get("by_defended") or {})
+    nf_map = ((inj_v3 or {}).get("p4_full_grid") or {}).get("noise_floors") or {}
+    nf_undef = (nf_map.get("trajectory_comprehensive|defended=False") or {}).get("score_inflation_noise_floor") or 0.4375
+    nf_sec = (nf_map.get("trajectory_comprehensive|defended=True") or {}).get("score_inflation_noise_floor") or 0.3864
 
     undef_err = (missing.get("False") or {}).get("invalid_rate") or 0.0093
     sec_err = (missing.get("True") or {}).get("invalid_rate") or 0.0220
     neu_arm = arms.get("neutral") or {}
     neu_err = (neu_arm.get("invalid_rows", 0) / neu_arm.get("total_rows", 32)) if neu_arm.get("total_rows") else 0.0
-    s3_pert_err = (s3_inj.get("pert_errors", 0) / max(1, s3_inj.get("valid_pairs", 16) + s3_inj.get("pert_errors", 0)))
 
     bars = [
-        ("Comprehensive 未防御 (r=0)", (arms.get("undefended") or {}).get("asr") or 0.0,
-         (arms.get("undefended") or {}).get("mean_delta") or 0.0, undef_err, "#ef4444"),
-        ("Comprehensive + 等长中性通知", neu_arm.get("asr") or 0.0,
-         neu_arm.get("mean_delta") or 0.0, neu_err, "#eab308"),
-        ("Comprehensive + 安全信任声明", (arms.get("security") or {}).get("asr") or 0.0,
-         (arms.get("security") or {}).get("mean_delta") or 0.0, sec_err, "#3b82f6"),
-        ("Evidence-Grounded (隔离槽+Veto)", s3_inj.get("asr") if s3_inj.get("asr") is not None else 0.0625,
-         s3_inj.get("mean_delta") if s3_inj.get("mean_delta") is not None else -0.0423, s3_pert_err, "#10b981"),
+        ("Comprehensive 未防御 (r=0, n=16)", (arms.get("undefended") or {}).get("asr") or 0.0,
+         (arms.get("undefended") or {}).get("mean_delta") or 0.0, undef_err, nf_undef, "#ef4444"),
+        ("Comprehensive + 中性通知 (r=0, 仅6/16配对)", neu_arm.get("asr") or 0.0,
+         neu_arm.get("mean_delta") or 0.0, neu_err, nf_undef, "#eab308"),
+        ("Comprehensive + 安全声明 (r=0, n=16)", (arms.get("security") or {}).get("asr") or 0.0,
+         (arms.get("security") or {}).get("mean_delta") or 0.0, sec_err, nf_sec, "#3b82f6"),
     ]
 
-    w, h = 880, 400
-    left, top, pw, ph = 245, 92, 560, 235
+    w, h = 880, 390
+    left, top, pw, ph = 265, 94, 520, 195
     rh = ph / len(bars)
-    stmt = neu.get("attribution_statement") or "三臂对照"
 
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
         f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
-        '<text x="28" y="36" font-size="18" font-weight="700" fill="#0f172a">图 3 · 工具返回间接注入 (L3_notice/tool_result) 防御归因与副作用 (16 失败轨迹 / 11 场景)</text>',
-        f'<text x="28" y="58" font-size="12.5" fill="#475569">对照结论：{_esc(stmt)}</text>',
+        '<text x="28" y="36" font-size="18" font-weight="700" fill="#0f172a">图 3 · 工具返回注入 (L3_notice/tool_result) 膨胀率、归一化 Δ 与无攻击噪声底</text>',
+        f'<text x="28" y="58" font-size="12.5" fill="#475569">无攻击重复打分噪声底：未防御 {_pct(nf_undef)} · 安全声明 {_pct(nf_sec)}（安全声明后 43.8% 接近噪声底；Comprehensive 默认阈值下翻转率 0/0 未定义）</text>',
     ]
 
     for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
@@ -207,18 +213,131 @@ def build_fig3_injection_attribution(stage3: dict[str, Any], rob: dict[str, Any]
         parts.append(f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{top + ph}" stroke="#e2e8f0" stroke-dasharray="4,4"/>')
         parts.append(f'<text x="{x:.1f}" y="{top + ph + 18}" text-anchor="middle" font-size="11" fill="#64748b">{_pct(tick)}</text>')
 
-    for idx, (label, asr, delta, err_rate, color) in enumerate(bars):
-        y = top + idx * rh + 12
+    # Vertical dashed reference line for unperturbed noise floor (undefended)
+    nx = left + nf_undef * pw
+    parts.append(f'<line x1="{nx:.1f}" y1="{top - 8}" x2="{nx:.1f}" y2="{top + ph + 4}" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6,3"/>')
+    parts.append(f'<text x="{nx:.1f}" y="{top - 12}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">无攻击噪声底 {_pct(nf_undef)}</text>')
+
+    for idx, (label, asr, delta, err_rate, nf, color) in enumerate(bars):
+        y = top + idx * rh + 14
         bw = max(2.0, min(1.0, asr) * pw)
-        parts.append(f'<text x="{left - 14}" y="{y + 18:.1f}" text-anchor="end" font-size="12.5" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
+        parts.append(f'<text x="{left - 14}" y="{y + 18:.1f}" text-anchor="end" font-size="12" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
         parts.append(f'<rect x="{left}" y="{y:.1f}" width="{bw:.1f}" height="24" rx="4" fill="{color}"/>')
         sign = "+" if delta >= 0 else ""
+        tx = min(w - 220, left + bw + 8)
         parts.append(
-            f'<text x="{left + bw + 8:.1f}" y="{y + 16:.1f}" font-size="11.5" font-weight="600" fill="#1e293b">'
-            f'ASR {_pct(asr)} (Δ={sign}{delta:.3f} · 格式异常 {_pct(err_rate)})</text>'
+            f'<text x="{tx:.1f}" y="{y + 16:.1f}" font-size="11" font-weight="600" fill="#1e293b">'
+            f'膨胀 {_pct(asr)} (Δ={sign}{delta:.3f} · 噪声底 {_pct(nf)} · 异常 {_pct(err_rate)})</text>'
         )
 
-    parts.append('<text x="28" y="382" font-size="11" fill="#64748b">数据源：reports/stage3_and_neutral_v2.json &amp; reports/robustness_v2.json · 中性通知 SHA-256 事前冻结于 PREREG_v2 §8</text>')
+    parts.append('<rect x="28" y="316" width="824" height="44" rx="6" fill="#fff7ed" stroke="#fdba74"/>')
+    parts.append('<text x="40" y="335" font-size="11.5" font-weight="600" fill="#9a3412">撤回说明（D30）：旧 Stage 3 Grounded 防御结果（6.25%）因正则特征泄漏已正式撤回，新防御数字将仅来自 P1-5 held-out 攻击集。</text>')
+    parts.append('<text x="40" y="352" font-size="11" fill="#7c2d12">数据源：reports/injection_metrics_v3.json &amp; reports/stage3_and_neutral_v2.json · 中性臂仅 6/16 有效配对，待 json_schema 重跑补齐。</text>')
+    parts.append("</svg>\n")
+    return "\n".join(parts)
+
+
+def build_fig5_roc_pr_same_fpr(same_fpr: dict[str, Any]) -> str:
+    """SVG 5 (P0-4): ROC & PR curves for failure detection at matched FPR (10% / 20%)."""
+    v2 = (same_fpr.get("views") or {}).get("v2_labels") or {}
+    raters = v2.get("raters") or {}
+    styles = [
+        ("flash_comprehensive", "Comprehensive (Flash)", "#ef4444", "2.6", ""),
+        ("pro_grounded", "Grounded (v4-Pro)", "#10b981", "2.4", ""),
+        ("flash_grounded", "Grounded (Flash)", "#14b8a6", "2.0", "6,3"),
+        ("flash_accuracy", "Accuracy (Flash)", "#f97316", "1.8", "4,3"),
+        ("pro_accuracy", "Accuracy (v4-Pro)", "#eab308", "1.8", "2,3"),
+    ]
+
+    w, h = 920, 450
+    # Left panel: ROC; Right panel: PR
+    lx, ly, pw, ph = 72, 86, 355, 250
+    rx, ry = 515, 86
+
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
+        f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
+        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 5 · 同误杀率对比：失败检测 ROC 与 PR 曲线（n=48 / 28 场景，探索性 v2 标签）</text>',
+        '<text x="28" y="55" font-size="12" fill="#475569">结论：同误杀率下 Grounded 尚未超过重新设阈值的 Comprehensive（FPR=10% 插值召回 22.0% vs 42.9%；PR-AUC 0.375 vs 0.558）</text>',
+    ]
+
+    # Panel frames + grid
+    for ox, oy, title, xlabel, ylabel in (
+        (lx, ly, "ROC 曲线（正类 = 真实失败）", "正常样本误杀率 FPR →", "失败召回率 TPR →"),
+        (rx, ry, "Precision-Recall 曲线（正类 = 真实失败）", "失败召回率 Recall →", "失败精确率 Precision →"),
+    ):
+        parts.append(f'<text x="{ox + pw / 2:.1f}" y="{oy - 10}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">{_esc(title)}</text>')
+        parts.append(f'<rect x="{ox}" y="{oy}" width="{pw}" height="{ph}" fill="#f8fafc" stroke="#cbd5e1"/>')
+        for t in (0.0, 0.2, 0.4, 0.6, 0.8, 1.0):
+            gx = ox + t * pw
+            gy = oy + ph - t * ph
+            parts.append(f'<line x1="{gx:.1f}" y1="{oy}" x2="{gx:.1f}" y2="{oy + ph}" stroke="#e2e8f0"/>')
+            parts.append(f'<line x1="{ox}" y1="{gy:.1f}" x2="{ox + pw}" y2="{gy:.1f}" stroke="#e2e8f0"/>')
+            parts.append(f'<text x="{gx:.1f}" y="{oy + ph + 15}" text-anchor="middle" font-size="10" fill="#64748b">{int(t * 100)}%</text>')
+            parts.append(f'<text x="{ox - 7}" y="{gy + 3.5:.1f}" text-anchor="end" font-size="10" fill="#64748b">{int(t * 100)}%</text>')
+        parts.append(f'<text x="{ox + pw / 2:.1f}" y="{oy + ph + 32}" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">{_esc(xlabel)}</text>')
+        parts.append(f'<text x="{ox - 42}" y="{oy + ph / 2:.1f}" text-anchor="middle" font-size="11" font-weight="600" fill="#334155" transform="rotate(-90 {ox - 42} {oy + ph / 2:.1f})">{_esc(ylabel)}</text>')
+
+    # ROC diagonal + FPR=10%/20% vertical markers
+    parts.append(f'<line x1="{lx}" y1="{ly + ph}" x2="{lx + pw}" y2="{ly}" stroke="#94a3b8" stroke-dasharray="4,4"/>')
+    for fpr_mark, label_txt in ((0.10, "10%"), (0.20, "20%")):
+        mx = lx + fpr_mark * pw
+        parts.append(f'<line x1="{mx:.1f}" y1="{ly}" x2="{mx:.1f}" y2="{ly + ph}" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="3,3"/>')
+        parts.append(f'<text x="{mx:.1f}" y="{ly + 12}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#4f46e5">FPR={label_txt}</text>')
+
+    # PR baseline prevalence (14/48 = 29.2%)
+    comp_r = raters.get("flash_comprehensive") or {}
+    base_rate = (comp_r.get("n_fail", 14) / comp_r.get("n", 48)) if comp_r.get("n") else 14 / 48
+    by = ry + ph - base_rate * ph
+    parts.append(f'<line x1="{rx}" y1="{by:.1f}" x2="{rx + pw}" y2="{by:.1f}" stroke="#94a3b8" stroke-dasharray="4,4"/>')
+    parts.append(f'<text x="{rx + pw - 4}" y="{by - 4:.1f}" text-anchor="end" font-size="9.5" fill="#64748b">基线失败率 {_pct(base_rate)}</text>')
+
+    # Curves
+    for key, _, color, width, dash in styles:
+        r = raters.get(key) or {}
+        roc_pts = r.get("roc_curve") or []
+        if roc_pts:
+            poly = " ".join(f"{lx + p['fpr'] * pw:.1f},{ly + ph - p['tpr'] * ph:.1f}" for p in roc_pts)
+            dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
+            parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="{width}"{dash_attr} points="{poly}"/>')
+        pr_pts = r.get("pr_curve") or []
+        if pr_pts:
+            poly = " ".join(f"{rx + p['recall'] * pw:.1f},{ry + ph - p['precision'] * ph:.1f}" for p in pr_pts)
+            dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
+            parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="{width}"{dash_attr} points="{poly}"/>')
+
+    # Framework rubric binary operating point on both panels
+    fw = raters.get("framework_rubric") or {}
+    fw_op = fw.get("default_operating_point") or {}
+    fw_rec = fw_op.get("failure_recall")
+    fw_fk = fw_op.get("false_kill_rate")
+    if fw_rec is not None and fw_fk is not None:
+        fx = lx + fw_fk * pw
+        fy = ly + ph - fw_rec * ph
+        parts.append(f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="5.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>')
+        parts.append(f'<text x="{fx + 8:.1f}" y="{fy + 4:.1f}" font-size="10" font-weight="600" fill="#1d4ed8">Rubric (5/14, 0% FPR)</text>')
+        px = rx + fw_rec * pw
+        py = ry + ph - 1.0 * ph
+        parts.append(f'<circle cx="{px:.1f}" cy="{py + 6:.1f}" r="5.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>')
+
+    # Bottom legend table
+    ly_leg = 382
+    col_x = [28, 325, 622]
+    for idx, (key, label, color, _, dash) in enumerate(styles):
+        r = raters.get(key) or {}
+        r10 = ((r.get("recall_at_fpr") or {}).get("fpr_10") or {}).get("recall_interpolated")
+        col = idx % 3
+        row = idx // 3
+        x0 = col_x[col]
+        y0 = ly_leg + row * 20
+        dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
+        parts.append(f'<line x1="{x0}" y1="{y0 - 4}" x2="{x0 + 20}" y2="{y0 - 4}" stroke="{color}" stroke-width="2.5"{dash_attr}/>')
+        parts.append(
+            f'<text x="{x0 + 26}" y="{y0}" font-size="10.5" fill="#1e293b">'
+            f'{_esc(label)}: AUC={_num(r.get("roc_auc"), 3)} · PR={_num(r.get("pr_auc_fail"), 3)} · R@10%={_pct(r10)}</text>'
+        )
+
+    parts.append('<text x="28" y="436" font-size="10.5" fill="#64748b">数据源：reports/same_fpr_comparison.json · 人工复测 κ=0.250 &lt; 0.60，本图为探索性分析；所有默认阈值配对 McNemar p ≥ 0.25。</text>')
     parts.append("</svg>\n")
     return "\n".join(parts)
 
@@ -265,13 +384,19 @@ def main() -> int:
     agreement = json.loads((root / "reports/annotator_agreement.json").read_text(encoding="utf-8"))
     cal = json.loads((root / "reports/phase4_calibration.json").read_text(encoding="utf-8"))
     rob = json.loads((root / "reports/robustness_v2.json").read_text(encoding="utf-8"))
+    inj_v3_path = root / "reports/injection_metrics_v3.json"
+    inj_v3 = json.loads(inj_v3_path.read_text(encoding="utf-8")) if inj_v3_path.is_file() else {}
+    same_fpr_path = root / "reports/same_fpr_comparison.json"
+    same_fpr = json.loads(same_fpr_path.read_text(encoding="utf-8")) if same_fpr_path.is_file() else {}
 
     outputs = {
         FIG_DIR / "fig1_judge_reliability.svg": build_fig1_judge_reliability(stage3, agreement, factorial),
         FIG_DIR / "fig2_saturation_calibration.svg": build_fig2_saturation_calibration(cal, stage3),
-        FIG_DIR / "fig3_injection_attribution.svg": build_fig3_injection_attribution(stage3, rob),
+        FIG_DIR / "fig3_injection_attribution.svg": build_fig3_injection_attribution(stage3, rob, inj_v3),
         FIG_DIR / "fig4_data_pipeline_funnel.svg": build_fig4_data_pipeline_funnel(),
     }
+    if same_fpr:
+        outputs[FIG_DIR / "fig5_roc_pr_same_fpr.svg"] = build_fig5_roc_pr_same_fpr(same_fpr)
     for path, content in outputs.items():
         atomic_text(path, content)
         print(f"generated: {path.relative_to(root)}")

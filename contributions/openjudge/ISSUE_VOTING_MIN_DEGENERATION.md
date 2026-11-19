@@ -1,6 +1,6 @@
 # Upstream Issue Proposal: `VotingEvaluationStrategy` degenerates to `min-of-N` on continuous-valued graders
 
-Status: **Submitted upstream as [agentscope-ai/OpenJudge#247](https://github.com/agentscope-ai/OpenJudge/issues/247) (status: OPEN, awaiting maintainer triage).**
+Status: **CLOSED (resolved via merged PR [agentscope-ai/OpenJudge#248](https://github.com/agentscope-ai/OpenJudge/pull/248), merge commit `15d22f2ca4e20413bc91f6f52ee65d5bee12b3cd` at `2026-11-18T06:54:47Z`; originally submitted as [agentscope-ai/OpenJudge#247](https://github.com/agentscope-ai/OpenJudge/issues/247)).**
 Audited upstream commit: `7d27246484e91c6ed4a349b6ebe7bd4629d9378f` (`openjudge/evaluation_strategy/voting_evaluation_strategy.py`), confirmed unchanged on `main` (`a850e78`).
 
 ## Problem Summary
