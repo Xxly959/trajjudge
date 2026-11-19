@@ -1,7 +1,7 @@
 # TrajJudge
 
 [![Offline CI](https://github.com/Xxly959/trajjudge/actions/workflows/ci.yml/badge.svg)](https://github.com/Xxly959/trajjudge/actions/workflows/ci.yml)
-[![Offline Tests](https://img.shields.io/badge/offline_tests-528_passed-10b981)](#quick-start-offline-no-api-key)
+[![Offline Tests](https://img.shields.io/badge/offline_tests-534_passed-10b981)](#quick-start-offline-no-api-key)
 [![Sockets](https://img.shields.io/badge/network_in_tests-blocked-2563eb)](#quick-start-offline-no-api-key)
 [![OpenJudge PR #246](https://img.shields.io/badge/OpenJudge_PR_%23246-merged_(c58d1d6)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/246)
 [![OpenJudge PR #248](https://img.shields.io/badge/OpenJudge_PR_%23248-merged_(15d22f2)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/248)
@@ -25,7 +25,7 @@
 
 ## Quick Start (Offline, No API Key)
 
-All 528 regression tests run with network sockets blocked and LLM replies mocked — no API key or Docker daemon required.
+All 534 regression tests run with network sockets blocked and LLM replies mocked — no API key or Docker daemon required.
 
 ```bash
 # 1. Clone pinned read-only upstream dependencies as siblings of my-project/

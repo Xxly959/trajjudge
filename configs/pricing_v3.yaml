@@ -1,0 +1,27 @@
+# P1 / v3 pricing registry. Following D5, unverified external provider prices stay null
+# until verified from official pricing pages before any paid live run.
+currency: USD
+per: 1M_tokens
+verified_on: "2026-11-05 (DeepSeek); external providers pending verification"
+models:
+  deepseek-flash:
+    input_per_mtok: 0.30
+    output_per_mtok: 1.20
+    off_peak_input_per_mtok: 0.15
+    off_peak_output_per_mtok: 0.60
+  deepseek-v4-pro:
+    input_per_mtok: 1.32
+    output_per_mtok: 3.96
+    input_cache_hit_per_mtok: 0.044
+    off_peak_input_per_mtok: 0.66
+    off_peak_output_per_mtok: 1.98
+    off_peak_input_cache_hit_per_mtok: 0.022
+  qwen-plus:
+    input_per_mtok: null
+    output_per_mtok: null
+  glm-4.5:
+    input_per_mtok: null
+    output_per_mtok: null
+  moonshot-v1-32k:
+    input_per_mtok: null
+    output_per_mtok: null

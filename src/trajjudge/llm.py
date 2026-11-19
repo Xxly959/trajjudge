@@ -324,7 +324,11 @@ class LLMClient:
             request["reasoning_effort"] = reasoning_effort
         if response_format is not None:
             request["response_format"] = dict(response_format)
-        request["extra_body"] = {"thinking": {"type": "enabled" if thinking_on else "disabled"}}
+        if self.settings.thinking_style == "deepseek":
+            request["extra_body"] = {"thinking": {"type": "enabled" if thinking_on else "disabled"}}
+        elif self.settings.thinking_style == "dashscope":
+            request["extra_body"] = {"enable_thinking": bool(thinking_on)}
+        # thinking_style == "none": omit extra_body for standard OpenAI-compatible endpoints.
 
         key_payload: dict[str, Any] = {
             "version": CACHE_VERSION,

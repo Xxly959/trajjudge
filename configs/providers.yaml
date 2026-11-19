@@ -1,0 +1,67 @@
+# Multi-vendor OpenAI-compatible provider registry (P1-3 / P1-4).
+# API keys are read ONLY from .env or process environment (never stored here).
+# Model IDs for external providers should be verified via /models before live runs (D3).
+paths:
+  cache_dir: .cache/llm
+  pricing_file: configs/pricing_v3.yaml
+
+providers:
+  deepseek:
+    api_key_env: DEEPSEEK_API_KEY
+    base_url_env: DEEPSEEK_BASE_URL
+    base_url: https://api.deepseek.com
+    thinking_style: deepseek
+    models:
+      judge: deepseek-flash
+      agent: deepseek-flash
+    thinking:
+      judge: false
+      agent: false
+
+  deepseek_pro:
+    api_key_env: DEEPSEEK_API_KEY
+    base_url_env: DEEPSEEK_BASE_URL
+    base_url: https://api.deepseek.com
+    thinking_style: deepseek
+    models:
+      judge: deepseek-v4-pro
+      agent: deepseek-v4-pro
+    thinking:
+      judge: false
+      agent: false
+
+  qwen:
+    api_key_env: DASHSCOPE_API_KEY
+    base_url_env: DASHSCOPE_BASE_URL
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    thinking_style: dashscope
+    models:
+      judge: qwen-plus
+      agent: qwen-plus
+    thinking:
+      judge: false
+      agent: false
+
+  glm:
+    api_key_env: ZHIPU_API_KEY
+    base_url_env: ZHIPU_BASE_URL
+    base_url: https://open.bigmodel.cn/api/paas/v4
+    thinking_style: none
+    models:
+      judge: glm-4.5
+      agent: glm-4.5
+    thinking:
+      judge: false
+      agent: false
+
+  kimi:
+    api_key_env: MOONSHOT_API_KEY
+    base_url_env: MOONSHOT_BASE_URL
+    base_url: https://api.moonshot.cn/v1
+    thinking_style: none
+    models:
+      judge: moonshot-v1-32k
+      agent: moonshot-v1-32k
+    thinking:
+      judge: false
+      agent: false

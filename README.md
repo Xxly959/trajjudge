@@ -1,7 +1,7 @@
 # TrajJudge
 
 [![Offline CI](https://github.com/Xxly959/trajjudge/actions/workflows/ci.yml/badge.svg)](https://github.com/Xxly959/trajjudge/actions/workflows/ci.yml)
-[![Offline Tests](https://img.shields.io/badge/离线单测-528_passed-10b981)](#快速开始免-key-离线复现)
+[![Offline Tests](https://img.shields.io/badge/离线单测-534_passed-10b981)](#快速开始免-key-离线复现)
 [![Sockets](https://img.shields.io/badge/测试网络-Socket_Blocked-2563eb)](#快速开始免-key-离线复现)
 [![OpenJudge PR #246](https://img.shields.io/badge/OpenJudge_PR_%23246-Merged_(c58d1d6)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/246)
 [![OpenJudge PR #248](https://img.shields.io/badge/OpenJudge_PR_%23248-Merged_(15d22f2)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/248)
@@ -25,7 +25,7 @@
 
 ## 快速开始（免 Key 离线复现）
 
-全部 528 项回归单测在 **Socket 断网** 环境下运行，无需 API Key 或 Docker 即可校验核心逻辑、防泄漏守卫与全部聚合图表。
+全部 534 项回归单测在 **Socket 断网** 环境下运行，无需 API Key 或 Docker 即可校验核心逻辑、防泄漏守卫与全部聚合图表。
 
 ```bash
 # 1. 在同级目录准备只读上游依赖（与 CI 保持一致）
@@ -100,7 +100,7 @@ contributions/openjudge/  合入上游 OpenJudge 的 PR #246 / PR #248 补丁与
 reports/                  技术报告、5 张 SVG 图表、showcase.html 与全部聚合 JSON 产物
 docs/                     CLAIMS.md 口径总表、PREREG_v2、DECISIONS、BUDGET_v2 与 archive/ 历史过程文档
 notes/walkthrough/        关键改动讲解卡与复盘练习
-tests/                    528 项禁网单测（含模板防泄漏守卫与密钥扫描）
+tests/                    534 项禁网单测（含模板防泄漏守卫、τ-bench 适配器、多厂商与密钥扫描）
 ```
 
 ---

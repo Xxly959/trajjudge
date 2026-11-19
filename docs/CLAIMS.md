@@ -79,7 +79,7 @@
 | :--- | :--- | :--- | :--- | :--- |
 | `C-TRK-01` | 跨源统一轨迹快照（Claw-Eval + SWE-bench） | `87 + 8 = 95` 条轨迹 | `deterministic` | `docs/SWE_IMPORT.md` |
 | `C-TRK-02` | 原创题防刷分对照（只看末轮声明误选无产物幻觉） | `2/2` 误选无产物幻觉；可执行 Verifier `16/16` 通过并过 `TRL 0.29` | `deterministic` | `docs/TRAINING_CANDIDATES.md`, `docs/ORIGINAL_API_PILOT.md` |
-| `C-ENG-01` | 离线禁网单测数量 | `528+` 项（含 P0-2 防泄漏守卫与 P0-3/P0-4 统计单测） | `deterministic` | `tests/` |
+| `C-ENG-01` | 离线禁网单测数量 | `534` 项（含 P0-2/P1-5 防泄漏守卫、P0-3/P0-4 统计与 P1 τ-bench/多厂商/消融单测） | `deterministic` | `tests/` |
 | `C-COST-01` | 截至 v2 累计保守预算 guard 支出 | `$10.751405`（v1 `$9.180483` + v2 `$1.570922`，远低于 v2 `$5.00` 上限） | `deterministic` | `docs/BUDGET_v2.md` |
 
 ---

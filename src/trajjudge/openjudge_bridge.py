@@ -43,23 +43,32 @@ class SharedCompletionTransport:
         if request.method != "POST" or not request.url.path.endswith("/chat/completions"):
             raise ValueError("unsupported OpenJudge endpoint")
         payload = json.loads(await request.aread())
-        allowed = {"model", "messages", "stream", "thinking", "temperature", "max_tokens",
+        allowed = {"model", "messages", "stream", "thinking", "enable_thinking", "temperature", "max_tokens",
                    "reasoning_effort", "tools", "tool_choice", "response_format"}
         if set(payload) - allowed or payload.get("stream", False):
             raise ValueError("unsupported OpenJudge request parameters or streaming")
+        style = self.client.settings.thinking_style
         thinking = payload.get("thinking")
-        if thinking not in ({"type": "enabled"}, {"type": "disabled"}):
-            raise ValueError("an explicit thinking toggle is required")
+        enable_thinking = payload.get("enable_thinking")
+        if style == "deepseek":
+            if thinking not in ({"type": "enabled"}, {"type": "disabled"}):
+                raise ValueError("an explicit thinking toggle is required")
+            thinking_bool = thinking["type"] == "enabled"
+        elif style == "dashscope":
+            thinking_bool = bool(enable_thinking)
+        else:
+            thinking_bool = False
         self.observations.append({
-            "thinking": thinking, "response_format": payload.get("response_format"),
+            "thinking": thinking if style == "deepseek" else enable_thinking,
+            "response_format": payload.get("response_format"),
             "request_fields": sorted(payload),
         })
-        parameters = {key: value for key, value in payload.items() if key not in {"thinking", "stream", "messages"}}
+        parameters = {key: value for key, value in payload.items() if key not in {"thinking", "enable_thinking", "stream", "messages"}}
         # Strategies (Average/Voting) send identical requests; a per-call suffix keeps
         # each one a real sample instead of a cache replay. None keeps legacy keys.
         repeat = None if self.repeat_id is None else f"{self.repeat_id}.{len(self.observations) - 1}"
         try:
-            result = self.client.complete(payload["messages"], thinking=thinking["type"] == "enabled", tag=self.tag,
+            result = self.client.complete(payload["messages"], thinking=thinking_bool, tag=self.tag,
                                           repeat_id=repeat, **parameters)
         except Exception as exc:
             self.failure = str(exc) if isinstance(exc, LLMError) else type(exc).__name__
@@ -120,12 +129,17 @@ async def openjudge_model(client: LLMClient, *, thinking: bool = False,
     """Provide the native upstream chat path with local JSON adaptation and transport."""
     bridge = SharedCompletionTransport(client, tag=tag, repeat_id=repeat_id)
     http_client = DefaultAsyncHttpxClient(transport=bridge)
+    extra_body: dict[str, Any] | None = None
+    if client.settings.thinking_style == "deepseek":
+        extra_body = {"thinking": {"type": "enabled" if thinking else "disabled"}}
+    elif client.settings.thinking_style == "dashscope":
+        extra_body = {"enable_thinking": bool(thinking)}
     model = DeepSeekOpenJudgeModel(
         model=client.settings.judge_model,
         api_key=client.settings.api_key or "offline-placeholder",
         base_url=client.settings.base_url, stream=False, max_retries=0, timeout=60,
         client_args={"http_client": http_client}, max_tokens=max_tokens,
-        extra_body={"thinking": {"type": "enabled" if thinking else "disabled"}},
+        **({"extra_body": extra_body} if extra_body is not None else {}),
         use_json_schema=use_json_schema,
         **({"temperature": temperature} if temperature is not None else {}),
     )
