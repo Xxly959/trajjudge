@@ -1,0 +1,12 @@
+{
+ "generated_at": "2026-11-19T15:48:48+00:00",
+ "provider": "hubcore_glm_pro",
+ "model": "glm-5.3",
+ "label_role": "silver_label_only",
+ "n_valid": 45,
+ "n_errors": 3,
+ "raw_agreement_vs_human_v2": 0.7333,
+ "kappa_vs_human_v2": 0.2059,
+ "pabak_vs_human_v2": 0.4667,
+ "n_disagreements_for_adjudication": 12
+}

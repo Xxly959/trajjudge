@@ -529,7 +529,9 @@ def grade_trajectory_grounded(
                 tag=tag,
             )
         except LLMError as exc:
-            return {**row, "usage": total_usage, "status": "error", "reason": str(exc), "fatal": True}
+            msg = str(exc)
+            fatal = any(tok in msg.lower() for tok in ("budget", "pending", "pricing", "offline", "http status 401", "http status 402", "http status 403"))
+            return {**row, "usage": total_usage, "status": "error", "reason": msg, **({"fatal": True} if fatal else {})}
         except Exception as exc:
             last_error = f"{type(exc).__name__}: {str(exc)[:200]}"
             continue

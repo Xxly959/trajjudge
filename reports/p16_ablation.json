@@ -1,0 +1,148 @@
+{
+ "generated_at": "2026-11-19T16:54:32+00:00",
+ "provider": "hubcore_glm_flash",
+ "n_subset": 60,
+ "n_scenarios": 40,
+ "ablations": {
+  "full": {
+   "n_valid": 53,
+   "n_errors": 7,
+   "n_scenarios": 36,
+   "caught_failures": "24/27",
+   "failure_recall": 0.8889,
+   "false_kills": "9/26",
+   "false_kill_rate": 0.3462,
+   "balanced_accuracy": 0.7714,
+   "kappa": 0.5451,
+   "roc_auc": 0.9103,
+   "pr_auc_fail": 0.8977,
+   "recall_at_fpr_10": 0.7407,
+   "recall_at_fpr_20": 0.8519,
+   "veto_overrode_model_count": 3,
+   "veto_overrode_model_rate": 0.0566
+  },
+  "no_veto": {
+   "n_valid": 53,
+   "n_errors": 7,
+   "n_scenarios": 36,
+   "caught_failures": "22/27",
+   "failure_recall": 0.8148,
+   "false_kills": "8/26",
+   "false_kill_rate": 0.3077,
+   "balanced_accuracy": 0.7536,
+   "kappa": 0.5082,
+   "roc_auc": 0.8689,
+   "pr_auc_fail": 0.8712,
+   "recall_at_fpr_10": 0.5926,
+   "recall_at_fpr_20": 0.7407,
+   "veto_overrode_model_count": 0,
+   "veto_overrode_model_rate": 0.0
+  },
+  "no_quarantine": {
+   "n_valid": 58,
+   "n_errors": 2,
+   "n_scenarios": 40,
+   "caught_failures": "27/29",
+   "failure_recall": 0.931,
+   "false_kills": "13/29",
+   "false_kill_rate": 0.4483,
+   "balanced_accuracy": 0.7414,
+   "kappa": 0.4828,
+   "roc_auc": 0.8216,
+   "pr_auc_fail": 0.7949,
+   "recall_at_fpr_10": 0.4828,
+   "recall_at_fpr_20": 0.6552,
+   "veto_overrode_model_count": 10,
+   "veto_overrode_model_rate": 0.1724
+  },
+  "no_ledger": {
+   "n_valid": 58,
+   "n_errors": 2,
+   "n_scenarios": 40,
+   "caught_failures": "20/29",
+   "failure_recall": 0.6897,
+   "false_kills": "7/29",
+   "false_kill_rate": 0.2414,
+   "balanced_accuracy": 0.7241,
+   "kappa": 0.4483,
+   "roc_auc": 0.7937,
+   "pr_auc_fail": 0.7379,
+   "recall_at_fpr_10": 0.2759,
+   "recall_at_fpr_20": 0.5517,
+   "veto_overrode_model_count": 1,
+   "veto_overrode_model_rate": 0.0172
+  }
+ },
+ "prompt_variants": {
+  "v0": {
+   "n_valid": 53,
+   "n_errors": 7,
+   "n_scenarios": 36,
+   "caught_failures": "24/27",
+   "failure_recall": 0.8889,
+   "false_kills": "9/26",
+   "false_kill_rate": 0.3462,
+   "balanced_accuracy": 0.7714,
+   "kappa": 0.5451,
+   "roc_auc": 0.9103,
+   "pr_auc_fail": 0.8977,
+   "recall_at_fpr_10": 0.7407,
+   "recall_at_fpr_20": 0.8519,
+   "veto_overrode_model_count": 3,
+   "veto_overrode_model_rate": 0.0566
+  },
+  "v1": {
+   "n_valid": 20,
+   "n_errors": 40,
+   "n_scenarios": 13,
+   "caught_failures": "8/10",
+   "failure_recall": 0.8,
+   "false_kills": "6/10",
+   "false_kill_rate": 0.6,
+   "balanced_accuracy": 0.6,
+   "kappa": 0.2,
+   "roc_auc": 0.81,
+   "pr_auc_fail": 0.8616,
+   "recall_at_fpr_10": 0.6,
+   "recall_at_fpr_20": 0.6,
+   "veto_overrode_model_count": 2,
+   "veto_overrode_model_rate": 0.1
+  },
+  "v2": {
+   "n_valid": 0,
+   "n_errors": 60
+  }
+ },
+ "prompt_sensitivity": {
+  "failure_recall": {
+   "mean": 0.8445,
+   "sd": 0.0629,
+   "min": 0.8,
+   "max": 0.8889
+  },
+  "false_kill_rate": {
+   "mean": 0.4731,
+   "sd": 0.1795,
+   "min": 0.3462,
+   "max": 0.6
+  },
+  "roc_auc": {
+   "mean": 0.8601,
+   "sd": 0.0709,
+   "min": 0.81,
+   "max": 0.9103
+  },
+  "pr_auc_fail": {
+   "mean": 0.8797,
+   "sd": 0.0255,
+   "min": 0.8616,
+   "max": 0.8977
+  },
+  "recall_at_fpr_10": {
+   "mean": 0.6704,
+   "sd": 0.0995,
+   "min": 0.6,
+   "max": 0.7407
+  }
+ }
+}

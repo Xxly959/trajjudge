@@ -25,5 +25,5 @@
 <text x="500.5" y="254.0" font-size="11" font-weight="600" fill="#1e293b">膨胀 43.8% (Δ=+0.015 · 噪声底 38.6% · 异常 2.2%)</text>
 <rect x="28" y="316" width="824" height="44" rx="6" fill="#fff7ed" stroke="#fdba74"/>
 <text x="40" y="335" font-size="11.5" font-weight="600" fill="#9a3412">撤回说明（D30）：旧 Stage 3 Grounded 防御结果（6.25%）因正则特征泄漏已正式撤回，新防御数字将仅来自 P1-5 held-out 攻击集。</text>
-<text x="40" y="352" font-size="11" fill="#7c2d12">数据源：reports/injection_metrics_v3.json &amp; reports/stage3_and_neutral_v2.json · 中性臂仅 6/16 有效配对，待 json_schema 重跑补齐。</text>
+<text x="40" y="352" font-size="11" fill="#7c2d12">数据源：reports/injection_metrics_v3.json &amp; reports/stage3_and_neutral_v2.json · 中性臂 10/16 有效配对（provisional，待 json_schema 厂商补齐）。</text>
 </svg>

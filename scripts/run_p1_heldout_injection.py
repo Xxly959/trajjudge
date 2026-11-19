@@ -80,15 +80,25 @@ def plan_heldout_variants(
     *,
     templates: Sequence[str],
     locations: Sequence[str],
+    compact_secondary_templates: Sequence[str] | None = None,
 ) -> list[tuple[str, list[dict[str, Any]], str, int]]:
-    """Build (trace_id, messages, variant, repeat_id) list: 3 unperturbed repeats + 1 per (template, location)."""
+    """Build (trace_id, messages, variant, repeat_id) list: 3 unperturbed repeats + held-out injections.
+
+    When ``compact_secondary_templates`` is set, applies ALL ``templates`` to ``tool_result``
+    and applies ``compact_secondary_templates`` to ``assistant_mid`` and ``assistant_final``.
+    """
     items: list[tuple[str, list[dict[str, Any]], str, int]] = []
     for t in traces:
         # 3 unperturbed repeats for exact P0-3 noise floor on the same cohort
         for r in range(3):
             items.append((t["trace_id"], t["messages"], "original", r))
-        for tpl_id in templates:
-            for loc in locations:
+        for loc in locations:
+            tpl_list = (
+                compact_secondary_templates
+                if (compact_secondary_templates is not None and loc != "tool_result")
+                else templates
+            )
+            for tpl_id in tpl_list:
                 try:
                     pert, _ = inject_v3(t["messages"], tpl_id, loc)
                 except ValueError:
@@ -104,6 +114,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--n-fail", type=int, default=24)
     parser.add_argument("--templates", nargs="*", default=[t.template_id for t in HELD_OUT_TEST_TEMPLATES])
     parser.add_argument("--locations", nargs="*", default=list(LOCATIONS_V3))
+    parser.add_argument("--compact-locations", action="store_true", help="All templates on tool_result; 4 cross-category templates on assistant_mid/assistant_final")
     parser.add_argument("--graders", nargs="+", default=["trajectory_comprehensive", GRADER_NAME])
     parser.add_argument("--ablation", default="full", choices=("full", "no_quarantine"))
     parser.add_argument("--workers", type=int, default=4)
@@ -116,7 +127,8 @@ def main(argv: list[str] | None = None) -> int:
     cohort = drv.load_cohort()
     fail_traces = select_fail_subset(cohort, args.n_fail)
     trace_scenarios = {t["trace_id"]: t["scenario_id"] for t in cohort}
-    items = plan_heldout_variants(fail_traces, templates=args.templates, locations=args.locations)
+    secondary = ("T01_qa_signoff", "T05_zh_qa_pass", "T09_json_grader_note", "T13_spoof_user_confirm") if args.compact_locations else None
+    items = plan_heldout_variants(fail_traces, templates=args.templates, locations=args.locations, compact_secondary_templates=secondary)
 
     if args.action == "report":
         all_rows: list[dict[str, Any]] = []
@@ -167,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
         run_dir = root / "runs" / run_id
         out_jsonl = OUT_DIR / f"{run_id}.jsonl"
         run_settings = drv._apply_budget_guard(settings, run_dir, args.cap_usd) if not args.offline else settings
-        client = LLMClient(run_settings, offline=args.offline, max_attempts=2, timeout=120.0)
+        client = LLMClient(run_settings, offline=args.offline, max_attempts=4, backoff_base=2.0, timeout=120.0)
         if g == GRADER_NAME:
             from concurrent.futures import ThreadPoolExecutor
             import threading

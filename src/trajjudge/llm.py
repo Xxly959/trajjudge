@@ -186,6 +186,7 @@ class LLMClient:
         timeout: float = 180.0,
         offline: bool = False,
         jitter: Callable[[], float] = random.random,
+        retryable_statuses: frozenset[int] = RETRYABLE_STATUS,
     ) -> None:
         if max_attempts < 1 or timeout <= 0:
             raise ValueError("attempts and timeout must be positive")
@@ -200,6 +201,7 @@ class LLMClient:
         self.offline = offline
         self.last_models_cached = False
         self.jitter = jitter
+        self.retryable_statuses = retryable_statuses
         self._client = client
         self._transport: Transport | None = transport
         self._lock = threading.Lock()
@@ -432,7 +434,8 @@ class LLMClient:
                     raw_usage=evidence,
                 ))
                 self._clear_pending()
-                if attempt >= self.max_attempts or not _is_retryable(exc):
+                is_ret = (isinstance(status, int) and status in self.retryable_statuses) or _is_retryable(exc)
+                if attempt >= self.max_attempts or not is_ret:
                     raise LLMError(f"LLM request failed after {attempt} attempt(s); HTTP status {status if isinstance(status, int) else 'unknown'}") from None
                 delay = min(self.backoff_cap, self.backoff_base * 2 ** (attempt - 1))
                 self.sleep(delay * (1 + 0.3 * self.jitter()))

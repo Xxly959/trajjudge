@@ -66,6 +66,7 @@ def annotate_one(
     client: LLMClient,
     *,
     tag: str,
+    max_tokens: int = 2048,
 ) -> dict[str, Any]:
     ledger = extract_evidence_ledger(messages)
     payload = {
@@ -83,7 +84,7 @@ def annotate_one(
         res = client.complete(
             prompt_msgs,
             thinking=False,
-            max_tokens=1024,
+            max_tokens=max_tokens,
             response_format={"type": "json_object"},
             repeat_id="silver.0",
             tag=tag,
@@ -116,6 +117,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--cap-usd", type=float)
     parser.add_argument("--limit", type=int, default=100)
+    parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument("--max-tokens", type=int, default=2048)
     args = parser.parse_args(argv)
 
     if args.provider in ("deepseek", "deepseek_pro"):
@@ -140,21 +143,26 @@ def main(argv: list[str] | None = None) -> int:
         run_settings = drv._apply_budget_guard(settings, run_dir, args.cap_usd)
         client = LLMClient(run_settings, max_attempts=2, timeout=120.0)
         OUT_DIR.mkdir(parents=True, exist_ok=True)
-        rows = []
-        for t in items:
-            row = annotate_one(t["trace_id"], t["messages"], t["privileged_outcome"], client, tag=f"p13/{t['trace_id']}")
-            rows.append(row)
-            if row.get("fatal"):
-                break
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            rows = list(pool.map(
+                lambda t: annotate_one(t["trace_id"], t["messages"], t["privileged_outcome"], client, tag=f"p13/{t['trace_id']}", max_tokens=args.max_tokens),
+                items,
+            ))
         out_jsonl = OUT_DIR / f"silver_{args.provider}_taubench_passes.jsonl"
         atomic_text(out_jsonl, "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
         flagged = [r for r in rows if r.get("status") == "ok" and r.get("silver_label") == "fail"]
+        md_lines = ["# τ-bench Objective-Pass Blind-Spot Audit (Silver Label vs DB Reward=1.0)\n"]
+        for r in flagged[:20]:
+            md_lines.append(f"- **{r['trace_id']}** (`{r['primary_defect_type']}`, indices={r['evidence_indices']}): {r['rationale']}")
+        atomic_text(OUT_DIR / "taubench_blindspot_audit.md", "\n".join(md_lines) + "\n")
         summary = {
             "generated_at": utc_now(),
             "provider": args.provider,
             "model": settings.judge_model,
             "label_role": "silver_label_only",
             "n_audited_passes": sum(1 for r in rows if r.get("status") == "ok"),
+            "n_errors": sum(1 for r in rows if r.get("status") != "ok"),
             "n_flagged_blindspots": len(flagged),
             "blindspot_rate": round(len(flagged) / max(1, sum(1 for r in rows if r.get("status") == "ok")), 4),
             "sample_for_human_review_count": min(20, len(flagged)),
@@ -184,14 +192,17 @@ def main(argv: list[str] | None = None) -> int:
     run_settings = drv._apply_budget_guard(settings, run_dir, args.cap_usd)
     client = LLMClient(run_settings, max_attempts=2, timeout=120.0)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    rows = []
-    for tid in sorted(cohort_v2):
+    from concurrent.futures import ThreadPoolExecutor
+
+    def _run_claw_one(tid: str) -> dict[str, Any]:
         priv = {"claw_eval_official_passed": bool((official_by_tid.get(tid) or {}).get("passed")), "task_id": traces[tid]["task_id"]}
-        row = annotate_one(tid, traces[tid]["messages"], priv, client, tag=f"p13-claw/{tid}")
+        row = annotate_one(tid, traces[tid]["messages"], priv, client, tag=f"p13-claw/{tid}", max_tokens=args.max_tokens)
         row["human_v2_pass"] = bool(cohort_v2[tid]["human_pass"])
-        rows.append(row)
-        if row.get("fatal"):
-            break
+        row["blind_id"] = cohort_v2[tid]["blind_id"]
+        return row
+
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        rows = list(pool.map(_run_claw_one, sorted(cohort_v2)))
     out_jsonl = OUT_DIR / f"silver_{args.provider}_claw48.jsonl"
     atomic_text(out_jsonl, "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
 
@@ -199,12 +210,20 @@ def main(argv: list[str] | None = None) -> int:
     h_vec = [bool(r["human_v2_pass"]) for r in ok_rows]
     s_vec = [r["silver_label"] == "pass" for r in ok_rows]
     disagree = [r for r in ok_rows if (r["silver_label"] == "pass") != bool(r["human_v2_pass"])]
+    md_lines = ["# Claw-Eval 48 Human-v2 vs Privileged AI Silver Label Disagreements (for round3_adjudicated)\n"]
+    for r in disagree:
+        md_lines.append(
+            f"- **{r['blind_id']}** (human_v2=`{'pass' if r['human_v2_pass'] else 'fail'}`, "
+            f"silver=`{r['silver_label']}`, defect=`{r['primary_defect_type']}`, indices={r['evidence_indices']}): {r['rationale']}"
+        )
+    atomic_text(OUT_DIR / "claw48_disagreements.md", "\n".join(md_lines) + "\n")
     summary = {
         "generated_at": utc_now(),
         "provider": args.provider,
         "model": settings.judge_model,
         "label_role": "silver_label_only",
         "n_valid": len(ok_rows),
+        "n_errors": sum(1 for r in rows if r.get("status") != "ok"),
         "raw_agreement_vs_human_v2": round(m.accuracy(h_vec, s_vec), 4) if ok_rows else None,
         "kappa_vs_human_v2": round(m.cohen_kappa(h_vec, s_vec), 4) if ok_rows and m.cohen_kappa(h_vec, s_vec) is not None else None,
         "pabak_vs_human_v2": round(m.pabak(h_vec, s_vec), 4) if ok_rows else None,

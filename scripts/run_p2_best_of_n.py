@@ -204,7 +204,7 @@ def main(argv: list[str] | None = None) -> int:
         run_dir = root / "runs" / run_id
         out_jsonl = OUT_DIR / f"{run_id}.jsonl"
         run_settings = drv._apply_budget_guard(settings, run_dir, args.cap_usd) if not args.offline else settings
-        client = LLMClient(run_settings, offline=args.offline, max_attempts=2, timeout=120.0)
+        client = LLMClient(run_settings, offline=args.offline, max_attempts=4, backoff_base=2.0, timeout=120.0)
         if g == GRADER_NAME:
             counts = drv._run_grounded_batch(
                 cand_traces, client, out_jsonl, run_dir,

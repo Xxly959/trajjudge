@@ -155,7 +155,9 @@ def judge_once(trace_id: str, messages: list[dict[str, Any]], config: JudgeConfi
                 _grade(messages, config, client, rep_key, tag, use_json_schema=use_json_schema)
             )
         except LLMError as exc:
-            return {**row, "usage": total_usage, "status": "error", "reason": str(exc), "fatal": True}
+            msg = str(exc)
+            fatal = any(tok in msg.lower() for tok in ("budget", "pending", "pricing", "offline", "http status 401", "http status 402", "http status 403"))
+            return {**row, "usage": total_usage, "status": "error", "reason": msg, **({"fatal": True} if fatal else {})}
         except Exception as exc:  # grader/parse failure: keep explicit or retry
             last_error = f"{type(exc).__name__}: {str(exc)[:200]}"
             continue

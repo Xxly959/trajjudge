@@ -395,5 +395,19 @@ uses existing rows for the same cohort. The paid P4 run awaits approval.
 2. 保留无 JSON Schema 冗余的完整领域政策（上限 7,000 字符），并在 JSON 审计输出中新增可选 `confidence_pass`（0–100）用于连续排序（仍严格服从 Veto 门控分区：pass ∈ [0.50, 1.00]，fail ∈ [0.00, 0.45]）。
 3. 增补多轮终止态与终态转人工单测；余额充值后使用修正版代码重跑完整 200 条队列并与 `Comprehensive` / `Accuracy` 同口径对照。
 
+---
+
+# D32 P1-4 两厂商范围决策、中转站深度思考排除与 P1-5 / P2-A 断点状态（2026-11-19）
+
+**背景**：
+1. 用户基于成本权衡明确决定 P1-4 多厂商对照采用 **两家模型厂商（DeepSeek + GLM）**，不额外采购 OpenAI / Anthropic 昂贵接口；对应结论在 `CLAIMS.md` 与 `FINAL_REPORT_v3.md` 中诚实标注为 **2-vendor scope（两厂商对照）**，不夸大为三厂商。
+2. 实测中转站 DeepSeek 通道（`HUBCORE_API_KEY`）仅暴露 4 个强制开启深度思考的模型（`deepseek-v4-flash` / `deepseek-v4-pro` / `deepseek-v4.1-flash` / `deepseek-v4.1-flash-1017`），忽略 `thinking: disabled` 与 `enable_thinking: false` 且在批量调用时频繁出现输出截断与网关 `504` 超时；而用户提供的 GLM 通道（`HUBCORE_GLM_API_KEY`，`glm-5.3-flash` / `glm-5.3`）正常支持 `thinking: disabled` 并顺利完成 P1-1 全量 1,000 次调用、P1-3 148 次特权银标调用与 P1-6 全部 4 路组件消融。
+3. 在 `P1-6` 提示词敏感性 `v1` 跑至 `20/60` 时，GLM 账户余额耗尽返回 `HTTP 403 INSUFFICIENT_BALANCE`；同时官方 `DEEPSEEK_API_KEY` 余额为 `-0.03 CNY`（`HTTP 402`）。
+
+**决定**：
+1. 将 `HTTP 403` 保持为 `fatal=True` 不可重试错误（避免余额耗尽空转），并将所有已完成并检验通过的实测结果（P1-1 全量 200 条、P1-3 银标与 13/92 盲区审计、P1-4 DeepSeek 161 条跨厂商离线 post-D31 复核、P1-6 四路组件消融）正式纳入 `docs/CLAIMS.md`、`reports/FINAL_REPORT_v3.md` 与 `fig6_p1_taubench_and_ablation.svg`。
+2. 保留 `runs/` 与 `.cache/llm/` 中 `P1-6 (v1/v2)`、`P2-A (Best-of-4)` 与 `P1-5 (15 模板 held-out 注入)` 的原子断点；在余额补充前严禁发布这三项的占位或推算数字。
+
+
 
 

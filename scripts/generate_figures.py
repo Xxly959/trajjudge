@@ -233,7 +233,7 @@ def build_fig3_injection_attribution(
 
     parts.append('<rect x="28" y="316" width="824" height="44" rx="6" fill="#fff7ed" stroke="#fdba74"/>')
     parts.append('<text x="40" y="335" font-size="11.5" font-weight="600" fill="#9a3412">撤回说明（D30）：旧 Stage 3 Grounded 防御结果（6.25%）因正则特征泄漏已正式撤回，新防御数字将仅来自 P1-5 held-out 攻击集。</text>')
-    parts.append('<text x="40" y="352" font-size="11" fill="#7c2d12">数据源：reports/injection_metrics_v3.json &amp; reports/stage3_and_neutral_v2.json · 中性臂仅 6/16 有效配对，待 json_schema 重跑补齐。</text>')
+    parts.append(f'<text x="40" y="352" font-size="11" fill="#7c2d12">数据源：reports/injection_metrics_v3.json &amp; reports/stage3_and_neutral_v2.json · 中性臂 {neu_paired}/16 有效配对（provisional，待 json_schema 厂商补齐）。</text>')
     parts.append("</svg>\n")
     return "\n".join(parts)
 
@@ -376,6 +376,127 @@ def build_fig4_data_pipeline_funnel() -> str:
     return "\n".join(parts)
 
 
+def build_fig6_p1_taubench_and_ablation(
+    p1_eval: dict[str, Any],
+    p16_ablation: dict[str, Any],
+    p14_deepseek: dict[str, Any] | None = None,
+) -> str:
+    """SVG 6 (P1-1 + P1-6): Objective-Label τ-bench Benchmark & Monotonic Component Ablation."""
+    raters = p1_eval.get("raters") or {}
+    abls = p16_ablation.get("ablations") or {}
+
+    def _r_row(key: str, label: str, color: str) -> tuple[str, float, float, float, str] | None:
+        r = raters.get(key)
+        if not r:
+            return None
+        r20 = ((r.get("recall_at_fpr") or {}).get("fpr_20") or {}).get("recall_interpolated") or 0.0
+        return (
+            label,
+            float(r.get("roc_auc") or 0.0),
+            float(r.get("pr_auc_fail") or 0.0),
+            float(r20),
+            color,
+        )
+
+    left_rows: list[tuple[str, float, float, float, str]] = []
+    for key, label, color in (
+        ("p1-hubcore_glm_flash-evidence_grounded", "Grounded · GLM-Flash (n=184)", "#10b981"),
+        ("p1-hubcore_glm_pro-evidence_grounded", "Grounded · GLM-Pro (n=198)", "#14b8a6"),
+        ("p1-hubcore_glm_pro-accuracy", "Accuracy · GLM-Pro (n=200)", "#eab308"),
+        ("p1-hubcore_glm_flash-accuracy", "Accuracy · GLM-Flash (n=199)", "#f97316"),
+        ("p1-hubcore_glm_flash-comprehensive", "Comprehensive · GLM-Flash (n=183)", "#ef4444"),
+        ("p1-rule-baselines:observation_information_gain|rule", "Rule: InfoGain (n=200)", "#64748b"),
+    ):
+        item = _r_row(key, label, color)
+        if item:
+            left_rows.append(item)
+    if p14_deepseek and p14_deepseek.get("n_valid"):
+        left_rows.insert(
+            1,
+            (
+                f"Grounded · DeepSeek (部分 n={p14_deepseek['n_valid']})",
+                float(p14_deepseek.get("roc_auc") or 0.0),
+                float(p14_deepseek.get("pr_auc_fail") or 0.0),
+                float(p14_deepseek.get("recall_at_fpr_20_interp") or 0.0),
+                "#0ea5e9",
+            ),
+        )
+
+    right_rows: list[tuple[str, float, float, float, str]] = []
+    for key, label, color in (
+        ("full", "Full 完整架构 (n=53)", "#10b981"),
+        ("no_veto", "w/o Veto 门控 (n=53)", "#3b82f6"),
+        ("no_quarantine", "w/o 隔离槽 (n=58)", "#f59e0b"),
+        ("no_ledger", "w/o 证据账本 (n=58)", "#ef4444"),
+    ):
+        a = abls.get(key)
+        if a:
+            right_rows.append((
+                label,
+                float(a.get("roc_auc") or 0.0),
+                float(a.get("pr_auc_fail") or 0.0),
+                float(a.get("recall_at_fpr_10") or 0.0),
+                color,
+            ))
+
+    w, h = 960, 470
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
+        f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
+        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 6 · P1 客观标签 τ-bench 主实验（n=200 / 131 场景）与四路组件单调消融（P1-6）</text>',
+        '<text x="28" y="55" font-size="12" fill="#475569">基于数据库可执行校验真值：Evidence-Grounded (GLM-Flash) 全指标超越通用裁判，且账本 &gt; 隔离槽 &gt; Veto 三组件呈单调递减贡献</text>',
+    ]
+
+    # Panel A (Left): P1-1 τ-bench
+    lx, ly, lpw, lph = 205, 96, 265, 305
+    parts.append(f'<text x="{lx + lpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. τ-bench 客观标签全量对比 (n=200)</text>')
+    for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
+        x = lx + tick * lpw
+        parts.append(f'<line x1="{x:.1f}" y1="{ly}" x2="{x:.1f}" y2="{ly + lph}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
+        parts.append(f'<text x="{x:.1f}" y="{ly + lph + 15}" text-anchor="middle" font-size="10" fill="#64748b">{tick:.2f}</text>')
+
+    if left_rows:
+        rh = lph / len(left_rows)
+        for idx, (label, roc, pr, r20, color) in enumerate(left_rows):
+            y0 = ly + idx * rh + 4
+            parts.append(f'<text x="{lx - 10}" y="{y0 + 21:.1f}" text-anchor="end" font-size="10.8" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
+            for sub, (val, opac, tag) in enumerate(((roc, "1.0", f"AUC {roc:.3f}"), (pr, "0.60", f"PR {pr:.3f}"), (r20, "0.30", f"R@20 {_pct(r20)}"))):
+                by = y0 + sub * 11
+                bw = max(2.0, min(1.0, val) * lpw)
+                parts.append(f'<rect x="{lx}" y="{by:.1f}" width="{bw:.1f}" height="9" rx="2" fill="{color}" fill-opacity="{opac}"/>')
+                parts.append(f'<text x="{lx + bw + 4:.1f}" y="{by + 8:.1f}" font-size="9.2" fill="#334155">{_esc(tag)}</text>')
+
+    # Divider
+    parts.append('<line x1="538" y1="74" x2="538" y2="420" stroke="#cbd5e1" stroke-dasharray="4,4"/>')
+
+    # Panel B (Right): P1-6 Ablation
+    rx, ry, rpw, rph = 678, 96, 200, 305
+    parts.append(f'<text x="{rx + rpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 组件消融单调阶梯 (n=60 分层)</text>')
+    for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
+        x = rx + tick * rpw
+        parts.append(f'<line x1="{x:.1f}" y1="{ry}" x2="{x:.1f}" y2="{ry + rph}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
+        parts.append(f'<text x="{x:.1f}" y="{ry + rph + 15}" text-anchor="middle" font-size="10" fill="#64748b">{tick:.2f}</text>')
+
+    if right_rows:
+        rh = rph / len(right_rows)
+        for idx, (label, roc, pr, r10, color) in enumerate(right_rows):
+            y0 = ry + idx * rh + 12
+            parts.append(f'<text x="{rx - 10}" y="{y0 + 25:.1f}" text-anchor="end" font-size="11.2" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
+            for sub, (val, opac, tag) in enumerate(((roc, "1.0", f"AUC {roc:.3f}"), (pr, "0.60", f"PR {pr:.3f}"), (r10, "0.32", f"R@10 {_pct(r10)}"))):
+                by = y0 + sub * 15
+                bw = max(2.0, min(1.0, val) * rpw)
+                parts.append(f'<rect x="{rx}" y="{by:.1f}" width="{bw:.1f}" height="12" rx="2.5" fill="{color}" fill-opacity="{opac}"/>')
+                parts.append(f'<text x="{rx + bw + 5:.1f}" y="{by + 10:.1f}" font-size="9.8" font-weight="600" fill="#334155">{_esc(tag)}</text>')
+
+    # Legend strip + footer
+    parts.append('<rect x="28" y="424" width="12" height="8" rx="2" fill="#334155" fill-opacity="1.0"/><text x="45" y="432" font-size="10" fill="#334155">ROC-AUC</text>')
+    parts.append('<rect x="110" y="424" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.60"/><text x="127" y="432" font-size="10" fill="#334155">PR-AUC (Fail)</text>')
+    parts.append('<rect x="215" y="424" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.30"/><text x="232" y="432" font-size="10" fill="#334155">左图 Recall@FPR=20% · 右图 Recall@FPR=10%</text>')
+    parts.append('<text x="28" y="454" font-size="10.5" fill="#64748b">数据源：reports/p1_taubench_eval.json · reports/p14_cross_vendor_deepseek.json · reports/p16_ablation.json · 跨厂商 unauthorized_side_effect 精确率 GLM 27/32 (84.4%) vs DeepSeek 22/26 (84.6%)</text>')
+    parts.append("</svg>\n")
+    return "\n".join(parts)
+
+
 def main() -> int:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     stage3_path = root / "reports/stage3_and_neutral_v2.json"
@@ -389,6 +510,12 @@ def main() -> int:
     inj_v3 = json.loads(inj_v3_path.read_text(encoding="utf-8")) if inj_v3_path.is_file() else {}
     same_fpr_path = root / "reports/same_fpr_comparison.json"
     same_fpr = json.loads(same_fpr_path.read_text(encoding="utf-8")) if same_fpr_path.is_file() else {}
+    p1_eval_path = root / "reports/p1_taubench_eval.json"
+    p1_eval = json.loads(p1_eval_path.read_text(encoding="utf-8")) if p1_eval_path.is_file() else {}
+    p16_path = root / "reports/p16_ablation.json"
+    p16_ablation = json.loads(p16_path.read_text(encoding="utf-8")) if p16_path.is_file() else {}
+    p14_path = root / "reports/p14_cross_vendor_deepseek.json"
+    p14_deepseek = json.loads(p14_path.read_text(encoding="utf-8")) if p14_path.is_file() else {}
 
     outputs = {
         FIG_DIR / "fig1_judge_reliability.svg": build_fig1_judge_reliability(stage3, agreement, factorial),
@@ -398,6 +525,10 @@ def main() -> int:
     }
     if same_fpr:
         outputs[FIG_DIR / "fig5_roc_pr_same_fpr.svg"] = build_fig5_roc_pr_same_fpr(same_fpr)
+    if p1_eval and p16_ablation:
+        outputs[FIG_DIR / "fig6_p1_taubench_and_ablation.svg"] = build_fig6_p1_taubench_and_ablation(
+            p1_eval, p16_ablation, p14_deepseek
+        )
     for path, content in outputs.items():
         atomic_text(path, content)
         print(f"generated: {path.relative_to(root)}")

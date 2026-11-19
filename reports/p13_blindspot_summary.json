@@ -1,0 +1,11 @@
+{
+ "generated_at": "2026-11-19T15:55:56+00:00",
+ "provider": "hubcore_glm_pro",
+ "model": "glm-5.3",
+ "label_role": "silver_label_only",
+ "n_audited_passes": 92,
+ "n_errors": 8,
+ "n_flagged_blindspots": 13,
+ "blindspot_rate": 0.1413,
+ "sample_for_human_review_count": 13
+}

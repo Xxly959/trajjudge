@@ -450,7 +450,9 @@ def evaluate_p1_reports(*, resamples: int = 2000, seed: int = 0) -> dict[str, An
                 }
 
             veto_overrode = sum(1 for r in valid_rows if (r.get("audit") or {}).get("veto_overrode_model"))
-            unauth = sum(1 for r in valid_rows if (r.get("audit") or {}).get("unauthorized_side_effect"))
+            unauth_rows = [r for r in valid_rows if (r.get("audit") or {}).get("unauthorized_side_effect")]
+            unauth = len(unauth_rows)
+            unauth_true_fail = sum(1 for r in unauth_rows if not by_tid[r["trace_id"]]["objective_pass"])
             prompt_toks = sum((r.get("usage") or {}).get("prompt_tokens", 0) for r in valid_rows)
             comp_toks = sum((r.get("usage") or {}).get("completion_tokens", 0) for r in valid_rows)
 
@@ -489,8 +491,12 @@ def evaluate_p1_reports(*, resamples: int = 2000, seed: int = 0) -> dict[str, An
                 "by_agent_model": by_agent_metrics,
                 "veto_overrode_model_count": veto_overrode,
                 "unauthorized_side_effect_count": unauth,
+                "unauthorized_side_effect_true_fails": unauth_true_fail,
+                "unauthorized_side_effect_precision": round(unauth_true_fail / unauth, 4) if unauth else None,
                 "total_prompt_tokens": prompt_toks,
                 "total_completion_tokens": comp_toks,
+                "avg_prompt_tokens": round(prompt_toks / len(valid_rows), 1),
+                "avg_completion_tokens": round(comp_toks / len(valid_rows), 1),
                 "roc_curve": roc_curve_fail(truth, scores),
                 "pr_curve": pr_curve_fail(truth, scores),
             }
@@ -592,7 +598,7 @@ def main(argv: list[str] | None = None) -> int:
         run_dir = root / "runs" / run_id
         out_jsonl = OUT_DIR / f"{run_id}.jsonl"
         run_settings = _apply_budget_guard(settings, run_dir, args.cap_usd) if not args.offline else settings
-        client = LLMClient(run_settings, offline=args.offline, max_attempts=2, timeout=120.0)
+        client = LLMClient(run_settings, offline=args.offline, max_attempts=4, timeout=120.0)
         if g == GRADER_NAME:
             counts = _run_grounded_batch(
                 traces, client, out_jsonl, run_dir,

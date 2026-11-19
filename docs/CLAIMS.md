@@ -1,16 +1,76 @@
 # TrajJudge 对外口径总表 (`CLAIMS.md`)
 
-最后核验：2026-11-19 · 适用范围：`README.md`、`README_en.md`、`reports/FINAL_REPORT_v2.md`、`reports/showcase.html` 与简历。
+最后核验：2026-11-19 · 适用范围：`README.md`、`README_en.md`、`reports/FINAL_REPORT_v3.md`、`reports/FINAL_REPORT_v2.md`、`reports/showcase.html` 与简历。
 
 **硬性口径规则（P0-1）**：
 1. 所有对外引用的数字必须能在下表查到唯一出处，禁止自创或四舍五入后跨文件不一致。
-2. 分母 `< 30` 的比较一律写 `x/n`（分子/分母），**禁用“翻倍 / 提升 N 倍 / 降 N 倍”**。
-3. 置信区间跨 `0`、或以人工盲标（`κ = 0.250 < 0.60`）为参照的指标一律标为 **exploratory**。
-4. 已撤回口径（v1 单轨迹 `75%` 与 Stage 3 泄漏 `6.25%`）单独归入「已撤回记录」表，仅作自我纠错案例，不得作为有效正面结论引用。
+2. 分母 `< 30` 的比较一律写 `x/n`（分子/分母），**禁用「翻倍 / 提升 N 倍 / 降 N 倍」**。
+3. 置信区间跨 `0`、或以人工盲标（`κ = 0.250 < 0.60`）为参照的指标一律标为 **`exploratory`**；基于数据库可执行验证的 τ-bench 客观标签大样本指标标为 **`confirmatory`**（部分样本或单次消融如实标明样本量与范围）。
+4. 已撤回口径（v1 单轨迹 `75%`、Stage 3 泄漏 `6.25%`、LOSO 误杀误报 `62.5%`）单独归入「已撤回记录」表，仅作自我纠错案例，不得作为有效正面结论引用。
 
 ---
 
-## 1. 语料、去重与人工标注一致性（Gate A）
+## 1. 主实验：P1 客观标签 τ-bench 大样本验证（`n = 200` / `131` 独立场景，P1-1 & P1-4）
+
+> **真值来源**：τ-bench 数据库可执行状态校验（`reward == 1.0` 为客观通过，零人工主观噪声），严格隔离 `reward` 与 `expected_actions` 防止泄漏（`PREREG_v3.md`）。跨 `DeepSeek-V3.2`（100 条：50 失败 / 50 通过）与 `gpt-4o`（100 条：50 失败 / 50 通过）精确 50/50 平衡，覆盖 `airline`（73 条）与 `retail`（127 条）。
+
+### 1.1 语料与池规模
+
+| ID | 指标 | 数值 (`x/n`) | 场景数 | 校验哈希 / 状态 | 定性 | 来源 JSON |
+| :--- | :--- | :--- | ---: | :--- | :--- | :--- |
+| `C-P1-DATA-01` | 冻结 τ-bench 客观标签队列 | `200` 条（`100` 失败 + `100` 通过；DeepSeek-V3.2 `100` + GPT-4o `100`；airline `73` + retail `127`） | 131 | `SHA-256 = e460dbef...1bed73a`（源池 `825` 条零未映射角色） | `deterministic` | `reports/p1_cohort_summary.json` |
+| `C-P1-DATA-02` | Best-of-4 重排候选池（P2-A） | `165` 个任务（每任务 4 次采样，其中 `75` 个混合成败任务）；随机期望通过率 `54.85%` vs 数据库 Oracle 上界 `78.18%` | 165 | 池已冻结，在线裁判重排待 GLM 余额充值后从断点续跑 | `deterministic` | `reports/p1_cohort_summary.json` |
+
+### 1.2 评分器客观标签全量对比（同误杀率与阈值无关指标）
+
+| ID | 评分器与模型配置 | 有效数 (`n/200`, 场景) | 默认阈值召回 (`x/n`) | 默认误杀 (`x/n`) | Cohen's `κ` (95% 簇 CI) | `ROC-AUC` (95% 簇 CI) | `PR-AUC` (95% 簇 CI) | `R@FPR=10%` (step / interp) | `R@FPR=20%` (step / interp) | 定性 | 来源 JSON |
+| :--- | :--- | :---: | :---: | :---: | :--- | :--- | :--- | :---: | :---: | :--- | :--- |
+| `C-P1-01` | **Evidence-Grounded · GLM-Flash** (`≥0.50`) | `184/200` (`123`) | **`58/91` (`63.7%`)** | `24/93` (`25.8%`) | **`0.380`** `[0.231, 0.514]` | **`0.755`** `[0.673, 0.825]` | **`0.739`** `[0.637, 0.830]` | **`37.4%` / `37.4%`** | **`60.4%` / `60.4%`** | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-02` | Evidence-Grounded · GLM-5.3 Pro (`≥0.50`) | `198/200` (`129`) | `68/99` (`68.7%`) | `38/99` (`38.4%`) | `0.303` `[0.177, 0.436]` | `0.683` `[0.616, 0.753]` | `0.665` `[0.573, 0.757]` | `0.0%` / `30.0%` | `51.5%` / `51.5%` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-03` | OpenJudge Accuracy · GLM-5.3 Pro (`≥2.0`) | `200/200` (`131`) | `21/100` (`21.0%`) | `4/100` (`4.0%`) | `0.170` `[0.086, 0.261]` | `0.703` `[0.641, 0.764]` | `0.665` `[0.580, 0.745]` | `21.0%` / `36.4%` | `57.0%` / `58.1%` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-04` | OpenJudge Accuracy · GLM-Flash (`≥2.0`) | `199/200` (`131`) | `27/99` (`27.3%`) | `8/100` (`8.0%`) | `0.193` `[0.091, 0.308]` | `0.686` `[0.623, 0.753]` | `0.641` `[0.550, 0.728]` | `27.3%` / `32.7%` | `54.6%` / `55.7%` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-05` | OpenJudge Comprehensive · GLM-Flash (`≥0.60`) | `183/200` (`125`) | `4/91` (`4.4%`) | `1/92` (`1.1%`) | `0.033` `[0.000, 0.074]` | `0.628` `[0.538, 0.710]` | `0.630` `[0.527, 0.733]` | `20.9%` / `21.2%` | `31.9%` / `31.9%` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-06` | Rule · `observation_information_gain` | `200/200` (`131`) | `8/100` (`8.0%`) | `4/100` (`4.0%`) | `0.040` `[-0.031, 0.109]` | `0.612` `[0.533, 0.693]` | `0.600` `[0.493, 0.715]` | `14.0%` / `14.0%` | `29.0%` / `29.0%` | `deterministic` | `reports/p1_taubench_eval.json` |
+| `C-P1-07` | Rule · `action_loop_detection` | `200/200` (`131`) | `0/100` (`0.0%`) | `0/100` (`0.0%`) | `0.000` (不可估) | `0.583` `[0.527, 0.639]` | `0.554` `[0.465, 0.649]` | `22.0%` / `20.0%` | `30.0%` / `35.6%` | `deterministic` | `reports/p1_taubench_eval.json` |
+| `C-P1-08` | **Evidence-Grounded · DeepSeek**（跨厂商部分 `n=161`，post-D31 离线复核） | `161/200` (`109`) | `55/79` (`69.6%`) | `31/82` (`37.8%`) | `0.318` `[0.161, 0.453]` | `0.692` `[0.612, 0.764]` | `0.673` `[0.558, 0.779]` | `32.9%` / `33.3%` | `45.6%` / `47.1%` | `partial_replication` | `reports/p14_cross_vendor_deepseek.json` |
+
+### 1.3 配对显著性检验、越权副作用精度与跨厂商自评偏好审计（P1-1 & P1-4，两厂商范围）
+
+| ID | 检验 / 审计结论 | 数值 (`x/n`) | 共同样本 / 场景 | 统计检验 / 证据 | 定性 | 来源 JSON |
+| :--- | :--- | :--- | :---: | :--- | :--- | :--- |
+| `C-P1-09` | Grounded (GLM-Flash) vs Comprehensive (GLM-Flash) | 失败召回 `63.9%` vs `4.8%`；总体准确率 `69.6%` vs `52.4%` | `n=168` (`49` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 3.55e-15`（Holm `p_adj = 3.20e-14`）；总准确率 `p = 0.00064` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-10` | Grounded (GLM-Flash) vs Accuracy (GLM-Flash) | 失败召回 `63.7%` vs `28.6%`；总体准确率 `69.0%` vs `60.3%` | `n=184` (`32` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 4.66e-10`（Holm `p_adj = 2.33e-09`）；总准确率 `p = 0.0328` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-11` | Grounded (GLM-Flash) vs Accuracy (GLM-5.3 Pro) | 失败召回 `63.7%` vs `20.9%`；总体准确率 `69.0%` vs `58.7%` | `n=184` (`39` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 3.64e-12`（Holm `p_adj = 2.91e-11`）；总准确率 `p = 0.0183` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-12` | 单纯升级通用模型无增益：Accuracy Pro vs Accuracy Flash | 失败召回 `20.2%` vs `27.3%`；总体准确率 `58.3%` vs `59.8%` | `n=199` (`13` vs `6`) | Exact McNemar 失败 `p = 0.167`（Holm `p_adj = 0.334`）；总准确率 `p = 0.690` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-13` | 跨厂商 `unauthorized_side_effect` 越权副作用精确率 | **GLM-Flash `27/32` (`84.4%`)** · **DeepSeek `22/26` (`84.6%`)** · GLM-Pro `30/40` (`75.0%`) | 2 厂商 (`184` / `161` / `198`) | 跨 GLM 与 DeepSeek 精确率几乎一致（~84.5%）；代码 Veto 覆写模型 `GLM-Flash 6/184 (3.3%)`、`DeepSeek 3/161 (1.9%)` | `confirmatory` | `reports/p1_taubench_eval.json`, `reports/p14_cross_vendor_deepseek.json` |
+| `C-P1-14` | 两厂商自评偏好（Self-Preference）检查 | **GLM-Flash Grounded**：审 DeepSeek 轨迹 `AUC 0.781` (FK `20.0%`) vs GPT-4o `AUC 0.726` (FK `31.3%`)；**DeepSeek Grounded**：审 DeepSeek 轨迹召回 `74.4%` (`AUC 0.716`) vs GPT-4o `63.9%` (`AUC 0.665`) | 2 裁判厂商 × 2 被测 Agent | 未出现 DeepSeek 裁判放水自家 DeepSeek 轨迹的自评偏倚（注：按 D32 明确为两厂商范围） | `confirmatory` | `reports/p1_taubench_eval.json`, `reports/p14_cross_vendor_deepseek.json` |
+
+---
+
+## 2. P1-6 组件消融与 P1-3 跨厂商特权银标审计
+
+### 2.1 四路组件消融单调阶梯（60 条分层 τ-bench / `36–40` 独立场景，`glm-5.3-flash`）
+
+| ID | 消融配置 | 有效数 / 场景 | 默认召回 / 误杀 | Cohen's `κ` | `ROC-AUC` | `PR-AUC` | `Recall@FPR=10%` | `Recall@FPR=20%` | Veto 覆写 (`x/n`) | 定性 | 来源 JSON |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :--- |
+| `C-P16-01` | **`full`（完整架构：账本 + 隔离槽 + Veto）** | `53/60` (`36`) | `24/27` (`88.9%`) / `9/26` (`34.6%`) | **`0.545`** | **`0.910`** | **`0.898`** | **`74.1%`** | **`85.2%`** | `3/53` (`5.7%`) | `confirmatory` | `reports/p16_ablation.json` |
+| `C-P16-02` | `no_veto`（关闭 Python 强制否决门控） | `53/60` (`36`) | `22/27` (`81.5%`) / `8/26` (`30.8%`) | `0.508` | `0.869` | `0.871` | `59.3%` (`-14.8 pp`) | `74.1%` | `0/53` (`0.0%`) | `confirmatory` | `reports/p16_ablation.json` |
+| `C-P16-03` | `no_quarantine`（关闭工具输出隔离槽） | `58/60` (`40`) | `27/29` (`93.1%`) / `13/29` (`44.8%`) | `0.483` | `0.822` | `0.795` | `48.3%` (`-25.8 pp`) | `65.5%` | `10/58` (`17.2%`) | `confirmatory` | `reports/p16_ablation.json` |
+| `C-P16-04` | `no_ledger`（移除证据账本，直审原始对话） | `58/60` (`40`) | `20/29` (`69.0%`) / `7/29` (`24.1%`) | `0.448` | `0.794` | `0.738` | `27.6%` (`-46.5 pp`) | `55.2%` | `1/58` (`1.7%`) | `confirmatory` | `reports/p16_ablation.json` |
+| `C-P16-05` | 提示词敏感性（`v0 / v1 / v2`） | `v0: 53/60`, `v1: 20/60`, `v2: 0/60` | — | — | `v0 0.910` / `v1(部分) 0.810` | — | `v0 74.1%` / `v1(部分) 60.0%` | — | — | `pending_resume` | `reports/p16_ablation.json` |
+
+### 2.2 P1-3 跨厂商特权 AI 标注者（`glm-5.3`，仅作 Silver Label）
+
+| ID | 审计任务 | 数值 (`x/n`) | 结论与定位 | 定性 | 来源 JSON |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `C-P13-01` | 旗舰 `glm-5.3` vs 人工盲标 `v2`（Claw-Eval 48 条） | 有效 `45/48`，原始一致率 `73.3%`，`PABAK = 0.467`，`κ = 0.206` | 高于双轮人工原始一致率 `66.7%`，`12` 条分歧已导出人工裁决清单（`silver_label_only`） | `exploratory` | `reports/p13_claw48_silver_agreement.json` |
+| `C-P13-02` | τ-bench 客观通过轨迹（`reward=1.0`）数据库校验盲区审计 | 有效审计 `92/100` 条，标出 **`13/92` (`14.1%`)** 疑似过程/越权盲区 | 证明单纯终态 DB 校验存在过程合规盲区，13 条案例已导出人工抽检清单（`silver_label_only`） | `exploratory` | `reports/p13_blindspot_summary.json` |
+
+---
+
+## 3. 附录探索性队列：早期 Claw-Eval 48 条人工盲标与校准（Gate A & RQ1 探索性）
+
+> 注：因人工复测 `κ = 0.250 < 0.60`，本节所有以人工标签为参照的指标均定性为 **`exploratory`**，在 `FINAL_REPORT_v3.md` 中正式降级至附录 A。`v1`（16 失败）与 `round2`（16 失败）对照见源 JSON；所有配对默认阈值 McNemar 检验 `p ≥ 0.25`。
 
 | ID | 指标 | 数值 (`x/n`) | 场景数 | 95% 簇 CI | 检验方法 | 定性 | 来源 JSON |
 | :--- | :--- | :--- | ---: | :--- | :--- | :--- | :--- |
@@ -20,13 +80,7 @@
 | `C-ANN-02` | 双轮盲标 Cohen's `κ`（全量） | `0.250` (`PABAK = 0.333`) | 28 | `[-0.045, 0.505]` | 场景簇 Bootstrap (B=2000) | `exploratory` | `reports/annotator_agreement.json` |
 | `C-ANN-03` | 双轮盲标 `κ`（剔除 2 处首轮笔误） | `0.309` (`n = 46`) | 28 | `[0.005, 0.559]` | 场景簇 Bootstrap (B=2000) | `exploratory` | `reports/annotator_agreement.json` |
 
----
-
-## 2. RQ1 评分器可靠性、2×2 消融与同误杀率对比（探索性人工参照 `v2`）
-
-> 注：因人工复测 `κ = 0.250 < 0.60`，本节所有以人工标签为参照的指标均定性为 **`exploratory`**。`v1`（16 失败）与 `round2`（16 失败）对照见源 JSON；所有配对默认阈值 McNemar 检验 `p ≥ 0.25`。
-
-| ID | 评分器与模型配置 | 默认阈值失败召回 (`x/14`) | 正常样本误杀 (`x/n`) | Cohen's `κ` (95% 簇 CI) | `ROC-AUC` | `PR-AUC` (95% 簇 CI) | `Recall@FPR=10%` (step / interp) | `Recall@FPR=20%` (step / interp) | 场景数 | 定性 | 来源 JSON |
+| ID | 评分器与模型配置（Claw-Eval 48 条探索性 `v2` 标签） | 默认阈值失败召回 (`x/14`) | 正常样本误杀 (`x/n`) | Cohen's `κ` (95% 簇 CI) | `ROC-AUC` | `PR-AUC` (95% 簇 CI) | `Recall@FPR=10%` (step / interp) | `Recall@FPR=20%` (step / interp) | 场景数 | 定性 | 来源 JSON |
 | :--- | :--- | :---: | :---: | :--- | :---: | :--- | :---: | :---: | ---: | :--- | :--- |
 | `C-RQ1-01` | Comprehensive · Flash (`≥0.60`) | `0/14` (`0.0%`) | `0/34` (`0.0%`) | `0.000` (不可估) | `0.744` | `0.558` `[0.398, 0.687]` | `42.9%` / `42.9%` | `50.0%` / `50.0%` | 28 | `exploratory` | `reports/same_fpr_comparison.json` |
 | `C-RQ1-02` | Accuracy · Flash (`≥2.0`) | `1/14` (`7.1%`) | `1/34` (`2.9%`) | `0.056` `[0.000, 0.187]` | `0.556` | `0.333` `[0.171, 0.483]` | `14.3%` / `20.5%` | `14.3%` / `29.4%` | 28 | `exploratory` | `reports/same_fpr_comparison.json` |
@@ -35,19 +89,19 @@
 | `C-RQ1-05` | Evidence-Grounded · v4-Pro (`≥0.50`, `n=46`) | `3/14` (`21.4%`) | `3/32` (`9.4%`) | `0.144` `[-0.085, 0.432]` | `0.557` | `0.375` `[0.189, 0.534]` | `21.4%` / `22.0%` | `21.4%` / `30.6%` | 27 | `exploratory` | `reports/same_fpr_comparison.json` |
 | `C-RQ1-06` | Claw-Eval 任务专属 Rubric (二值) | `5/14` (`35.7%`) | `0/34` (`0.0%`) | `0.440` `[0.101, 0.780]` | `0.679` | `0.545` `[0.286, 0.792]` | `35.7%` / `42.1%` | `35.7%` / `48.6%` | 28 | `exploratory` | `reports/same_fpr_comparison.json` |
 
-| ID | 配对对比与校准 / 离线消融结论 | 数值 (`x/n`) | 场景数 | 95% 簇 CI / 检验 | 定性 | 来源 JSON |
+| ID | 配对对比与校准 / 离线消融结论（Claw-Eval 48 条探索性） | 数值 (`x/n`) | 场景数 | 95% 簇 CI / 检验 | 定性 | 来源 JSON |
 | :--- | :--- | :--- | ---: | :--- | :--- | :--- |
 | `C-RQ1-07` | 通用 Accuracy 从 Flash 升至 v4-Pro 失败召回差 | `1/14 → 1/14` (`0/14` 变化) | 28 | Exact McNemar `p = 1.000` | `exploratory` | `reports/same_fpr_comparison.json` |
 | `C-RQ1-08` | Pro Grounded vs Flash Comprehensive 默认阈值配对 | `3/14` vs `0/14` (`b=0, c=3`) | 27 | Exact McNemar `p = 0.250` | `exploratory` | `reports/same_fpr_comparison.json` |
-| `C-RQ1-09` | 同误杀率对比一句话结论（P0-4） | **没有**：`FPR=10%` 处 `Comprehensive` 插值召回 `42.9%` 高于 `Pro Grounded` `22.0%`（`PR-AUC` `0.558` vs `0.375`） | 28 | `FPR=10%` CI `[4.8%, 66.7%]` vs `[3.6%, 42.8%]` | `exploratory` | `reports/same_fpr_comparison.json` |
+| `C-RQ1-09` | 同误杀率对比一句话结论（P0-4，仅限 Claw-Eval 48 条） | **小样本探索集尚未反超**：`FPR=10%` 处 `Comprehensive` 插值召回 `42.9%` 高于 `Pro Grounded` `22.0%`（`PR-AUC` `0.558` vs `0.375`）；而在 200 条客观 τ-bench 上反转为 Grounded 全指标领先（见 `C-P1-01`） | 28 | `FPR=10%` CI `[4.8%, 66.7%]` vs `[3.6%, 42.8%]` | `exploratory` | `reports/same_fpr_comparison.json` |
 | `C-CAL-01` | 28 折 LOSO 均衡目标 · `Comprehensive` (`v1` 16 失败) | 仍漏判 `10/16` (`62.5%`)，误杀 `5/32` (`15.6%`)，`κ = 0.237` | 28 | OOF `AUC = 0.675` `[0.516, 0.791]` | `exploratory` | `reports/phase4_calibration.json` |
 | `C-CAL-02` | 28 折 LOSO `miss ≤ 25%` 目标 · `Comprehensive` (`v1`) | 漏判 `1/16` (`6.25%`)，代价误杀 `23/32` (`71.9%`) | 28 | `κ = 0.163` | `exploratory` | `reports/phase4_calibration.json` |
 | `C-CAL-03` | 28 折 LOSO · `Accuracy` (`v1` 16 失败) | `AUC = 0.546`（CI 覆盖 0.5）；`miss ≤ 50%/25%/10%` 全退化为 `always_fail`（误杀 `32/32`） | 28 | OOF `AUC` CI `[0.500, 0.610]` | `exploratory` | `reports/phase4_calibration.json` |
-| `C-VETO-01` | 离线 P1-6 Veto 覆写比例（全部已有 Grounded 有效行） | `0/109` (`0.0%`)；`structural_veto = 0/109` | 28 | 确定性计数（Flash 原 47 + 扰 16 + Pro 原 46） | `deterministic` | `reports/veto_ablation_offline.json` |
+| `C-VETO-01` | 离线 Veto 覆写比例（旧 Claw-Eval 全部有效 Grounded 行） | `0/109` (`0.0%`)；`structural_veto = 0/109`（而在 τ-bench 上 Veto 实际覆写 `6/184` 与 `3/53`，见 `C-P1-13` / `C-P16-01`） | 28 | 确定性计数（Flash 原 47 + 扰 16 + Pro 原 46） | `deterministic` | `reports/veto_ablation_offline.json` |
 
 ---
 
-## 3. RQ2 重复稳定性与上游 OpenJudge 源码贡献
+## 4. RQ2 重复稳定性与上游 OpenJudge 源码贡献
 
 | ID | 指标 / 贡献 | 数值 (`x/n`) | 场景数 / 面板数 | 95% 簇 CI / 状态 | 定性 | 来源 |
 | :--- | :--- | :--- | ---: | :--- | :--- | :--- |
@@ -57,9 +111,9 @@
 
 ---
 
-## 4. RQ3 间接提示注入、无攻击噪声底与防御副作用（P0-3 新口径）
+## 5. RQ3 间接提示注入、无攻击噪声底与防御副作用（P0-3 新口径）
 
-> 新口径要求每个注入臂并列给出：**主指标决策翻转率 (`fail→pass / base_fail`)**、**次指标归一化分差 `Δ / (max - min)`**、**传统涨分率与无攻击重复噪声底**、**有效配对数**。
+> 新口径要求每个注入臂并列给出：**主指标决策翻转率 (`fail→pass / base_fail`)**、**次指标归一化分差 `Δ / (max - min)`**、**传统涨分率与无攻击重复噪声底**、**有效配对数**。P1-5 事前冻结的 15 模板 held-out 攻击集（`SHA-256 = 08a07040...bab30081`）已完成代码与断点准备，待 GLM 余额补充后运行。
 
 | ID | 对照臂 (`Comprehensive` 量表 `[0, 1]`；`Accuracy` 量表 `[1, 3]`) | 有效配对 (`n_traj`, 场景) | 主指标决策翻转率 (`fail→pass / base_fail`) | 归一化分差 `Δ/(max-min)` (95% 簇 CI) | 涨分率 vs 无攻击噪声底 | 检验 / 状态 | 定性 | 来源 JSON |
 | :--- | :--- | :---: | :---: | :--- | :---: | :--- | :--- | :--- |
@@ -73,21 +127,21 @@
 
 ---
 
-## 5. Track B 数据工程、原创容器题与离线测试
+## 6. Track B 数据工程、原创容器题与离线测试
 
 | ID | 指标 | 数值 (`x/n`) | 定性 | 来源 |
 | :--- | :--- | :--- | :--- | :--- |
-| `C-TRK-01` | 跨源统一轨迹快照（Claw-Eval + SWE-bench） | `87 + 8 = 95` 条轨迹 | `deterministic` | `docs/SWE_IMPORT.md` |
+| `C-TRK-01` | 跨源统一轨迹快照（Claw-Eval + SWE-bench + τ-bench） | `87 + 8 + 825 = 920` 条标准化轨迹（其中 τ-bench 抽取 `200` 条冻结主队列） | `deterministic` | `docs/SWE_IMPORT.md`, `reports/p1_cohort_summary.json` |
 | `C-TRK-02` | 原创题防刷分对照（只看末轮声明误选无产物幻觉） | `2/2` 误选无产物幻觉；可执行 Verifier `16/16` 通过并过 `TRL 0.29` | `deterministic` | `docs/TRAINING_CANDIDATES.md`, `docs/ORIGINAL_API_PILOT.md` |
-| `C-ENG-01` | 离线禁网单测数量 | `534` 项（含 P0-2/P1-5 防泄漏守卫、P0-3/P0-4 统计与 P1 τ-bench/多厂商/消融单测） | `deterministic` | `tests/` |
-| `C-COST-01` | 截至 v2 累计保守预算 guard 支出 | `$10.751405`（v1 `$9.180483` + v2 `$1.570922`，远低于 v2 `$5.00` 上限） | `deterministic` | `docs/BUDGET_v2.md` |
+| `C-ENG-01` | 离线禁网单测数量 | `535+` 项（含 P0-2/P1-5 防泄漏守卫、P0-3/P0-4 统计、P1 τ-bench/多厂商/消融与 6 张 SVG 交付件单测） | `deterministic` | `tests/` |
+| `C-COST-01` | 截至 v2 累计保守预算 guard 支出 | `$10.751405`（v1 `$9.180483` + v2 `$1.570922`；P1 在线主实验均运行于中转站 GLM 通道并完整记录在本地账本） | `deterministic` | `docs/BUDGET_v2.md` |
 
 ---
 
-## 6. 已撤回口径记录（严禁作为有效结论引用）
+## 7. 已撤回口径记录（严禁作为有效结论引用）
 
 | ID | 原表述 | 撤回原因 | 决策记录 | 替代来源 |
 | :--- | :--- | :--- | :--- | :--- |
-| `R-01` | v1 声称未防御 `Accuracy` 翻转率 `75% (18/24)` | 全部 24 对均来自同 1 条基线失败轨迹（`n_traj=1, n_scenario=1`），属伪重复 | `PREREG_v2.md` §6 / `V2_LOG.md` | 降级为单轨迹 Case Study；新翻转率来自 P1-1 + P1-5 |
+| `R-01` | v1 声称未防御 `Accuracy` 翻转率 `75% (18/24)` | 全部 24 对均来自同 1 条基线失败轨迹（`n_traj=1, n_scenario=1`），属伪重复 | `PREREG_v2.md` §6 | 降级为单轨迹 Case Study；新翻转率来自 P1-5 held-out |
 | `R-02` | Stage 3 声称 `EvidenceGroundedGrader` 将注入膨胀率「压降 15 倍至 `6.25% (1/16)`」 | `grounded_judge.py` 中的 `_INJECTION_CUE_RE` 直接匹配 `perturb.py` 攻击模板并在扰动臂 `16/16` 触发（原始臂 `0/47`），构成测试集特征泄漏 | `docs/DECISIONS.md` **D30** | 仅允许引用 P1-5 事前冻结的 **held-out** 攻击集结果 |
 | `R-03` | 旧报告声称 LOSO 均衡校准 `Comprehensive`「误杀 62.5% 正常轨迹」 | `generate_figures.py` 读取错误键名后触发硬编码回退，将均衡目标的漏判率 `62.5% (10/16)` 误作误杀率（实际均衡误杀率为 `5/32 = 15.6%`，`miss ≤ 25%` 目标误杀率为 `23/32 = 71.9%`） | 本表 `C-CAL-01` / `C-CAL-02` | 已修正 `generate_figures.py` 与全部报告 |

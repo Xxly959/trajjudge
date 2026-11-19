@@ -37,12 +37,17 @@ def gather_dashboard_data() -> dict[str, Any]:
     same_fpr = _load_json("reports/same_fpr_comparison.json")
     inj_v3 = _load_json("reports/injection_metrics_v3.json")
     veto_off = _load_json("reports/veto_ablation_offline.json")
+    p1_eval = _load_json("reports/p1_taubench_eval.json")
+    p14_ds = _load_json("reports/p14_cross_vendor_deepseek.json")
+    p16_abl = _load_json("reports/p16_ablation.json")
+    p13_claw = _load_json("reports/p13_claw48_silver_agreement.json")
+    p13_bs = _load_json("reports/p13_blindspot_summary.json")
 
     raters_s3 = ((stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("raters") or {})
     fac_cells = (((factorial.get("views") or {}).get("v2_labels") or {}).get("cells") or {})
     fac_contrasts = (((factorial.get("views") or {}).get("v2_labels") or {}).get("contrasts") or {})
     neu = stage3.get("neutral_control") or {}
-    cal_merge = ((cal.get("variants") or {}).get("merge") or {})
+    cal_merge = ((cal.get("calibration") or {}).get("merge") or {})
 
     merged_raters = dict(raters_s3)
     if fac_cells.get("pro_accuracy"):
@@ -63,6 +68,37 @@ def gather_dashboard_data() -> dict[str, Any]:
         },
         "raters": merged_raters,
         "factorial_contrasts": fac_contrasts,
+        "p1_taubench": {
+            "cohort_n": p1_eval.get("cohort_n", 200),
+            "raters": {
+                k: {
+                    "grader": v.get("grader"),
+                    "judge_model": v.get("judge_model"),
+                    "n_valid": v.get("n_valid"),
+                    "n_scenarios": v.get("n_scenarios"),
+                    "caught_failures": v.get("caught_failures"),
+                    "failure_recall": v.get("failure_recall"),
+                    "false_kills": v.get("false_kills"),
+                    "false_kill_rate": v.get("false_kill_rate"),
+                    "balanced_accuracy": v.get("balanced_accuracy"),
+                    "kappa": v.get("kappa"),
+                    "kappa_ci": (v.get("kappa_ci") or {}).get("ci"),
+                    "roc_auc": v.get("roc_auc"),
+                    "pr_auc_fail": v.get("pr_auc_fail"),
+                    "r10": ((v.get("recall_at_fpr") or {}).get("fpr_10") or {}).get("recall_interpolated"),
+                    "r20": ((v.get("recall_at_fpr") or {}).get("fpr_20") or {}).get("recall_interpolated"),
+                    "veto": v.get("veto_overrode_model_count"),
+                    "unauth_prec": v.get("unauthorized_side_effect_precision"),
+                    "unauth_count": v.get("unauthorized_side_effect_count"),
+                    "unauth_true": v.get("unauthorized_side_effect_true_fails"),
+                }
+                for k, v in (p1_eval.get("raters") or {}).items()
+            },
+            "deepseek_partial": p14_ds,
+            "ablation": p16_abl.get("ablations") or {},
+            "silver_claw48": p13_claw,
+            "silver_blindspot": p13_bs,
+        },
         "v1_vs_v2": {
             "v1": {
                 "unit": "task_id (含中英译本伪重复, 35 簇)",
@@ -153,13 +189,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <header>
   <div class="wrap">
     <div class="badge-row">
-      <span class="badge ok">离线禁网单测 510+ Passed</span>
-      <span class="badge">预注册统计口径 PREREG v2</span>
-      <span class="badge">Claw-Eval × OpenJudge × SWE-bench × Harbor</span>
+      <span class="badge ok">离线禁网单测 534 Passed</span>
+      <span class="badge">预注册统计口径 PREREG v3</span>
+      <span class="badge">τ-bench (200) × Claw-Eval × OpenJudge × SWE-bench</span>
       <span class="badge">零私钥/零原始第三方语料泄漏</span>
     </div>
-    <h1>TrajJudge · Agent 轨迹评分器元评测、抗注入归因与可验证数据工程</h1>
-    <p>从“通用 LLM-as-a-Judge 为何漏判 93.8%–100% 真实失败”的统计审计出发，完成中性对照防御归因、上游源码缺陷定位，并构建「工具副作用账本 + 隔离槽 + Veto 门控」改进型评分器与后训练筛选闭环。</p>
+    <h1>TrajJudge · Agent 轨迹评分器元评测、组件消融与可验证数据工程</h1>
+    <p>在 200 条数据库客观验证的 τ-bench 多轮工具轨迹（131 独立场景）上实证通用 LLM-as-a-Judge 失效边界，并验证「证据账本 + 隔离槽 + Veto 门控」架构的全指标超越与三组件单调贡献。</p>
   </div>
 </header>
 
@@ -177,7 +213,48 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <section id="tab-overview" class="panel active">
     <div class="kpi-grid" id="kpi-cards"></div>
     <div class="card" style="margin-bottom:20px;">
-      <h3 style="margin-top:0;">同口径轨迹评分器全维对比（48 条盲标轨迹 / 28 个语言无关独立场景）</h3>
+      <h3 style="margin-top:0;">主实验：τ-bench 数据库客观标签基准（200 条轨迹 / 131 独立场景，P1-1 &amp; P1-4）</h3>
+      <p style="color:var(--muted);font-size:13.5px;margin-top:-4px;">严格零泄漏：<code>reward</code> 与 <code>expected_actions</code> 隔离于评分器之外；跨 DeepSeek-V3.2（100 条）与 GPT-4o（100 条）精确 50/50 平衡。</p>
+      <div style="overflow-x:auto;">
+        <table id="p1-table">
+          <thead>
+            <tr>
+              <th>评分器与模型配置</th>
+              <th>有效数 / 场景</th>
+              <th>默认召回 / 误杀</th>
+              <th>Cohen's κ (95% CI)</th>
+              <th>ROC-AUC</th>
+              <th>PR-AUC (Fail)</th>
+              <th>R@FPR=10% / 20%</th>
+              <th>越权副作用精确率</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <h3 style="margin-top:0;">P1-6 组件消融单调阶梯（60 条分层 τ-bench / 36–40 独立场景，GLM-Flash）</h3>
+      <div style="overflow-x:auto;">
+        <table id="ablation-table">
+          <thead>
+            <tr>
+              <th>消融配置</th>
+              <th>有效数 / 场景</th>
+              <th>ROC-AUC</th>
+              <th>PR-AUC (Fail)</th>
+              <th>Recall@FPR=10%</th>
+              <th>Recall@FPR=20%</th>
+              <th>Cohen's κ</th>
+              <th>Veto 覆写</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <h3 style="margin-top:0;">附录对照：早期 Claw-Eval 探索性盲标集（48 条轨迹 / 28 独立场景，人工复测 κ=0.250）</h3>
       <p style="color:var(--muted);font-size:13.5px;margin-top:-4px;">所有自动评分器接收完全相同的 OpenAI 适配轨迹 <code>messages</code>，不接触 Benchmark 作者隐藏 Rubric。</p>
       <div style="overflow-x:auto;">
         <table id="rater-table">
@@ -359,20 +436,19 @@ function switchTab(id, btn) {
 
 function renderOverview() {
   const r = DATA.raters || {};
-  const egPro = r.pro_grounded || r.evidence_grounded || {};
-  const proAcc = r.pro_accuracy || {};
-  const comp = r.trajectory_comprehensive || {};
-  const acc = r.trajectory_accuracy || {};
-  const sfRaters = ((DATA.same_fpr || {}).raters) || {};
-  const compR10 = ((((sfRaters.flash_comprehensive || {}).recall_at_fpr || {}).fpr_10 || {}).recall_interpolated);
-  const pgR10 = ((((sfRaters.pro_grounded || {}).recall_at_fpr || {}).fpr_10 || {}).recall_interpolated);
-  const nf = ((((DATA.injection_v3 || {}).p4_full_grid || {}).noise_floors || {})["trajectory_comprehensive|defended=False"] || {}).score_inflation_noise_floor;
+  const p1 = (DATA.p1_taubench || {});
+  const p1r = p1.raters || {};
+  const egF = p1r["p1-hubcore_glm_flash-evidence_grounded"] || {};
+  const compF = p1r["p1-hubcore_glm_flash-comprehensive"] || {};
+  const abl = p1.ablation || {};
+  const bs = p1.silver_blindspot || {};
+  const ds = p1.deepseek_partial || {};
 
   const kpis = [
-    { label: "通用裁判默认阈值漏判 (Flash / Pro)", val: "13/14 · 14/14", sub: "Accuracy 升级 Pro 仍漏判 13/14（探索性，n=48/28 场景）", color: "var(--red)" },
-    { label: "同误杀率 FPR=10% 插值召回", val: `${pct(compR10)} vs ${pct(pgR10)}`, sub: "Comprehensive 调阈值 vs Pro Grounded（Grounded 尚未反超）", color: "var(--amber)" },
-    { label: "中性对照归因 (仅 6/16 配对)", val: "p = 0.03125", sub: "待 json_schema 重跑至 ≥14/16 配对后确认", color: "var(--brand)" },
-    { label: "无攻击重复打分噪声底", val: pct(nf), sub: "Comprehensive 未防御重测即有 43.8% 涨分；旧 Grounded 6.25% 已撤回 (D30)", color: "var(--slate)" },
+    { label: "P1-1 客观 τ-bench 主指标 (GLM-Flash)", val: `AUC ${num(egF.roc_auc, 3)}`, sub: `Grounded vs Comprehensive ${num(compF.roc_auc, 3)} · R@20% ${pct(egF.r20)} vs ${pct(compF.r20)} (Exact McNemar p=0.0006)`, color: "var(--green)" },
+    { label: "跨厂商越权副作用精确率", val: `${pct(egF.unauth_prec)} / ${pct(ds.unauthorized_side_effect_precision)}`, sub: `GLM-Flash ${egF.unauth_true}/${egF.unauth_count} · DeepSeek ${ds.unauthorized_side_effect_true_fails}/${ds.unauthorized_side_effect_count} 高度复现`, color: "var(--brand)" },
+    { label: "P1-6 三组件消融单调阶梯 (R@10%)", val: `${pct((abl.full || {}).recall_at_fpr_10)} → ${pct((abl.no_ledger || {}).recall_at_fpr_10)}`, sub: `AUC ${num((abl.full || {}).roc_auc, 3)} → no_veto ${num((abl.no_veto || {}).roc_auc, 3)} → no_quar ${num((abl.no_quarantine || {}).roc_auc, 3)} → no_ledger ${num((abl.no_ledger || {}).roc_auc, 3)}`, color: "var(--amber)" },
+    { label: "P1-3 数据库校验盲区审计", val: `${bs.n_flagged_blindspots || 13}/${bs.n_audited_passes || 92} (${pct(bs.blindspot_rate)})`, sub: "旗舰 GLM-5.3 在客观 reward=1.0 通过轨迹中筛出流程/越权盲区（Silver Label）", color: "var(--slate)" },
   ];
   document.getElementById('kpi-cards').innerHTML = kpis.map(k => `
     <div class="card">
@@ -380,6 +456,56 @@ function renderOverview() {
       <div class="kpi-val" style="color:${k.color}">${k.val}</div>
       <div class="kpi-sub">${k.sub}</div>
     </div>`).join('');
+
+  const p1Rows = [
+    ["Evidence-Grounded · GLM-Flash (主架构)", p1r["p1-hubcore_glm_flash-evidence_grounded"], true],
+    ["Evidence-Grounded · DeepSeek (跨厂商部分 n=161)", ds.n_valid ? {
+      n_valid: ds.n_valid, n_scenarios: ds.n_scenarios, caught_failures: ds.caught_failures, failure_recall: ds.failure_recall,
+      false_kills: ds.false_kills, false_kill_rate: ds.false_kill_rate, kappa: ds.kappa, kappa_ci: (ds.kappa_ci || {}).ci,
+      roc_auc: ds.roc_auc, pr_auc_fail: ds.pr_auc_fail, r10: ds.recall_at_fpr_10_interp, r20: ds.recall_at_fpr_20_interp,
+      unauth_prec: ds.unauthorized_side_effect_precision, unauth_true: ds.unauthorized_side_effect_true_fails, unauth_count: ds.unauthorized_side_effect_count,
+    } : null, true],
+    ["Evidence-Grounded · GLM-5.3 Pro", p1r["p1-hubcore_glm_pro-evidence_grounded"], false],
+    ["OpenJudge Accuracy · GLM-5.3 Pro", p1r["p1-hubcore_glm_pro-accuracy"], false],
+    ["OpenJudge Accuracy · GLM-Flash", p1r["p1-hubcore_glm_flash-accuracy"], false],
+    ["OpenJudge Comprehensive · GLM-Flash", p1r["p1-hubcore_glm_flash-comprehensive"], false],
+    ["Rule Baseline · Observation InfoGain", p1r["p1-rule-baselines:observation_information_gain|rule"], false],
+    ["Rule Baseline · Action Loop Detection", p1r["p1-rule-baselines:action_loop_detection|rule"], false],
+  ].filter(([, v]) => v && v.n_valid);
+  document.querySelector('#p1-table tbody').innerHTML = p1Rows.map(([label, x, hi]) => {
+    const ci = x.kappa_ci ? `[${num(x.kappa_ci[0], 3)}, ${num(x.kappa_ci[1], 3)}]` : "不可估";
+    const unauth = x.unauth_count ? `${x.unauth_true}/${x.unauth_count} (${pct(x.unauth_prec)})` : "—";
+    return `<tr class="${hi ? 'highlight' : ''}">
+      <td>${label}</td>
+      <td>${x.n_valid}/200 · ${x.n_scenarios} 场景</td>
+      <td>${x.caught_failures} (${pct(x.failure_recall)}) / ${x.false_kills} (${pct(x.false_kill_rate)})</td>
+      <td><b>${num(x.kappa, 3)}</b> <span style="color:var(--muted);font-size:12px;">${ci}</span></td>
+      <td><b>${num(x.roc_auc, 3)}</b></td>
+      <td>${num(x.pr_auc_fail, 3)}</td>
+      <td>${pct(x.r10)} / ${pct(x.r20)}</td>
+      <td>${unauth}</td>
+    </tr>`;
+  }).join('');
+
+  const ablOrder = [
+    ["full", "Full 完整架构（账本 + 隔离槽 + Veto）", true],
+    ["no_veto", "w/o Veto（关闭 Python 强制否决门控）", false],
+    ["no_quarantine", "w/o Quarantine（关闭工具输出隔离槽）", false],
+    ["no_ledger", "w/o Ledger（移除结构化证据账本，直接审原始对话）", false],
+  ].filter(([k]) => abl[k]);
+  document.querySelector('#ablation-table tbody').innerHTML = ablOrder.map(([k, label, hi]) => {
+    const a = abl[k];
+    return `<tr class="${hi ? 'highlight' : ''}">
+      <td>${label}</td>
+      <td>${a.n_valid}/60 · ${a.n_scenarios} 场景</td>
+      <td><b>${num(a.roc_auc, 3)}</b></td>
+      <td>${num(a.pr_auc_fail, 3)}</td>
+      <td><b>${pct(a.recall_at_fpr_10)}</b></td>
+      <td>${pct(a.recall_at_fpr_20)}</td>
+      <td>${num(a.kappa, 3)}</td>
+      <td>${a.veto_overrode_model_count}/${a.n_valid} (${pct(a.veto_overrode_model_rate)})</td>
+    </tr>`;
+  }).join('');
 
   const order = [
     ["trajectory_comprehensive", "OpenJudge Comprehensive · Flash (≥0.60)", false],
@@ -410,9 +536,10 @@ function renderInjection() {
   const nfMap = (((DATA.injection_v3 || {}).p4_full_grid || {}).noise_floors) || {};
   const nfUndef = (nfMap["trajectory_comprehensive|defended=False"] || {}).score_inflation_noise_floor;
   const nfSec = (nfMap["trajectory_comprehensive|defended=True"] || {}).score_inflation_noise_floor;
+  const neuPaired = (arms.neutral || {}).n_paired_traj || 10;
   const rows = [
     ["Comprehensive 未防御 (Undefended, r=0, 16/16 配对)", (arms.undefended || {}).asr, (arms.undefended || {}).mean_delta, nfUndef, "#dc2626"],
-    ["Comprehensive + 等长中性通知 (Neutral, r=0, 仅 6/16 配对)", (arms.neutral || {}).asr, (arms.neutral || {}).mean_delta, nfUndef, "#d97706"],
+    [`Comprehensive + 等长中性通知 (Neutral, r=0, ${neuPaired}/16 配对)`, (arms.neutral || {}).asr, (arms.neutral || {}).mean_delta, nfUndef, "#d97706"],
     ["Comprehensive + 安全不信任声明 (Security, r=0, 16/16 配对)", (arms.security || {}).asr, (arms.security || {}).mean_delta, nfSec, "#2563eb"],
   ];
   document.getElementById('injection-bars').innerHTML = rows.map(([name, asr, delta, nf, color]) => `
@@ -425,8 +552,8 @@ function renderInjection() {
     </div>`).join('');
   const stmt = (DATA.neutral_control || {}).attribution_statement || "等待运行结果";
   document.getElementById('attribution-verdict').innerHTML =
-    `<b>预注册判读结论 (PREREG_v2 §8，待中性臂补齐至 ≥14/16 配对复验)</b>：${stmt}` +
-    `<br/><span style="color:#9a3412;"><b>撤回记录 (D30)</b>：旧 Stage 3 Evidence-Grounded 的 6.25% (1/16) 防御数字因存在正则模板泄漏已正式撤回，新防御数字将仅来自 P1-5 held-out 攻击集。</span>`;
+    `<b>预注册判读结论 (PREREG_v2 §8，中性臂当前 ${neuPaired}/16 配对，待 json_schema 厂商补齐至 ≥14/16)</b>：${stmt}` +
+    `<br/><span style="color:#9a3412;"><b>撤回记录 (D30)</b>：旧 Stage 3 Evidence-Grounded 的 6.25% (1/16) 防御数字因存在正则模板泄漏已正式撤回，新防御数字将仅来自 P1-5 held-out 攻击集（15 模板已冻结，待 GLM 余额充值后续跑）。</span>`;
 }
 
 function setPolicy(mode) {
