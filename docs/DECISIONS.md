@@ -382,4 +382,18 @@ uses existing rows for the same cohort. The paid P4 run awaits approval.
 - 旧 `stage3-grounded-flash-64.jsonl` 仅保留作历史归档（其原始无注入 48 条轨迹的 `untrusted_grading_directive_cues` 恒为 0，不受该正则触发影响；但 16 条扰动轨迹防御结果全部作废）。
 - `EvidenceGroundedGrader` 新的抗注入防御数字必须且只能来自 P1-5 事前哈希冻结的 **held-out（开发期未见过）攻击测试集**。
 
+---
+
+# D31 修复 `EvidenceGroundedGrader` 在多轮对话（τ-bench）上的终止态误杀与策略截断（2026-11-19，P1-1）
+
+**背景**：在 200 条客观标签 τ-bench 队列上首次实跑 `EvidenceGroundedGrader`（DeepSeek Flash，在余额 CNY 1.33 耗尽触发 HTTP 402 前原子落盘 161 条有效评估 / 109 独立场景），暴露出两个仅在真实多轮工具对话基准上才会显现的系统性缺陷：
+1. **单轮假设导致的 `structural_veto` 全量误杀**：旧版 `has_final_assistant_reply` 要求数组最后一条非系统消息必须是 `role == "assistant"`；但 τ-bench 多轮用户模拟器中 `170/200` 条轨迹以用户道别/停止符（`###STOP###`）收尾，另有 `27/200` 条以终态转人工工具 `transfer_to_human_agents` 收尾，导致 `has_final_assistant_reply` 在 **161/161** 条轨迹上全报 `False`，误触发 `structural_veto` 把全部通过样本强制判 `fail`；而真正异常中断在普通工具（`think` / `search_direct_flight` / `get_order_details`）的仅 `3/200` 条（客观全部失败）。
+2. **领域政策截断与离散排序分辨率**：旧版 `_extract_system_summary` 将无 `## Tool Schemas` 的系统提示词截断在 1,500 字符（丢弃 τ-bench 5.7–6.2KB 业务政策后 75%），且缺少连续置信度字段导致 ROC/PR 排序分辨率不足。
+
+**决定**：
+1. 升级 `has_final_assistant_reply` 判定为支持三种合法终止态：末轮为无待处理工具调用的 `assistant` 文本回复、末轮为 `user` 且紧邻上一轮为干净 `assistant` 回复、或末轮为显式终态转人工工具（`_TERMINAL_HANDOFF_TOOLS`）；普通工具异常截断仍触发 `structural_veto`。
+2. 保留无 JSON Schema 冗余的完整领域政策（上限 7,000 字符），并在 JSON 审计输出中新增可选 `confidence_pass`（0–100）用于连续排序（仍严格服从 Veto 门控分区：pass ∈ [0.50, 1.00]，fail ∈ [0.00, 0.45]）。
+3. 增补多轮终止态与终态转人工单测；余额充值后使用修正版代码重跑完整 200 条队列并与 `Comprehensive` / `Accuracy` 同口径对照。
+
+
 

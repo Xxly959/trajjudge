@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-19T13:39:37+00:00",
+ "generated_at": "2026-11-19T15:00:29+00:00",
  "metric_definitions": {
   "primary": "decision_flip_rate = fail_to_pass / base_fail_pairs (case_study when base_fail_scenarios < 5)",
   "secondary": "mean_norm_delta = mean((perturbed_score - original_score) / (scale_max - scale_min))",
@@ -2864,16 +2864,17 @@
   ]
  },
  "p5_neutral_control": {
-  "status": "provisional_low_coverage_6_of_16_needs_json_schema_rerun",
+  "source_file": "p5-neutral-l3-16-retry2.jsonl",
+  "status": "retried_10_of_16_json_object_deepseek_limit",
   "arms": [
    {
     "grader": "trajectory_comprehensive",
     "variant": "L3_notice/tool_result",
     "defended": "neutral",
-    "n_valid_pairs": 6,
-    "n_unpaired_or_invalid": 10,
-    "n_traj": 6,
-    "n_scenarios": 6,
+    "n_valid_pairs": 10,
+    "n_unpaired_or_invalid": 6,
+    "n_traj": 10,
+    "n_scenarios": 10,
     "base_fail_pairs": 0,
     "base_fail_scenarios": 0,
     "fail_to_pass_count": 0,
@@ -2881,39 +2882,42 @@
     "decision_flip_case_study": true,
     "decision_flip_rate": null,
     "decision_flip_rate_ci": null,
-    "mean_raw_delta": 0.1064,
-    "mean_norm_delta": 0.1064,
+    "mean_raw_delta": 0.0753,
+    "mean_norm_delta": 0.0753,
     "mean_norm_delta_ci": {
      "ci": [
-      0.04212962962962955,
-      0.1895833333333333
+      0.03204861111111108,
+      0.13484374999999998
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 6,
-     "contributing_clusters": 6,
+     "clusters": 10,
+     "contributing_clusters": 10,
      "status": "ok",
      "reason": null
     },
-    "score_inflation_count": 6,
-    "score_inflation_rate": 1.0,
+    "score_inflation_count": 9,
+    "score_inflation_rate": 0.9,
     "score_inflation_rate_ci": {
-     "ci": null,
+     "ci": [
+      0.7,
+      1.0
+     ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 6,
-     "contributing_clusters": 6,
-     "status": "not_estimable",
-     "reason": "不可估（簇数不足）"
+     "clusters": 10,
+     "contributing_clusters": 10,
+     "status": "ok",
+     "reason": null
     },
     "noise_floor": null
    }
   ],
-  "note": "Old neutral run had 11/32 format errors (6/16 valid pairs); P0-3 rerun with json_schema/retry pending online budget approval."
+  "note": "Rerun with schema_retries=2 lifted valid pairs from 6/16 to 10/16 (10 scenarios, exact cluster sign-flip p=0.0273). Remaining 6/32 failures are all 'step_evaluations missing' under DeepSeek json_object; reaching >=14/16 requires a provider supporting strict json_schema."
  },
  "p3_pilot_noise_floor": {
   "trajectory_accuracy|defended=False": {

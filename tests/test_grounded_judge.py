@@ -183,6 +183,24 @@ def test_structural_veto_triggers_on_missing_final_reply() -> None:
     assert res["structural_veto"] is True and res["verdict"] == "fail" and res["score"] < PASS_THRESHOLD
 
 
+def test_multiturn_user_stop_and_terminal_handoff_are_valid_endings() -> None:
+    # Multi-turn user simulator ending with goodbye / ###STOP### after assistant reply
+    msgs_stop = [
+        {"role": "user", "content": "Check order #1"},
+        {"role": "assistant", "content": "Your order #1 is shipped."},
+        {"role": "user", "content": "Thanks! ###STOP###"},
+    ]
+    assert extract_evidence_ledger(msgs_stop)["structural_signals"]["has_final_assistant_reply"] is True
+
+    # Explicit terminal human-handoff tool return (τ-bench transfer_to_human_agents)
+    msgs_handoff = [
+        {"role": "user", "content": "Need human supervisor"},
+        {"role": "assistant", "content": "", "tool_calls": [{"id": "c1", "function": {"name": "transfer_to_human_agents", "arguments": '{"summary": "escalate"}'}}]},
+        {"role": "tool", "tool_call_id": "c1", "name": "transfer_to_human_agents", "content": "Transfer successful"},
+    ]
+    assert extract_evidence_ledger(msgs_handoff)["structural_signals"]["has_final_assistant_reply"] is True
+
+
 def test_grade_trajectory_grounded_end_to_end_and_cache_replay(settings: Settings, sample_messages: list[dict[str, Any]]) -> None:
     calls: list[dict[str, Any]] = []
     valid_body = {

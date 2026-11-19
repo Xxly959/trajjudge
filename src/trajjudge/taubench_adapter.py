@@ -117,6 +117,8 @@ def _normalize_messages(raw_traj: Sequence[Mapping[str, Any]]) -> tuple[list[dic
 def _infer_domain(record: Mapping[str, Any], default_domain: str) -> str:
     if record.get("domain"):
         return str(record["domain"]).strip().lower()
+    if record.get("task_name") and str(record["task_name"]).strip().lower() in ("retail", "airline", "telecom"):
+        return str(record["task_name"]).strip().lower()
     info = record.get("info") or {}
     if isinstance(info, Mapping) and info.get("domain"):
         return str(info["domain"]).strip().lower()
@@ -135,19 +137,28 @@ def adapt_taubench_record(
     default_agent_model: str = "unknown",
     source_file: str = "",
 ) -> AdaptedTauTrace:
-    """Adapt a single τ-bench trajectory record into ``AdaptedTauTrace``."""
+    """Adapt a single τ-bench record (official JSON or AgentSuite JSONL) into ``AdaptedTauTrace``."""
     raw_traj = record.get("traj") if "traj" in record else record.get("messages")
     if not isinstance(raw_traj, list) or not raw_traj:
         raise ValueError("τ-bench record missing non-empty 'traj'/'messages' list")
 
+    meta = record.get("meta") if isinstance(record.get("meta"), Mapping) else {}
+    eval_res = record.get("eval_result") if isinstance(record.get("eval_result"), Mapping) else {}
+
     domain = _infer_domain(record, default_domain)
-    task_id = str(record.get("task_id"))
+    raw_task_id = record.get("task_id") if record.get("task_id") is not None else meta.get("task_id")
+    task_id = str(raw_task_id) if raw_task_id is not None else ""
     if not task_id or task_id == "None":
         raise ValueError("τ-bench record missing 'task_id'")
-    trial = int(record.get("trial", 0))
-    agent_model = str(record.get("model") or record.get("agent_model") or default_agent_model)
+    trial = int(record.get("trial", meta.get("trial", 0)) or 0)
+    agent_model = str(
+        record.get("model")
+        or record.get("agent_model")
+        or record.get("model_path")
+        or default_agent_model
+    )
 
-    raw_reward = record.get("reward")
+    raw_reward = record.get("reward") if record.get("reward") is not None else eval_res.get("score")
     if raw_reward is None:
         raise ValueError(f"τ-bench record task_id={task_id} missing objective 'reward'")
     reward = float(raw_reward)
@@ -164,13 +175,20 @@ def adapt_taubench_record(
     scenario_id = f"taubench:{domain}:{task_id}"
 
     info = record.get("info") if isinstance(record.get("info"), Mapping) else {}
-    task_info = info.get("task") if isinstance(info.get("task"), Mapping) else {}
+    task_info = (
+        info.get("task")
+        if isinstance(info.get("task"), Mapping)
+        else (meta.get("task_description") if isinstance(meta.get("task_description"), Mapping) else {})
+    )
     privileged = {
         "reward": reward,
         "objective_pass": objective_pass,
-        "reward_info": info.get("reward_info") or {
-            k: info[k] for k in ("reward_action", "reward_output") if k in info
-        },
+        "reward_info": (
+            info.get("reward_info")
+            or meta.get("reward_details")
+            or eval_res
+            or {k: info[k] for k in ("reward_action", "reward_output") if k in info}
+        ),
         "user_instruction": task_info.get("instruction") or record.get("instruction"),
         "expected_actions": task_info.get("actions") or record.get("actions") or [],
         "expected_outputs": task_info.get("outputs") or record.get("outputs") or [],

@@ -1,0 +1,59 @@
+{
+ "generated_at": "2026-11-19T14:54:46+00:00",
+ "seed": 20261119,
+ "cohort_sha256": "e460dbef6668ce2c5d9185728e0300e49ee0c3abac6a5e42d18e6806e1bed73a",
+ "n_total": 200,
+ "n_failures": 100,
+ "n_passes": 100,
+ "n_scenarios": 131,
+ "meets_prereg_v3_target": true,
+ "by_domain": {
+  "airline": 73,
+  "retail": 127
+ },
+ "by_agent_model": {
+  "deepseek-ai/DeepSeek-V3.2-Exp-thinking-off": 100,
+  "gpt-4o": 100
+ },
+ "by_agent_and_outcome": {
+  "deepseek-ai/DeepSeek-V3.2-Exp-thinking-off|fail": 50,
+  "deepseek-ai/DeepSeek-V3.2-Exp-thinking-off|pass": 50,
+  "gpt-4o|fail": 50,
+  "gpt-4o|pass": 50
+ },
+ "avg_messages": 31.8,
+ "avg_tool_calls": 8.1,
+ "avg_mutating_calls": 1.7,
+ "best_of_4_pool": {
+  "n_tasks": 165,
+  "n_mixed": 75,
+  "random_expected_pass_rate": 0.5485,
+  "oracle_pass_rate": 0.7818
+ },
+ "sources": [
+  {
+   "file": "DeepSeek-V3.2-Exp-thinking-off.jsonl",
+   "sha256": "0e4f8a994c87a38d845d197a63722589d01b3179f8c6515033f7c8af72fb5bcb",
+   "n_records": 165,
+   "n_failures": 60,
+   "n_passes": 105,
+   "n_scenarios": 165
+  },
+  {
+   "file": "gpt-4o-airline.json",
+   "sha256": "e9e6c0297660c537f83d4fd9c476ce7a9a86ecd2784874b7bfc13be598e37bfa",
+   "n_records": 200,
+   "n_failures": 116,
+   "n_passes": 84,
+   "n_scenarios": 50
+  },
+  {
+   "file": "gpt-4o-retail.json",
+   "sha256": "df01707894836168ff0ec9616b0bf08f66c7e5afcf313e5fe4f7a2f5c2ec938b",
+   "n_records": 460,
+   "n_failures": 182,
+   "n_passes": 278,
+   "n_scenarios": 115
+  }
+ ]
+}

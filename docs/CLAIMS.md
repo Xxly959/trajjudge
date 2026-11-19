@@ -69,7 +69,7 @@
 | `C-RQ3-04` | `Comprehensive` 安全声明 · `L3_notice/tool_result` (全 3 轮) | `44/48` (`16` 轨迹 / `11` 场景) | 未定义 (`0/0`，基线全过) | `+0.0144` `[+0.004, +0.027]` | `45.5%` (`20/44`) ≈ 噪声底 `38.6%` | 描述性对比 | `exploratory` | `reports/injection_metrics_v3.json` |
 | `C-RQ3-05` | `Accuracy` 未防御 · `L3_notice/tool_result` (全 3 轮) | `48/48` (`16` 轨迹 / `11` 场景) | `2/3`（`n_scenario=1`，Case Study） | `+0.0729` | `10.4%` (`5/48`) vs 噪声底 `4.2%` | Holm `p_adj = 1.0` | `exploratory` | `reports/injection_metrics_v3.json` |
 | `C-RQ3-06` | 安全声明副作用：结构化输出校验失败率（P4 1,728 行） | `864` vs `864` | — | — | `2.20%` (`19/864`) vs `0.93%` (`8/864`) | Fisher 精确检验 `p = 0.0504` | `exploratory` | `reports/robustness_v2.json` |
-| `C-RQ3-07` | Phase 5 中性对照三臂差值 (`security − neutral`, `r=0`) | `6/16` 有效配对 (`6` 场景) | 未定义 (`0/0`) | `-0.0791` `[-0.140, -0.024]` | 中性 `6/6` vs 安全 `7/16` (`r=0`) | 簇符号置换 `p = 0.03125`（中性臂缺失 `11/32`，待 `json_schema` 重跑至 `≥14/16`） | `provisional` | `reports/stage3_and_neutral_v2.json`, `reports/injection_metrics_v3.json` |
+| `C-RQ3-07` | Phase 5 中性对照三臂差值 (`security − neutral`, `r=0`, `schema_retries=2`) | `10/16` 有效配对 (`10` 场景) | 未定义 (`0/0`) | `-0.0482` `[-0.097, -0.007]` | 中性 `9/10` (`90.0%`) vs 安全 `7/16` (`43.8%`) | 簇符号置换 `p = 0.0273`（1,024 精确置换；剩余 6/32 为 DeepSeek `json_object` 缺失 `step_evaluations`，需 `json_schema` 厂商补齐至 `≥14/16`） | `provisional` | `reports/stage3_and_neutral_v2.json`, `reports/injection_metrics_v3.json` |
 
 ---
 

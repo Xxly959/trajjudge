@@ -329,7 +329,9 @@ def main() -> int:
 
     # P0-3 revised injection report (P4 full grid + P5 neutral control; Stage 3 perturbed excluded as retracted under D30)
     p4_rows = latest_rows(load_rows(root / "outputs/p4/p4-flash-human-fail-16.jsonl"))
-    p5_rows = latest_rows(load_rows(root / "outputs/p5/p5-neutral-l3-16.jsonl"))
+    p5_retry = root / "outputs/p5/p5-neutral-l3-16-retry2.jsonl"
+    p5_source = p5_retry if p5_retry.is_file() else (root / "outputs/p5/p5-neutral-l3-16.jsonl")
+    p5_rows = latest_rows(load_rows(p5_source))
     p3_pilot = latest_rows(load_rows(root / "outputs/p3/p3-flash-direct-pilot.jsonl"))
 
     p4_v3 = injection_metrics_v3(p4_rows, trace_scenarios)
@@ -353,9 +355,13 @@ def main() -> int:
         ],
         "p4_full_grid": p4_v3,
         "p5_neutral_control": {
-            "status": "provisional_low_coverage_6_of_16_needs_json_schema_rerun",
+            "source_file": p5_source.name,
+            "status": "retried_10_of_16_json_object_deepseek_limit" if p5_source == p5_retry else "provisional_low_coverage_6_of_16",
             "arms": p5_v3["arms"],
-            "note": "Old neutral run had 11/32 format errors (6/16 valid pairs); P0-3 rerun with json_schema/retry pending online budget approval.",
+            "note": (
+                "Rerun with schema_retries=2 lifted valid pairs from 6/16 to 10/16 (10 scenarios, exact cluster sign-flip p=0.0273). "
+                "Remaining 6/32 failures are all 'step_evaluations missing' under DeepSeek json_object; reaching >=14/16 requires a provider supporting strict json_schema."
+            ),
         },
         "p3_pilot_noise_floor": {f"{k[0]}|defended={k[1]}": v for k, v in p3_noise.items()},
     }

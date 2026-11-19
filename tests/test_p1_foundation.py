@@ -100,6 +100,27 @@ def test_taubench_adapter_normalizes_and_quarantines_ground_truth(tmp_path: Path
     jlpath.write_text(json.dumps(rec) + "\n", encoding="utf-8")
     assert load_taubench_file(jpath)[0].trace_id == load_taubench_file(jlpath)[0].trace_id
 
+    # AgentSuite JSONL schema (benchmark_name / task_name / eval_result / meta / model_path / messages)
+    as_rec = {
+        "benchmark_name": "taubench",
+        "task_name": "airline",
+        "model_path": "deepseek-ai/DeepSeek-V3.2-Exp-thinking-off",
+        "eval_result": {"score": 1.0, "db_match": True},
+        "meta": {
+            "task_id": "12",
+            "task_description": {"instruction": "Secret user goal", "actions": [{"name": "book_reservation", "kwargs": {}}]},
+            "reward_details": {"db_reward": 1.0},
+        },
+        "messages": rec["traj"],
+    }
+    as_adapted = adapt_taubench_record(as_rec)
+    assert as_adapted.domain == "airline"
+    assert as_adapted.scenario_id == "taubench:airline:12"
+    assert as_adapted.objective_pass is True
+    assert as_adapted.agent_model == "deepseek-ai/DeepSeek-V3.2-Exp-thinking-off"
+    assert "Secret user goal" not in json.dumps(as_adapted.messages)
+    assert as_adapted.privileged_outcome["user_instruction"] == "Secret user goal"
+
 
 def test_select_taubench_cohort_and_best_of_n_targets() -> None:
     # Build 70 independent scenarios × 4 trials (2 fail, 2 pass each) = 280 traces

@@ -1,13 +1,13 @@
 {
- "generated_at": "2026-11-18T02:44:10+00:00",
+ "generated_at": "2026-11-19T14:55:39+00:00",
  "estimate": {
   "neutral_jobs": 32,
   "stage3_jobs": 64,
   "total_completions": 96,
   "guard_cap_estimate_usd": {
    "neutral": 0.240927,
-   "stage3": 0.263118,
-   "combined": 0.504044
+   "stage3": 0.262887,
+   "combined": 0.503814
   },
   "expected_token_estimate_usd": {
    "peak_all_miss": 0.165696,
@@ -57,33 +57,36 @@
    },
    "neutral": {
     "total_rows": 32,
-    "invalid_rows": 11,
-    "n_paired_traj": 6,
-    "n_paired_scenarios": 6,
-    "asr": 1.0,
+    "invalid_rows": 6,
+    "n_paired_traj": 10,
+    "n_paired_scenarios": 10,
+    "asr": 0.9,
     "asr_ci": {
-     "ci": null,
-     "resamples": 2000,
-     "undefined_draws": 0,
-     "undefined_share": 0.0,
-     "defined_draws": 2000,
-     "clusters": 6,
-     "contributing_clusters": 6,
-     "status": "not_estimable",
-     "reason": "不可估（簇数不足）"
-    },
-    "mean_delta": 0.1064,
-    "mean_delta_ci": {
      "ci": [
-      0.04212962962962955,
-      0.1895833333333333
+      0.7,
+      1.0
      ],
      "resamples": 2000,
      "undefined_draws": 0,
      "undefined_share": 0.0,
      "defined_draws": 2000,
-     "clusters": 6,
-     "contributing_clusters": 6,
+     "clusters": 10,
+     "contributing_clusters": 10,
+     "status": "ok",
+     "reason": null
+    },
+    "mean_delta": 0.0753,
+    "mean_delta_ci": {
+     "ci": [
+      0.03204861111111108,
+      0.13484374999999998
+     ],
+     "resamples": 2000,
+     "undefined_draws": 0,
+     "undefined_share": 0.0,
+     "defined_draws": 2000,
+     "clusters": 10,
+     "contributing_clusters": 10,
      "status": "ok",
      "reason": null
     }
@@ -126,45 +129,45 @@
    }
   },
   "paired_three_way": {
-   "n_traj": 6,
-   "n_scenarios": 6,
-   "mean_security_minus_neutral": -0.0791,
+   "n_traj": 10,
+   "n_scenarios": 10,
+   "mean_security_minus_neutral": -0.0482,
    "security_minus_neutral_ci": {
     "ci": [
-     -0.13981481481481475,
-     -0.023958333333333342
+     -0.09656250000000001,
+     -0.007013888888888875
     ],
     "resamples": 2000,
     "undefined_draws": 0,
     "undefined_share": 0.0,
     "defined_draws": 2000,
-    "clusters": 6,
-    "contributing_clusters": 6,
+    "clusters": 10,
+    "contributing_clusters": 10,
     "status": "ok",
     "reason": null
    },
-   "mean_undefended_minus_neutral": -0.0375,
+   "mean_undefended_minus_neutral": -0.0191,
    "undefended_minus_neutral_ci": {
     "ci": [
-     -0.08541666666666668,
-     -0.004166666666666652
+     -0.05479166666666665,
+     0.006875000000000053
     ],
     "resamples": 2000,
     "undefined_draws": 0,
     "undefined_share": 0.0,
     "defined_draws": 2000,
-    "clusters": 6,
-    "contributing_clusters": 6,
+    "clusters": 10,
+    "contributing_clusters": 10,
     "status": "ok",
     "reason": null
    },
    "sign_flip_neutral_gt_security": {
     "status": "ok",
-    "k": 6,
-    "statistic": 0.0790509259259259,
-    "p": 0.03125,
-    "nonzero_clusters": 6,
-    "assignments": 64,
+    "k": 10,
+    "statistic": 0.048159722222222215,
+    "p": 0.02734375,
+    "nonzero_clusters": 9,
+    "assignments": 1024,
     "exact": true,
     "alternative": "greater",
     "reason": null
@@ -174,8 +177,8 @@
     0.08309844771241826
    ],
    "neutral_ci": [
-    0.04212962962962955,
-    0.1895833333333333
+    0.03204861111111108,
+    0.13484374999999998
    ],
    "security_ci": [
     0.0032291666666666237,

@@ -188,12 +188,13 @@ def build_fig3_injection_attribution(
     neu_arm = arms.get("neutral") or {}
     neu_err = (neu_arm.get("invalid_rows", 0) / neu_arm.get("total_rows", 32)) if neu_arm.get("total_rows") else 0.0
 
+    neu_paired = neu_arm.get("n_paired_traj", 6)
     bars = [
-        ("Comprehensive 未防御 (r=0, n=16)", (arms.get("undefended") or {}).get("asr") or 0.0,
+        ("Comprehensive 未防御 (r=0, 16/16配对)", (arms.get("undefended") or {}).get("asr") or 0.0,
          (arms.get("undefended") or {}).get("mean_delta") or 0.0, undef_err, nf_undef, "#ef4444"),
-        ("Comprehensive + 中性通知 (r=0, 仅6/16配对)", neu_arm.get("asr") or 0.0,
+        (f"Comprehensive + 中性通知 (r=0, {neu_paired}/16配对)", neu_arm.get("asr") or 0.0,
          neu_arm.get("mean_delta") or 0.0, neu_err, nf_undef, "#eab308"),
-        ("Comprehensive + 安全声明 (r=0, n=16)", (arms.get("security") or {}).get("asr") or 0.0,
+        ("Comprehensive + 安全声明 (r=0, 16/16配对)", (arms.get("security") or {}).get("asr") or 0.0,
          (arms.get("security") or {}).get("mean_delta") or 0.0, sec_err, nf_sec, "#3b82f6"),
     ]
 
