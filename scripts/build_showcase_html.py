@@ -486,10 +486,17 @@ function renderOverview() {
   const abl = p1.ablation || {};
   const bs = p1.silver_blindspot || {};
   const ds = p1.deepseek_partial || {};
+  const dsFull = p1r["p1-deepseek-evidence_grounded"];
+  const dsView = dsFull || (ds.n_valid ? {
+    n_valid: ds.n_valid, n_scenarios: ds.n_scenarios, caught_failures: ds.caught_failures, failure_recall: ds.failure_recall,
+    false_kills: ds.false_kills, false_kill_rate: ds.false_kill_rate, kappa: ds.kappa, kappa_ci: (ds.kappa_ci || {}).ci,
+    roc_auc: ds.roc_auc, pr_auc_fail: ds.pr_auc_fail, r10: ds.recall_at_fpr_10_interp, r20: ds.recall_at_fpr_20_interp,
+    unauth_prec: ds.unauthorized_side_effect_precision, unauth_true: ds.unauthorized_side_effect_true_fails, unauth_count: ds.unauthorized_side_effect_count,
+  } : {});
 
   const kpis = [
     { label: "P1-1 客观 τ-bench 主指标 (GLM-Flash)", val: `AUC ${num(egF.roc_auc, 3)}`, sub: `Grounded vs Comprehensive ${num(compF.roc_auc, 3)} · R@20% ${pct(egF.r20)} vs ${pct(compF.r20)} (Exact McNemar p=0.0006)`, color: "var(--green)" },
-    { label: "跨厂商越权副作用精确率", val: `${pct(egF.unauth_prec)} / ${pct(ds.unauthorized_side_effect_precision)}`, sub: `GLM-Flash ${egF.unauth_true}/${egF.unauth_count} · DeepSeek ${ds.unauthorized_side_effect_true_fails}/${ds.unauthorized_side_effect_count} 高度复现`, color: "var(--brand)" },
+    { label: "跨厂商越权副作用精确率", val: `${pct(egF.unauth_prec)} / ${pct(dsView.unauth_prec)}`, sub: `GLM-Flash ${egF.unauth_true}/${egF.unauth_count} · DeepSeek-Flash ${dsView.unauth_true}/${dsView.unauth_count}（2 厂商对照）`, color: "var(--brand)" },
     { label: "P1-6 三组件消融单调阶梯 (R@10%)", val: `${pct((abl.full || {}).recall_at_fpr_10)} → ${pct((abl.no_ledger || {}).recall_at_fpr_10)}`, sub: `AUC ${num((abl.full || {}).roc_auc, 3)} → no_veto ${num((abl.no_veto || {}).roc_auc, 3)} → no_quar ${num((abl.no_quarantine || {}).roc_auc, 3)} → no_ledger ${num((abl.no_ledger || {}).roc_auc, 3)}`, color: "var(--amber)" },
     { label: "P1-3 数据库校验盲区审计", val: `${bs.n_flagged_blindspots || 13}/${bs.n_audited_passes || 92} (${pct(bs.blindspot_rate)})`, sub: "旗舰 GLM-5.3 在客观 reward=1.0 通过轨迹中筛出流程/越权盲区（Silver Label）", color: "var(--slate)" },
   ];
@@ -502,15 +509,11 @@ function renderOverview() {
 
   const p1Rows = [
     ["Evidence-Grounded · GLM-Flash (主架构)", p1r["p1-hubcore_glm_flash-evidence_grounded"], true],
-    ["Evidence-Grounded · DeepSeek (跨厂商部分 n=161)", ds.n_valid ? {
-      n_valid: ds.n_valid, n_scenarios: ds.n_scenarios, caught_failures: ds.caught_failures, failure_recall: ds.failure_recall,
-      false_kills: ds.false_kills, false_kill_rate: ds.false_kill_rate, kappa: ds.kappa, kappa_ci: (ds.kappa_ci || {}).ci,
-      roc_auc: ds.roc_auc, pr_auc_fail: ds.pr_auc_fail, r10: ds.recall_at_fpr_10_interp, r20: ds.recall_at_fpr_20_interp,
-      unauth_prec: ds.unauthorized_side_effect_precision, unauth_true: ds.unauthorized_side_effect_true_fails, unauth_count: ds.unauthorized_side_effect_count,
-    } : null, true],
     ["Evidence-Grounded · GLM-5.3 Pro", p1r["p1-hubcore_glm_pro-evidence_grounded"], false],
+    [dsFull ? "Evidence-Grounded · DeepSeek-Flash (官方完整 197/200)" : "Evidence-Grounded · DeepSeek (跨厂商部分 n=161)", dsView, true],
     ["OpenJudge Accuracy · GLM-5.3 Pro", p1r["p1-hubcore_glm_pro-accuracy"], false],
     ["OpenJudge Accuracy · GLM-Flash", p1r["p1-hubcore_glm_flash-accuracy"], false],
+    ["OpenJudge Accuracy · DeepSeek-Flash (官方完整 200/200)", p1r["p1-deepseek-accuracy"], false],
     ["OpenJudge Comprehensive · GLM-Flash", p1r["p1-hubcore_glm_flash-comprehensive"], false],
     ["Rule Baseline · Observation InfoGain", p1r["p1-rule-baselines:observation_information_gain|rule"], false],
     ["Rule Baseline · Action Loop Detection", p1r["p1-rule-baselines:action_loop_detection|rule"], false],

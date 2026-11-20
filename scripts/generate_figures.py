@@ -387,11 +387,11 @@ def build_fig6_p1_taubench_and_ablation(
 
     def _r_row(key: str, label: str, color: str) -> tuple[str, float, float, float, str] | None:
         r = raters.get(key)
-        if not r:
+        if not r or not r.get("n_valid"):
             return None
         r20 = ((r.get("recall_at_fpr") or {}).get("fpr_20") or {}).get("recall_interpolated") or 0.0
         return (
-            label,
+            f"{label} (n={int(r['n_valid'])})",
             float(r.get("roc_auc") or 0.0),
             float(r.get("pr_auc_fail") or 0.0),
             float(r20),
@@ -400,19 +400,21 @@ def build_fig6_p1_taubench_and_ablation(
 
     left_rows: list[tuple[str, float, float, float, str]] = []
     for key, label, color in (
-        ("p1-hubcore_glm_flash-evidence_grounded", "Grounded · GLM-Flash (n=184)", "#10b981"),
-        ("p1-hubcore_glm_pro-evidence_grounded", "Grounded · GLM-Pro (n=198)", "#14b8a6"),
-        ("p1-hubcore_glm_pro-accuracy", "Accuracy · GLM-Pro (n=200)", "#eab308"),
-        ("p1-hubcore_glm_flash-accuracy", "Accuracy · GLM-Flash (n=199)", "#f97316"),
-        ("p1-hubcore_glm_flash-comprehensive", "Comprehensive · GLM-Flash (n=183)", "#ef4444"),
-        ("p1-rule-baselines:observation_information_gain|rule", "Rule: InfoGain (n=200)", "#64748b"),
+        ("p1-hubcore_glm_flash-evidence_grounded", "Grounded · GLM-Flash", "#10b981"),
+        ("p1-hubcore_glm_pro-evidence_grounded", "Grounded · GLM-Pro", "#14b8a6"),
+        ("p1-deepseek-evidence_grounded", "Grounded · DeepSeek-Flash", "#0ea5e9"),
+        ("p1-hubcore_glm_pro-accuracy", "Accuracy · GLM-Pro", "#eab308"),
+        ("p1-hubcore_glm_flash-accuracy", "Accuracy · GLM-Flash", "#f97316"),
+        ("p1-deepseek-accuracy", "Accuracy · DeepSeek-Flash", "#6366f1"),
+        ("p1-hubcore_glm_flash-comprehensive", "Comprehensive · GLM-Flash", "#ef4444"),
+        ("p1-rule-baselines:observation_information_gain|rule", "Rule: InfoGain", "#64748b"),
     ):
         item = _r_row(key, label, color)
         if item:
             left_rows.append(item)
-    if p14_deepseek and p14_deepseek.get("n_valid"):
+    if "p1-deepseek-evidence_grounded" not in raters and p14_deepseek and p14_deepseek.get("n_valid"):
         left_rows.insert(
-            1,
+            2 if len(left_rows) >= 2 else len(left_rows),
             (
                 f"Grounded · DeepSeek (部分 n={p14_deepseek['n_valid']})",
                 float(p14_deepseek.get("roc_auc") or 0.0),
@@ -439,16 +441,33 @@ def build_fig6_p1_taubench_and_ablation(
                 color,
             ))
 
-    w, h = 960, 470
+    def _unauth_txt(rater: dict[str, Any], name: str) -> str | None:
+        cnt = int(rater.get("unauthorized_side_effect_count") or 0)
+        if not cnt:
+            return None
+        tf = int(rater.get("unauthorized_side_effect_true_fails") or 0)
+        prec = float(rater.get("unauthorized_side_effect_precision") or 0.0)
+        return f"{name} {tf}/{cnt} ({_pct(prec)})"
+
+    unauth_parts = [
+        p for p in (
+            _unauth_txt(raters.get("p1-hubcore_glm_flash-evidence_grounded") or {}, "GLM-Flash"),
+            _unauth_txt(raters.get("p1-deepseek-evidence_grounded") or {}, "DeepSeek-Flash"),
+            _unauth_txt(raters.get("p1-hubcore_glm_pro-evidence_grounded") or {}, "GLM-Pro"),
+        ) if p
+    ]
+    unauth_summary = " vs ".join(unauth_parts) if unauth_parts else "GLM-Flash 27/32 (84.4%)"
+
+    w, h = 960, 505
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
         f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
-        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 6 · P1 客观标签 τ-bench 主实验（n=200 / 131 场景）与四路组件单调消融（P1-6）</text>',
-        '<text x="28" y="55" font-size="12" fill="#475569">基于数据库可执行校验真值：Evidence-Grounded (GLM-Flash) 全指标超越通用裁判，且账本 &gt; 隔离槽 &gt; Veto 三组件呈单调递减贡献</text>',
+        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 6 · P1 客观标签 τ-bench 两厂商全量对比（n=200 / 131 场景）与四路组件单调消融（P1-6）</text>',
+        '<text x="28" y="55" font-size="11.8" fill="#475569">基于 DB 可执行真值：Evidence-Grounded 显著提升两厂商默认失败召回（GLM-Flash 全指标第一；DeepSeek-Flash 呈现轻量推理敏感性）</text>',
     ]
 
     # Panel A (Left): P1-1 τ-bench
-    lx, ly, lpw, lph = 205, 96, 265, 305
+    lx, ly, lpw, lph = 205, 96, 265, 340
     parts.append(f'<text x="{lx + lpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. τ-bench 客观标签全量对比 (n=200)</text>')
     for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
         x = lx + tick * lpw
@@ -458,19 +477,19 @@ def build_fig6_p1_taubench_and_ablation(
     if left_rows:
         rh = lph / len(left_rows)
         for idx, (label, roc, pr, r20, color) in enumerate(left_rows):
-            y0 = ly + idx * rh + 4
-            parts.append(f'<text x="{lx - 10}" y="{y0 + 21:.1f}" text-anchor="end" font-size="10.8" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
+            y0 = ly + idx * rh + 3
+            parts.append(f'<text x="{lx - 10}" y="{y0 + 19:.1f}" text-anchor="end" font-size="10.4" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
             for sub, (val, opac, tag) in enumerate(((roc, "1.0", f"AUC {roc:.3f}"), (pr, "0.60", f"PR {pr:.3f}"), (r20, "0.30", f"R@20 {_pct(r20)}"))):
-                by = y0 + sub * 11
+                by = y0 + sub * 10
                 bw = max(2.0, min(1.0, val) * lpw)
-                parts.append(f'<rect x="{lx}" y="{by:.1f}" width="{bw:.1f}" height="9" rx="2" fill="{color}" fill-opacity="{opac}"/>')
-                parts.append(f'<text x="{lx + bw + 4:.1f}" y="{by + 8:.1f}" font-size="9.2" fill="#334155">{_esc(tag)}</text>')
+                parts.append(f'<rect x="{lx}" y="{by:.1f}" width="{bw:.1f}" height="8.5" rx="2" fill="{color}" fill-opacity="{opac}"/>')
+                parts.append(f'<text x="{lx + bw + 4:.1f}" y="{by + 7.5:.1f}" font-size="9" fill="#334155">{_esc(tag)}</text>')
 
     # Divider
-    parts.append('<line x1="538" y1="74" x2="538" y2="420" stroke="#cbd5e1" stroke-dasharray="4,4"/>')
+    parts.append('<line x1="538" y1="74" x2="538" y2="455" stroke="#cbd5e1" stroke-dasharray="4,4"/>')
 
     # Panel B (Right): P1-6 Ablation
-    rx, ry, rpw, rph = 678, 96, 200, 305
+    rx, ry, rpw, rph = 678, 96, 200, 340
     parts.append(f'<text x="{rx + rpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 组件消融单调阶梯 (n=60 分层)</text>')
     for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
         x = rx + tick * rpw
@@ -480,7 +499,7 @@ def build_fig6_p1_taubench_and_ablation(
     if right_rows:
         rh = rph / len(right_rows)
         for idx, (label, roc, pr, r10, color) in enumerate(right_rows):
-            y0 = ry + idx * rh + 12
+            y0 = ry + idx * rh + 16
             parts.append(f'<text x="{rx - 10}" y="{y0 + 25:.1f}" text-anchor="end" font-size="11.2" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
             for sub, (val, opac, tag) in enumerate(((roc, "1.0", f"AUC {roc:.3f}"), (pr, "0.60", f"PR {pr:.3f}"), (r10, "0.32", f"R@10 {_pct(r10)}"))):
                 by = y0 + sub * 15
@@ -489,10 +508,10 @@ def build_fig6_p1_taubench_and_ablation(
                 parts.append(f'<text x="{rx + bw + 5:.1f}" y="{by + 10:.1f}" font-size="9.8" font-weight="600" fill="#334155">{_esc(tag)}</text>')
 
     # Legend strip + footer
-    parts.append('<rect x="28" y="424" width="12" height="8" rx="2" fill="#334155" fill-opacity="1.0"/><text x="45" y="432" font-size="10" fill="#334155">ROC-AUC</text>')
-    parts.append('<rect x="110" y="424" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.60"/><text x="127" y="432" font-size="10" fill="#334155">PR-AUC (Fail)</text>')
-    parts.append('<rect x="215" y="424" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.30"/><text x="232" y="432" font-size="10" fill="#334155">左图 Recall@FPR=20% · 右图 Recall@FPR=10%</text>')
-    parts.append('<text x="28" y="454" font-size="10.5" fill="#64748b">数据源：reports/p1_taubench_eval.json · reports/p14_cross_vendor_deepseek.json · reports/p16_ablation.json · 跨厂商 unauthorized_side_effect 精确率 GLM 27/32 (84.4%) vs DeepSeek 22/26 (84.6%)</text>')
+    parts.append('<rect x="28" y="460" width="12" height="8" rx="2" fill="#334155" fill-opacity="1.0"/><text x="45" y="468" font-size="10" fill="#334155">ROC-AUC</text>')
+    parts.append('<rect x="110" y="460" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.60"/><text x="127" y="468" font-size="10" fill="#334155">PR-AUC (Fail)</text>')
+    parts.append('<rect x="215" y="460" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.30"/><text x="232" y="468" font-size="10" fill="#334155">左图 Recall@FPR=20% · 右图 Recall@FPR=10%</text>')
+    parts.append(f'<text x="28" y="489" font-size="10.2" fill="#64748b">数据源：reports/p1_taubench_eval.json · reports/p16_ablation.json · 跨厂商 unauthorized_side_effect 精确率：{unauth_summary}</text>')
     parts.append("</svg>\n")
     return "\n".join(parts)
 

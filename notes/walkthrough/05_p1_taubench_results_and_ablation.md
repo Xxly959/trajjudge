@@ -13,7 +13,7 @@
 1. **D31 真实工程排障（面试高频加分点）**：首次在 τ-bench 上跑 Grounded 时，旧版 `has_final_assistant_reply` 假设最后一条消息必须是 `assistant`，导致以 `user` `###STOP###`（170/200）或 `transfer_to_human_agents`（27/200）收尾的轨迹 **161/161 全被 `structural_veto` 误杀**；同时 6KB 业务政策在 1,500 字符处被截断。修复多轮终止态、保留完整政策（上限 7,000 字符）并加入 `confidence_pass` 连续排序后，架构真实表现才得以稳定显现。
 2. **P1-1 全指标领先**：`Evidence-Grounded (glm-5.3-flash)` 拿到全场最高 **`ROC-AUC = 0.755`、`PR-AUC = 0.739`、`R@10% = 37.4%`、`R@20% = 60.4%`、`κ = 0.380`**，配对 Exact McNemar 不仅失败召回显著超越所有基线（`p < 1e-9`），总体准确率也显著胜出（vs `Comprehensive` `p = 0.00064`；vs `Accuracy Pro` `p = 0.0183`）。
 3. **P1-6 严格单调消融**：`full (AUC 0.910 / R@10% 74.1%)` > `no_veto (0.869 / 59.3%)` > `no_quarantine (0.822 / 48.3%)` > `no_ledger (0.794 / 27.6%)`，证明**证据账本 > 隔离槽 > Python Veto** 三层设计每一层都不可替代。
-4. **P1-4 两厂商复现 + P1-3 盲区发现**：`unauthorized_side_effect` 越权精确率在 **GLM-Flash（`27/32 = 84.4%`）** 与 **DeepSeek（`22/26 = 84.6%`）** 上高度复现；跨厂商旗舰 `glm-5.3`（Silver Label）还在 `92` 条客观通过轨迹中揪出 **`13/92 (14.1%)`** 数据库终态校验盲区。
+4. **P1-4 两厂商 200/200 对称复现 + P1-3 盲区发现**：补充运行官方 `deepseek-flash` post-D31 完整 200 条（`Evidence-Grounded 197/200` + `OpenJudge Accuracy 200/200`）后，证实同底座失败召回显著提升 **`+31.6 pp`**（`16/98 → 47/98 = 48.0%`, `p = 7.92e-09`），`unauthorized_side_effect` 精确率跨两厂商保持 **`74%–84%`**（GLM-Flash `27/32 = 84.4%`、GLM-Pro `30/40 = 75.0%`、DeepSeek-Flash `20/27 = 74.1%`），同时诚实定位到零推理底座对 7KB 长政策的轻量推理预算敏感性（`DeepSeek-Flash` `AUC 0.629` vs `GLM-Flash` `0.755`）；跨厂商旗舰 `glm-5.3`（Silver Label）另在 `92` 条客观通过轨迹中揪出 **`13/92 (14.1%)`** 数据库终态校验盲区。
 
 ---
 
@@ -21,8 +21,8 @@
 
 - **多轮终止态与连续分**：[src/trajjudge/grounded_judge.py](../../src/trajjudge/grounded_judge.py) — `_TERMINAL_HANDOFF_TOOLS`、`extract_evidence_ledger`（保留 7KB 业务政策）、`validate_and_score_grounded`（`pass ∈ [0.50, 1.00]` / `fail ∈ [0.00, 0.45]` 严格 Veto 分区）、4 路消融开关 `ablation = full | no_veto | no_quarantine | no_ledger`。
 - **实验与产物**：
-  - [reports/p1_taubench_eval.json](../../reports/p1_taubench_eval.json)（P1-1 全量 5 个 LLM 裁判 + 2 个规则基线 + 10 组 Exact McNemar + Holm 校正）
-  - [reports/p14_cross_vendor_deepseek.json](../../reports/p14_cross_vendor_deepseek.json)（DeepSeek 161/200 post-D31 跨厂商离线复核）
+  - [reports/p1_taubench_eval.json](../../reports/p1_taubench_eval.json)（P1-1 + P1-4 全量 7 个 LLM 裁判含官方 DeepSeek-Flash `197/200` & `200/200` + 2 个规则基线 + 21 组 Exact McNemar + Holm 校正）
+  - [reports/p14_cross_vendor_deepseek.json](../../reports/p14_cross_vendor_deepseek.json)（早期 DeepSeek 161/200 pre-D31 离线复核历史归档）
   - [reports/p16_ablation.json](../../reports/p16_ablation.json)（60 条分层 τ-bench 4 路消融）
   - [reports/p13_blindspot_summary.json](../../reports/p13_blindspot_summary.json)（`13/92` 数据库校验盲区汇总）
   - [reports/figures/fig6_p1_taubench_and_ablation.svg](../../reports/figures/fig6_p1_taubench_and_ablation.svg)
@@ -37,8 +37,8 @@
    - **A**：实测日志显示 `glm-5.3-flash` 平均消耗约 `200` 个轻量推理 token（总输出 `1,511` tokens），而 `glm-5.3` Pro 在 `thinking=disabled` 下零推理 token（总输出 `1,286` tokens）且判断过于激进（误杀率高达 `38.4%`）。这说明在需要逐条对照 6KB 政策核验工具参数的审计任务里，**轻度步骤化推理对校准的帮助大于单纯参数量扩张**。
 3. **Q：你们说消融里 `no_quarantine` 即使在没有提示注入的干净 τ-bench 上也掉了 `0.088 AUC`，为什么？**
    - **A**：看 `reports/p16_ablation.json` 的交叉指标就明白了：移除 `<untrusted_tool_data>` 隔离槽后，正常样本误杀率从 `34.6%` 飙到 `44.8%`，同时模型自我矛盾导致 Veto 覆写的比例从 `5.7%` 涨到 `17.2%`。隔离槽不仅是安全边界，也是**结构化语义分隔符**，帮裁判清楚区分“环境返回了什么”和“助手声称了什么”。
-4. **Q：P1-4 只用了两家厂商（DeepSeek + GLM），且 DeepSeek 只有 161/200，结论站得住吗？**
-   - **A**：我们在 `DECISIONS.md` **D32** 和 `CLAIMS.md` 中严格按「两厂商范围 + 部分样本离线 post-D31 复核」如实披露，不做三厂商夸大；核心价值在于即便在旧提示词、不同模型家族下，`unauthorized_side_effect` 精确率依然精准复现（`84.6%` vs `84.4%`），且排除了 DeepSeek 裁判放水 DeepSeek 轨迹的自评偏倚。
+4. **Q：P1-4 两厂商（DeepSeek + GLM）完整跑完后，为什么 DeepSeek-Flash (`0.629`) 和 GLM-Flash (`0.755`) 有差距？结论还站得住吗？**
+   - **A**：官方 `deepseek-flash` 在 `thinking=off` 下完成了完整 200 条对称运行（`Evidence-Grounded 197/200` + `Accuracy 200/200`，详见 **D34**）。结论很诚实也更有区分度：(1) 同在 DeepSeek 上，通用 `Accuracy` 同样只抓出 `16/100 (16.0%)` 失败，而 `Evidence-Grounded` 把默认失败召回显著提高 **`+31.6 pp`**（`48.0%`, `p = 7.92e-09`）、`unauthorized_side_effect` 精确率 `20/27 (74.1%)`、且排除了自评放水偏倚；(2) 但 DeepSeek (`thinking=off`, 均输出 `740` tok) 比带轻量推理的 `GLM-Flash`（`1,511` tok, `0.755`）甚至 `GLM-Pro`（`0.683`）都更宽松，导致总准确率与低误杀 `R@10%` 排序增益受限——恰恰与消融和 Pro 对比互相印证，说明长政策核验需要底座配足轻量步骤推理预算。
 
 ---
 
@@ -56,4 +56,4 @@ for name, res in d["holm_fail_recall"]["tests"].items():
 EOF
 ```
 
-观察最后两行：`glm_pro-accuracy vs glm_flash-accuracy`（`p_adj = 0.334, reject = False`）说明**单纯升级通用裁判模型无显著增益**；而全部 Grounded vs 通用裁判对比均为 `reject = True`（`p_adj < 1e-8`）。
+观察结果：`glm_pro-accuracy vs glm_flash-accuracy`（`p_adj = 0.501, reject = False`）说明**单纯升级通用裁判模型无显著增益**；`deepseek-evidence_grounded vs deepseek-accuracy`（`p = 7.92e-09, p_adj = 9.50e-08, reject = True`）与全部 GLM Grounded vs 通用裁判对比（`p_adj < 1e-8`）均显著胜出。

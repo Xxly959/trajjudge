@@ -1,6 +1,6 @@
 # TrajJudge 对外口径总表 (`CLAIMS.md`)
 
-最后核验：2026-11-19 · 适用范围：`README.md`、`README_en.md`、`reports/FINAL_REPORT_v3.md`、`reports/FINAL_REPORT_v2.md`、`reports/showcase.html` 与简历。
+最后核验：2026-11-20 · 适用范围：`README.md`、`README_en.md`、`reports/FINAL_REPORT_v3.md`、`reports/FINAL_REPORT_v2.md`、`reports/showcase.html` 与简历。
 
 **硬性口径规则（P0-1）**：
 1. 所有对外引用的数字必须能在下表查到唯一出处，禁止自创或四舍五入后跨文件不一致。
@@ -19,7 +19,7 @@
 | ID | 指标 | 数值 (`x/n`) | 场景数 | 校验哈希 / 状态 | 定性 | 来源 JSON |
 | :--- | :--- | :--- | ---: | :--- | :--- | :--- |
 | `C-P1-DATA-01` | 冻结 τ-bench 客观标签队列 | `200` 条（`100` 失败 + `100` 通过；DeepSeek-V3.2 `100` + GPT-4o `100`；airline `73` + retail `127`） | 131 | `SHA-256 = e460dbef...1bed73a`（源池 `825` 条零未映射角色） | `deterministic` | `reports/p1_cohort_summary.json` |
-| `C-P1-DATA-02` | Best-of-4 重排候选池（P2-A） | `165` 个任务（每任务 4 次采样，其中 `75` 个混合成败任务）；随机期望通过率 `54.85%` vs 数据库 Oracle 上界 `78.18%` | 165 | 池已冻结，在线裁判重排待 GLM 余额充值后从断点续跑 | `deterministic` | `reports/p1_cohort_summary.json` |
+| `C-P1-DATA-02` | Best-of-4 重排候选池（P2-A） | `165` 个任务（每任务 4 次采样，其中 `75` 个混合成败任务）；随机期望通过率 `54.85%` vs 数据库 Oracle 上界 `78.18%` | 165 | 池已冻结；已抽取 50 任务完成在线裁判重排，见 `C-P2A-01..05` | `deterministic` | `reports/p1_cohort_summary.json` |
 
 ### 1.2 评分器客观标签全量对比（同误杀率与阈值无关指标）
 
@@ -27,23 +27,25 @@
 | :--- | :--- | :---: | :---: | :---: | :--- | :--- | :--- | :---: | :---: | :--- | :--- |
 | `C-P1-01` | **Evidence-Grounded · GLM-Flash** (`≥0.50`) | `184/200` (`123`) | **`58/91` (`63.7%`)** | `24/93` (`25.8%`) | **`0.380`** `[0.231, 0.514]` | **`0.755`** `[0.673, 0.825]` | **`0.739`** `[0.637, 0.830]` | **`37.4%` / `37.4%`** | **`60.4%` / `60.4%`** | `confirmatory` | `reports/p1_taubench_eval.json` |
 | `C-P1-02` | Evidence-Grounded · GLM-5.3 Pro (`≥0.50`) | `198/200` (`129`) | `68/99` (`68.7%`) | `38/99` (`38.4%`) | `0.303` `[0.177, 0.436]` | `0.683` `[0.616, 0.753]` | `0.665` `[0.573, 0.757]` | `0.0%` / `30.0%` | `51.5%` / `51.5%` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-08` | **Evidence-Grounded · DeepSeek-Flash**（官方完整 post-D31） | `197/200` (`130`) | `47/98` (`48.0%`) | `27/99` (`27.3%`) | `0.207` `[0.076, 0.341]` | `0.629` `[0.553, 0.707]` | `0.616` `[0.514, 0.717]` | `21.4%` / `21.4%` | `38.8%` / `39.6%` | `confirmatory` | `reports/p1_taubench_eval.json` |
 | `C-P1-03` | OpenJudge Accuracy · GLM-5.3 Pro (`≥2.0`) | `200/200` (`131`) | `21/100` (`21.0%`) | `4/100` (`4.0%`) | `0.170` `[0.086, 0.261]` | `0.703` `[0.641, 0.764]` | `0.665` `[0.580, 0.745]` | `21.0%` / `36.4%` | `57.0%` / `58.1%` | `confirmatory` | `reports/p1_taubench_eval.json` |
 | `C-P1-04` | OpenJudge Accuracy · GLM-Flash (`≥2.0`) | `199/200` (`131`) | `27/99` (`27.3%`) | `8/100` (`8.0%`) | `0.193` `[0.091, 0.308]` | `0.686` `[0.623, 0.753]` | `0.641` `[0.550, 0.728]` | `27.3%` / `32.7%` | `54.6%` / `55.7%` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-08b` | OpenJudge Accuracy · DeepSeek-Flash (`≥2.0`, 官方完整) | `200/200` (`131`) | `16/100` (`16.0%`) | `3/100` (`3.0%`) | `0.130` `[0.045, 0.217]` | `0.620` `[0.566, 0.672]` | `0.601` `[0.516, 0.681]` | `30.0%` / `33.0%` | `30.0%` / `40.4%` | `confirmatory` | `reports/p1_taubench_eval.json` |
 | `C-P1-05` | OpenJudge Comprehensive · GLM-Flash (`≥0.60`) | `183/200` (`125`) | `4/91` (`4.4%`) | `1/92` (`1.1%`) | `0.033` `[0.000, 0.074]` | `0.628` `[0.538, 0.710]` | `0.630` `[0.527, 0.733]` | `20.9%` / `21.2%` | `31.9%` / `31.9%` | `confirmatory` | `reports/p1_taubench_eval.json` |
 | `C-P1-06` | Rule · `observation_information_gain` | `200/200` (`131`) | `8/100` (`8.0%`) | `4/100` (`4.0%`) | `0.040` `[-0.031, 0.109]` | `0.612` `[0.533, 0.693]` | `0.600` `[0.493, 0.715]` | `14.0%` / `14.0%` | `29.0%` / `29.0%` | `deterministic` | `reports/p1_taubench_eval.json` |
 | `C-P1-07` | Rule · `action_loop_detection` | `200/200` (`131`) | `0/100` (`0.0%`) | `0/100` (`0.0%`) | `0.000` (不可估) | `0.583` `[0.527, 0.639]` | `0.554` `[0.465, 0.649]` | `22.0%` / `20.0%` | `30.0%` / `35.6%` | `deterministic` | `reports/p1_taubench_eval.json` |
-| `C-P1-08` | **Evidence-Grounded · DeepSeek**（跨厂商部分 `n=161`，post-D31 离线复核） | `161/200` (`109`) | `55/79` (`69.6%`) | `31/82` (`37.8%`) | `0.318` `[0.161, 0.453]` | `0.692` `[0.612, 0.764]` | `0.673` `[0.558, 0.779]` | `32.9%` / `33.3%` | `45.6%` / `47.1%` | `partial_replication` | `reports/p14_cross_vendor_deepseek.json` |
 
 ### 1.3 配对显著性检验、越权副作用精度与跨厂商自评偏好审计（P1-1 & P1-4，两厂商范围）
 
 | ID | 检验 / 审计结论 | 数值 (`x/n`) | 共同样本 / 场景 | 统计检验 / 证据 | 定性 | 来源 JSON |
 | :--- | :--- | :--- | :---: | :--- | :--- | :--- |
-| `C-P1-09` | Grounded (GLM-Flash) vs Comprehensive (GLM-Flash) | 失败召回 `63.9%` vs `4.8%`；总体准确率 `69.6%` vs `52.4%` | `n=168` (`49` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 3.55e-15`（Holm `p_adj = 3.20e-14`）；总准确率 `p = 0.00064` | `confirmatory` | `reports/p1_taubench_eval.json` |
-| `C-P1-10` | Grounded (GLM-Flash) vs Accuracy (GLM-Flash) | 失败召回 `63.7%` vs `28.6%`；总体准确率 `69.0%` vs `60.3%` | `n=184` (`32` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 4.66e-10`（Holm `p_adj = 2.33e-09`）；总准确率 `p = 0.0328` | `confirmatory` | `reports/p1_taubench_eval.json` |
-| `C-P1-11` | Grounded (GLM-Flash) vs Accuracy (GLM-5.3 Pro) | 失败召回 `63.7%` vs `20.9%`；总体准确率 `69.0%` vs `58.7%` | `n=184` (`39` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 3.64e-12`（Holm `p_adj = 2.91e-11`）；总准确率 `p = 0.0183` | `confirmatory` | `reports/p1_taubench_eval.json` |
-| `C-P1-12` | 单纯升级通用模型无增益：Accuracy Pro vs Accuracy Flash | 失败召回 `20.2%` vs `27.3%`；总体准确率 `58.3%` vs `59.8%` | `n=199` (`13` vs `6`) | Exact McNemar 失败 `p = 0.167`（Holm `p_adj = 0.334`）；总准确率 `p = 0.690` | `confirmatory` | `reports/p1_taubench_eval.json` |
-| `C-P1-13` | 跨厂商 `unauthorized_side_effect` 越权副作用精确率 | **GLM-Flash `27/32` (`84.4%`)** · **DeepSeek `22/26` (`84.6%`)** · GLM-Pro `30/40` (`75.0%`) | 2 厂商 (`184` / `161` / `198`) | 跨 GLM 与 DeepSeek 精确率几乎一致（~84.5%）；代码 Veto 覆写模型 `GLM-Flash 6/184 (3.3%)`、`DeepSeek 3/161 (1.9%)` | `confirmatory` | `reports/p1_taubench_eval.json`, `reports/p14_cross_vendor_deepseek.json` |
-| `C-P1-14` | 两厂商自评偏好（Self-Preference）检查 | **GLM-Flash Grounded**：审 DeepSeek 轨迹 `AUC 0.781` (FK `20.0%`) vs GPT-4o `AUC 0.726` (FK `31.3%`)；**DeepSeek Grounded**：审 DeepSeek 轨迹召回 `74.4%` (`AUC 0.716`) vs GPT-4o `63.9%` (`AUC 0.665`) | 2 裁判厂商 × 2 被测 Agent | 未出现 DeepSeek 裁判放水自家 DeepSeek 轨迹的自评偏倚（注：按 D32 明确为两厂商范围） | `confirmatory` | `reports/p1_taubench_eval.json`, `reports/p14_cross_vendor_deepseek.json` |
+| `C-P1-09` | Grounded (GLM-Flash) vs Comprehensive (GLM-Flash) | 失败召回 `63.9%` vs `4.8%`；总体准确率 `69.6%` vs `52.4%` | `n=168` (`49` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 3.55e-15`（21 检验族 Holm `p_adj = 7.11e-14`）；总准确率 `p = 0.00064` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-10` | Grounded (GLM-Flash) vs Accuracy (GLM-Flash) | 失败召回 `63.7%` vs `28.6%`；总体准确率 `69.0%` vs `60.3%` | `n=184` (`32` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 4.66e-10`（Holm `p_adj = 6.05e-09`）；总准确率 `p = 0.0328` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-11` | Grounded (GLM-Flash) vs Accuracy (GLM-5.3 Pro) | 失败召回 `63.7%` vs `20.9%`；总体准确率 `69.0%` vs `58.7%` | `n=184` (`39` vs `0` 仅前者抓出) | Exact McNemar 失败 `p = 3.64e-12`（Holm `p_adj = 6.18e-11`）；总准确率 `p = 0.0183` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-12` | 单纯升级通用模型无增益：Accuracy Pro vs Accuracy Flash | 失败召回 `20.2%` vs `27.3%`；总体准确率 `58.3%` vs `59.8%` | `n=199` (`13` vs `6`) | Exact McNemar 失败 `p = 0.167`（Holm `p_adj = 0.501`）；总准确率 `p = 0.690` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-12b` | DeepSeek-Flash 同底座配对与跨厂商差异 | Grounded vs Accuracy：`48.0%` vs `16.3%` 召回（`n=197`, `32` vs `1`）；总准确率 `60.4%` vs `57.4%` | `n=197` / 跨厂商 `n=181` | 同底座 Exact McNemar 失败 `p = 7.92e-09`（Holm `p_adj = 9.50e-08`），总准确率 `p = 0.512`；跨厂商 GLM-Flash vs DeepSeek-Flash Grounded 失败 `p = 0.0106`（Holm `p_adj = 0.0531`）、总准确率 `69.1%` vs `60.8%` (`p = 0.0275`) | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-13` | 跨厂商 `unauthorized_side_effect` 越权副作用精确率 | **GLM-Flash `27/32` (`84.4%`)** · **GLM-Pro `30/40` (`75.0%`)** · **DeepSeek-Flash `20/27` (`74.1%`)** | 2 厂商 (`184` / `198` / `197`) | 三次全量 Grounded 均维持 `74%–84%` 精确率；代码 Veto 覆写模型 `GLM-Flash 6/184 (3.3%)`、`GLM-Pro 0/198`、`DeepSeek-Flash 2/197 (1.0%)` | `confirmatory` | `reports/p1_taubench_eval.json` |
+| `C-P1-14` | 两厂商自评偏好（Self-Preference）检查 | **GLM-Flash Grounded**：DeepSeek-V3.2 `AUC 0.781` (召回 `62.2%`, FK `20.0%`) vs GPT-4o `AUC 0.726` (召回 `65.2%`, FK `31.3%`)；**DeepSeek-Flash Grounded**：DeepSeek-V3.2 `AUC 0.659` (召回 `48.0%`, FK `26.5%`) vs GPT-4o `AUC 0.599` (召回 `47.9%`, FK `28.0%`) | 2 裁判厂商 × 2 被测 Agent | 未出现 DeepSeek 裁判放水自家 DeepSeek 轨迹的自评偏倚（`DeepSeek-Flash Accuracy` 亦为 DeepSeek 召回 `20.0%` 高于 GPT-4o `12.0%`；注：按 D32 明确为两厂商范围） | `confirmatory` | `reports/p1_taubench_eval.json` |
 
 ---
 
@@ -154,7 +156,7 @@
 | `C-TRK-01` | 跨源统一轨迹快照（Claw-Eval + SWE-bench + τ-bench） | `87 + 8 + 825 = 920` 条标准化轨迹（其中 τ-bench 抽取 `200` 条冻结主队列） | `deterministic` | `docs/SWE_IMPORT.md`, `reports/p1_cohort_summary.json` |
 | `C-TRK-02` | 原创题防刷分对照（只看末轮声明误选无产物幻觉） | `2/2` 误选无产物幻觉；可执行 Verifier `16/16` 通过并过 `TRL 0.29` | `deterministic` | `docs/TRAINING_CANDIDATES.md`, `docs/ORIGINAL_API_PILOT.md` |
 | `C-ENG-01` | 离线禁网单测数量 | `537` 项（含 P0-2/P1-5 防泄漏守卫、P0-3/P0-4 统计、P1 τ-bench/多厂商/消融、`reasoning_effort`/Markdown 代码块剥离与 7 张 SVG 交付件单测） | `deterministic` | `tests/` |
-| `C-COST-01` | 截至 v2 累计保守预算 guard 支出 | `$10.751405`（v1 `$9.180483` + v2 `$1.570922`；P1 在线主实验均运行于中转站 GLM 通道并完整记录在本地账本） | `deterministic` | `docs/BUDGET_v2.md` |
+| `C-COST-01` | 截至 v2 累计保守预算 guard 支出与官方 DeepSeek 复跑实扣 | v1/v2 合计 `$10.751405`（v1 `$9.180483` + v2 `$1.570922`）；P1 GLM 主实验运行于中转站并记录在本地账本；P1-4 官方 DeepSeek `deepseek-flash` post-D31 全量 400 次调用实扣 **`¥1.25` CNY**（`¥4.96 → ¥3.71`） | `deterministic` | `docs/BUDGET_v2.md`, `outputs/usage/` |
 
 ---
 

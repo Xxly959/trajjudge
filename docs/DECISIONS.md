@@ -418,6 +418,19 @@ uses existing rows for the same cohort. The paid P4 run awaits approval.
 
 **决定**：
 1. 在 `config.py` / `llm.py` / `openjudge_bridge.py` 贯通 `reasoning_effort` 字段（`hubcore_glm_flash` 锁定 `reasoning_effort: low`），在 `llm.py` 新增 `parse_json_object` 仅剥离外层 Markdown 代码块（内部格式或数值越界仍由 `check_raw` / `validate_and_score_grounded` 严格拒绝），并以 `--workers 4` 零额外成本从缓存回放 `40` 条成功恢复 `P2-A` 与完成 `P1-6` 三提示词敏感性。
+
+---
+
+# D34 官方 DeepSeek-Flash post-D31 200/200 对称复现与轻量推理敏感性边界（2026-11-20）
+
+**背景与执行记录**：
+1. 用户于 DeepSeek 官方账号补充充值（初始余额 `¥4.96 CNY`）并确认方案 A：仅使用官方 `https://api.deepseek.com` 的 `deepseek-flash`（`thinking: false`）重跑完整 post-D31 `200` 条 `Evidence-Grounded` 与 `OpenJudge Accuracy`（共 `400` 次调用），严格不切换至 Pro 或中转站。
+2. 为避免混用 pre-D31（1.5KB 截断政策、无 `confidence_pass`）断点，运行前将旧 `runs/p1-deepseek-evidence_grounded/` 归档至 `runs/archive-pre-d31-p1-deepseek-evidence_grounded/`（`reports/p14_cross_vendor_deepseek.json` 保留作历史 pre-D31 对照归档）。
+3. 本次完整运行实况：`p1-deepseek-evidence_grounded` 有效 **`197/200`**（3 条 `evidence_indices` 类型校验错误 `1.5%`，130 场景，扣费 `¥0.35`）；`p1-deepseek-accuracy` 有效 **`200/200`**（0 错误，131 场景，扣费 `¥0.90`），累计实扣 **`¥1.25 CNY`**（余额 `¥4.96 → ¥3.71`）。
+
+**实证发现与口径更新**：
+1. **跨厂商复现的核心共性**：(a) 两厂商上通用 `Accuracy` 均严重漏判（`DeepSeek-Flash 16/100 = 16.0%, κ = 0.130`；`GLM-Flash 27/99 = 27.3%, κ = 0.193`）；(b) 同在 `DeepSeek-Flash` 上，`Evidence-Grounded` 将默认失败召回显著提升 **`+31.6 pp`**（`16/98 → 47/98 = 48.0%`, Exact McNemar `p = 7.92e-09`, 21 检验族 Holm `p_adj = 9.50e-08`），`κ` 升至 `0.207`；(c) `unauthorized_side_effect` 越权精确率维持 `20/27 (74.1%)`，代码 Veto 覆写 `2/197`；(d) 两厂商均未观测到裁判偏袒 `DeepSeek-V3.2` 轨迹的自评放水偏倚。
+2. **诚实汇报的骨干与轻量推理敏感性边界**：不同于 `GLM-Flash`（轻推理平均 `1,511` comp tokens，`ROC-AUC 0.755`），`DeepSeek-Flash`（`thinking=off`，平均 `740` comp tokens）在看到 post-D31 完整 7KB 业务政策后判断更趋宽松（与旧 pre-D31 1.5KB 政策 `159` 条共同轨迹相比，模型 Verdict 由 `fail → pass` 翻转 `27` 条、反向 `7` 条），导致其 `ROC-AUC` 仅微弱领先 `Accuracy`（`0.629 [0.553, 0.707]` vs `0.620 [0.566, 0.672]`）、总准确率差异不显著（`60.4% vs 57.4%`, `p = 0.512`），且在极紧低误杀插值点 `R@FPR=10%` 上低于 `Accuracy`（`21.4%` vs `33.0%` interp / `30.0%` step），并与 `GLM-Flash Grounded`（`0.755`）存在明显差距（配对 `n=181` 失败 `p = 0.0106`, 总准确率 `p = 0.0275`）。这与 `GLM-Flash`（轻推理 `1,511` tok `AUC 0.755`）> `GLM-Pro`（零推理 `1,286` tok `AUC 0.683`）> `DeepSeek-Flash`（`thinking=off` `740` tok `AUC 0.629`）一致，共同揭示 `Extract-Audit-Veto` 面对 7KB 复杂政策长轨迹时对底层模型**轻量步骤推理预算**存在敏感性。
 2. 全量跑完 **P1-5 15 模板 Held-Out 间接提示注入三臂对照**（`Comprehensive` `220/297`, `orig0=11/12`；`Evidence-Grounded full` `273/297`, `orig0=12/12`；`Grounded no_quarantine` `155/297`, `orig0=9/12`），全部结论写入 `docs/CLAIMS.md`、`FINAL_REPORT_v3.md`、`fig7_p15_injection_and_p2_bon.svg`、讲解卡 06 与 P3 简历定稿 `docs/RESUME_BULLETS_v3.md`。
 
 
