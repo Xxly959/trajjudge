@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-11-20T11:34:35+00:00",
+  "status": "pending_human_review",
+  "blindspots_c1": {
+    "total_flagged_by_silver": 13,
+    "reviewed_count": 0,
+    "completed": false,
+    "verdict_counts": {
+      "confirmed": 0,
+      "false_alarm": 0,
+      "unclear": 0
+    },
+    "ai_blindspot_precision_reviewed": null,
+    "ai_blindspot_precision_over_13": null,
+    "by_domain": {}
+  },
+  "claw48_adjudication_c2": {
+    "total_disagreements": 12,
+    "reviewed_count": 0,
+    "completed": false,
+    "final_label_counts": {},
+    "favors_counts": {
+      "human": 0,
+      "ai": 0,
+      "other": 0
+    }
+  }
+}

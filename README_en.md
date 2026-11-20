@@ -1,61 +1,70 @@
 # TrajJudge
 
 [![Offline CI](https://github.com/Xxly959/trajjudge/actions/workflows/ci.yml/badge.svg)](https://github.com/Xxly959/trajjudge/actions/workflows/ci.yml)
-[![Offline Tests](https://img.shields.io/badge/offline_tests-537_passed-10b981)](#quick-start-offline-no-api-key)
-[![Sockets](https://img.shields.io/badge/network_in_tests-blocked-2563eb)](#quick-start-offline-no-api-key)
-[![OpenJudge PR #246](https://img.shields.io/badge/OpenJudge_PR_%23246-merged_(c58d1d6)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/246)
-[![OpenJudge PR #248](https://img.shields.io/badge/OpenJudge_PR_%23248-merged_(15d22f2)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/248)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Offline Tests](https://img.shields.io/badge/Offline_Tests-547_passed-10b981)](#quick-start-offline-key-free)
+[![Sockets](https://img.shields.io/badge/Network-Socket_Blocked-2563eb)](#quick-start-offline-key-free)
+[![OpenJudge PR #246](https://img.shields.io/badge/OpenJudge_PR_%23246-Merged_(c58d1d6)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/246)
+[![OpenJudge PR #248](https://img.shields.io/badge/OpenJudge_PR_%23248-Merged_(15d22f2)-8957e5)](https://github.com/agentscope-ai/OpenJudge/pull/248)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> **Language**: [简体中文主站 (README.md)](README.md) · English
->
-> **Key Links**: [v3 Technical Report (Primary)](reports/FINAL_REPORT_v3.md) · [Verified Claims Registry (CLAIMS.md)](docs/CLAIMS.md) · [Resume & Interview Bullets](docs/RESUME_BULLETS_v3.md) · [Interactive HTML Audit Showcase](reports/showcase.html) · [Pre-Registration v3](docs/PREREG_v3.md) · [Decisions & Retractions](docs/DECISIONS.md) · [Walkthrough Cards](notes/walkthrough/)
+> **Language**: [简体中文](README.md) · English
 
-**One-line positioning**: **TrajJudge** is a trajectory meta-evaluation and quality-audit framework for multi-step tool-using LLM agents (designed alongside the `LightClaw` runtime) — diagnosing generic LLM-as-a-Judge failure modes on database-verified trajectories (τ-bench), demonstrating monotonic gains from an evidence-ledger + quarantine + veto architecture, and keeping upstream checkouts ([Claw-Eval](https://github.com/claw-eval/claw-eval), [OpenJudge](https://github.com/agentscope-ai/OpenJudge)) strictly read-only.
+**TrajJudge** is a trajectory-audit framework for multi-step tool-using agents, decoupling trajectory evaluation into deterministic **Evidence Ledger Extraction** (`[index]` citations + side-effect tracking), **`<untrusted_tool_data>` Quarantine Boundaries**, and **Post-Hoc Python Veto Gating**. Rather than relying on vague Likert rubrics, it transforms opaque pass/fail verdicts into auditable, tunable risk-control gates—validated against **τ-bench objective database ground truth (`n = 200`, `131` scenarios)**, a **pre-registered `n = 100` independent validation cohort** with frozen operating-point transfer, and **2 merged upstream OpenJudge PRs ([#246](https://github.com/agentscope-ai/OpenJudge/pull/246), [#248](https://github.com/agentscope-ai/OpenJudge/pull/248))**.
 
-### Four Core Empirical Findings (all figures sourced from [docs/CLAIMS.md](docs/CLAIMS.md))
-
-1. **Objective-label τ-bench benchmark (200 traces / 131 deduplicated scenarios): Evidence-Grounded leads strongly on GLM-Flash and replicates failure capture on full 200-trace DeepSeek-Flash**: On a balanced DB-verified cohort (100 failures / 100 passes, 50/50 across DeepSeek-V3.2 and GPT-4o), `EvidenceGroundedGrader (glm-5.3-flash)` achieves **`ROC-AUC = 0.755`**, **`PR-AUC = 0.739`**, **`Recall@FPR=10% = 37.4%`**, **`Recall@FPR=20% = 60.4%`**, and **`κ = 0.380`**, significantly outperforming `OpenJudge Comprehensive` (exact McNemar fail `p = 3.55e-15`, accuracy `p = 0.00064`) and `OpenJudge Accuracy Flash/Pro` (fail `p = 4.66e-10` / `3.64e-12`, accuracy `p = 0.0328` / `0.0183`). Upgrading generic `Accuracy` from Flash to Pro gives zero significant gain (`27/99 → 21/100`, `p = 0.167`). On full post-D31 **`deepseek-flash`** (`thinking=off`, 200 traces), `Evidence-Grounded` raises default failure recall by `+31.6 pp` (`16/98 → 47/98 = 48.0%`, `p = 7.92e-09`) while revealing backbone reasoning-budget sensitivity (`AUC 0.629` vs `Accuracy 0.620`, `R@10% 21.4% < 33.0%`).
-2. **Monotonic 4-way component ablation, low prompt variance & cross-vendor `unauthorized_side_effect` validation**: On a stratified 60-trace τ-bench subset (`glm-5.3-flash`), removing components monotonically degrades `ROC-AUC` (**`full 0.910 > no_veto 0.869 > no_quarantine 0.822 > no_ledger 0.794`**) and `Recall@FPR=10%` (**`74.1% → 59.3% → 48.3% → 27.6%`**), while 3 equivalent prompt rewrites (`v0/v1/v2`) stay tightly clustered (`ROC-AUC` mean **`0.900`**, SD **`0.0092`**). Precision of `unauthorized_side_effect` flags stays consistently strong across vendors (**`84.4%` (`27/32`) on GLM-Flash**, **`75.0%` (`30/40`) on GLM-Pro**, **`74.1%` (`20/27`) on DeepSeek-Flash**) with zero self-preference bias toward DeepSeek-V3.2; a flagship silver-label audit (`glm-5.3`) flags **`13/92 (14.1%)`** DB-pass traces as process blind spots.
-3. **15-template held-out prompt injection (P1-5) & Best-of-4 reranking (P2-A)**: Replacing the retracted Stage 3 leakage number ([D30](docs/DECISIONS.md)), across 15 frozen unseen templates (`SHA-256 = 08a07040...bab30081`), `Evidence-Grounded full` suffers only **`10/134 (7.5%)`** decision flips on `tool_result` (score inflation `20.1%` below its `26.4%` noise floor), whereas removing quarantine (`no_quarantine`) raises `tool_result` flips to **`7/55 (12.7%)`** and JSON-disguise flips from `3.5% (2/57)` to `15.8% (3/19)`. On 50 Best-of-4 tasks, `Evidence-Grounded` reaches `45.5% (20/44)` vs `42.0%` random (tied with `Comprehensive` at `57.1%` on `n=28` paired tasks), trailing the `72.0%` DB Oracle by `26.5 pp`.
-4. **Two upstream OpenJudge defects fixed and merged into `main`**: Preserving unclamped `raw_score` in `TrajectoryAccuracyGrader` (**[PR #246](https://github.com/agentscope-ai/OpenJudge/pull/246)** merged at `c58d1d6`) and exposing tie metadata / documenting `min-of-3` degeneration (`15/22` continuous panels) in `VotingEvaluationStrategy` (**[Issue #247](https://github.com/agentscope-ai/OpenJudge/issues/247)** closed by merged **[PR #248](https://github.com/agentscope-ai/OpenJudge/pull/248)** at `15d22f2`).
-
-![P1 Objective-Label tau-bench Benchmark and 4-Way Component Ablation](reports/figures/fig6_p1_taubench_and_ablation.svg)
-
-![P1-5 Held-Out 15-Template Injection Defense and P2-A Best-of-4 Reranking](reports/figures/fig7_p15_injection_and_p2_bon.svg)
+> **Core Architecture Takeaway**: Structured Evidence-Grounded judging does not conjure extra model discrimination out of thin air. Its engineering value lies in: (1) lifting near-broken generic rubrics (`Comprehensive`) into the usable regime with significant paired ranking gains; (2) shifting the default operating point into a high-recall region with continuous threshold tuning (`46` distinct score levels vs discrete `{1, 2, 3}`); and (3) making every verdict auditable via `[index]` evidence citations and side-effect flags.
 
 ---
 
-## Quick Start (Offline, No API Key)
+## Core Empirical Findings (v3, `CLAIMS.md` & Pre-Registered Protocols)
 
-All regression tests run with network sockets blocked and LLM replies mocked — no API key or Docker daemon required.
+1. **Paired `ΔAUC` & Intention-to-Treat (ITT) Evidence on `n = 200` Objective τ-bench Traces (`B = 2000` Cluster Bootstrap, [`paired_auc_v3.json`](reports/paired_auc_v3.json))**:
+   - **vs `OpenJudge Comprehensive` (`GLM-Flash`)**: `Evidence-Grounded` significantly improves paired ranking under both **complete-case (`n = 168`: `0.7639 vs 0.6077`, `ΔAUC = +0.1561 [+0.0531, +0.2604], p = 0.001`)** and **ITT where errors/missing rows are scored `0.0` (`n = 200`: `0.7332 vs 0.6119`, `ΔAUC = +0.1212 [+0.0231, +0.2139], p = 0.012`)**, while raising default failure recall from `4.4%` (`4/91`) to `63.7%` (`58/91`, McNemar `p = 3.55e-15`) and overall accuracy (`69.6% vs 52.4%`, `p = 0.00064`).
+   - **vs `OpenJudge Accuracy` (`GLM-Flash` / `GLM-Pro`)**: On complete-case common traces (`n = 184`), `Grounded (GLM-Flash)` outperforms `Accuracy (GLM-Flash)` (`0.7552 vs 0.6908`, `ΔAUC = +0.0644 [+0.0078, +0.1229], p = 0.024`), narrowing to non-significant under ITT (`+0.0446 [-0.0206, +0.1062], p = 0.184`) and non-significant vs `Accuracy (GLM-Pro)` (cc `+0.0541, p = 0.121`; ITT `+0.0307, p = 0.404`). Its practical difference is operating-point placement (`63.7%` recall / `25.8%` FPR vs `Accuracy` `27.3%` / `8.0%`, McNemar `p = 4.66e-10`) plus continuous risk granularity instead of discrete `{1, 2, 3}` scores.
+   - **Cross-Vendor Operating-Point Shift (`deepseek-flash`, `¥1.25 CNY`)**: Official `deepseek-flash` shows near-identical continuous ranking (`ΔAUC = +0.0000 [-0.0685, +0.0666], p = 0.973`, `0.6288 vs 0.6288`), yet the Evidence-Grounded architecture still shifts default recall by **`+31.6 pp`** (`47/98` vs `16/98`, McNemar `p = 7.92e-09`) with `20/27 (74.1%)` `unauthorized_side_effect` precision (`GLM-Flash`: `27/32 = 84.4%`). No same-family self-preference bias was observed in observational `DeepSeek-V3.2` vs `gpt-4o` subsets.
+2. **Pre-Registered `n = 100` Independent Validation & Operating-Point Transfer ([`PREREG_v3.md`](docs/PREREG_v3.md) Commit `54619c3`, [`p1_validation_v3.json`](reports/p1_validation_v3.json), [`operating_points_v3.json`](reports/operating_points_v3.json))**:
+   - **Honest Negative Replication on `ΔAUC`**: Locked before API calls (`cohort_sha256: 6716de02...766c1`, `96% retail / 4% airline`, `93` unseen scenarios), `Grounded vs Comprehensive` did not replicate ranking separation (`ΔAUC = -0.0337, p = 0.840` cc / `+0.0144, p = 0.815` ITT; `Grounded` `88/100`, `Accuracy` `98/100`, `Comprehensive` `78/100`), though default failure recall separation persisted (`34.1%` vs `12.2%` vs `5.1%`).
+   - **Root-Cause Diagnostics**: (1) **Domain shift (`airline 36.5% -> 4%`)**, not D31 prompt overfitting: within `retail -> retail`, `Grounded` tracks `0.6772 -> 0.6379` (`Accuracy`: `0.5985 -> 0.5974`). (2) **D33 `reasoning_effort=low` confounder**: `Comprehensive` ran pre-D33 on `p1` (`59.57%` reasoning rate, `1274.4` avg tokens) vs `95.73%` / `2203.7` tok on `p1val`, lifting complete-case AUC to `0.6614` while triggering `7` length-limit failures (`ITT = 0.5982`).
+   - **Operating-Point Drift**: Applying frozen main-cohort thresholds to `p1val` drops `Grounded` strict (`<0.1294`) from `37.4%/8.6%` to `9.1%/2.3%` and default (`<0.50`) from `63.7%/25.8%` to `34.1%/22.7%` (loose `<0.98125`: `87.9%/59.1% -> 77.3%/59.1%`), confirming that cross-domain deployment requires target-domain threshold recalibration—while discrete `{1, 2, 3}` `Accuracy` has no non-degenerate high-recall cutpoint (`<3.01` collapses to `100%/100%`).
+3. **Component Ablation (`n = 60` Stratified Subset) & Prompt Stability**:
+   - On the `60`-trace subset (an easier subset where full main `Grounded` also achieves `0.910`), point estimates decrease across `full (0.910)` -> `no_veto (0.869)` -> `no_quarantine (0.822)` -> `no_ledger (0.794)`. Common-sample paired `ΔAUC` confirms statistically significant contributions from the **Evidence Ledger** (`+0.1569, p = 0.012`) and **Tool Quarantine** (`+0.1054, p = 0.015`); **Veto** is positive but crosses zero (`+0.0413, p = 0.105`) and is retained at zero marginal API cost as a deterministic safety floor (`+7.4 pp` ablation recall, `84.4%` unauthorized-action precision). Three paraphrased prompt variants (`v0/v1/v2`) average `0.8997 ROC-AUC` (`SD = 0.0092`).
+4. **Upstream OpenJudge Bugfixes & Multi-Source Engineering**:
+   - Merged **[PR #246](https://github.com/agentscope-ai/OpenJudge/pull/246)** (`raw_score` observability fix) and **[PR #248](https://github.com/agentscope-ai/OpenJudge/pull/248)** (closing **[Issue #247](https://github.com/agentscope-ai/OpenJudge/issues/247)**: `15/22 = 68.2%` continuous voting panels degenerating to `min-of-3`).
+   - Non-invasive HTTPX sidecar adapter + atomic checkpointing + relay model audit ([`relay_audit.json`](reports/relay_audit.json): `6,646` cache entries; `100%` GLM-family across main/ablation/silver/BoN/`p1val`, with `5/675` exploratory `p15` calls routed to `nemotron`).
+
+![Main Cohort Paired Delta-AUC & Validation Operating-Point Transfer](reports/figures/fig8_operating_points_v3.svg)
+
+---
+
+## Quick Start (Offline, Key-Free)
+
+All regression tests execute with **outbound sockets blocked**, requiring no API keys or Docker to verify core logic, leakage/claims guards, and all 8 SVG deliverable figures.
 
 ```bash
-# 1. Clone pinned read-only upstream dependencies as siblings of my-project/
+# 1. Prepare pinned read-only upstream dependencies alongside this repo
 git clone https://github.com/agentscope-ai/OpenJudge.git OpenJudge
 git -C OpenJudge checkout 7d27246484e91c6ed4a349b6ebe7bd4629d9378f
 git clone https://github.com/claw-eval/claw-eval.git claw-eval
 git -C claw-eval checkout 5680b8b11ff2ee5dd2b07b89086a29a5c5c984d7
 
-# 2. Install isolated venv and run secret scan + offline test suite
+# 2. Create virtualenv and run secret scan + socket-blocked unit tests
 cd my-project
 make install
 make install-openjudge
 make secrets
 make test
 
-# 3. Rebuild deterministic SVG figures (7 charts) and offline HTML showcase from tracked JSON reports
+# 3. Regenerate all 8 SVG figures and offline interactive dashboard
 make figures
 make showcase
 ```
 
-For live online runs, copy `.env.example` to `.env`, configure provider keys, and pass explicit `--run --cap-usd` bounds (default invocations only print cost estimates).
+For live API runs, copy `.env.example` to `.env`. Experiment drivers default to cost estimation only; live requests require explicit `--run --cap-usd`.
 
 ---
 
-## Primary Benchmark Summary (τ-bench, 200 Objective Traces / 131 Scenarios)
+## Main Experiment Summary (τ-bench `n = 200` / `131` Scenarios)
 
-| Judge & Model | Valid / Scens | Default Recall | False Kills | Cohen's `κ` (95% CI) | `ROC-AUC` | `PR-AUC` | `R@FPR=10% / 20%` |
+| Grader & Model | Valid (`n/200`, Scen.) | Default Recall (`x/n`) | Default FPR (`x/n`) | Cohen's `κ` (95% CI) | `ROC-AUC` | `PR-AUC` | `R@FPR=10% / 20%` |
 | :--- | :---: | :---: | :---: | :--- | :---: | :---: | :---: |
 | **Evidence-Grounded · GLM-Flash** | `184/200` (`123`) | **`58/91` (`63.7%`)** | `24/93` (`25.8%`) | **`0.380`** `[0.231, 0.514]` | **`0.755`** | **`0.739`** | **`37.4%` / `60.4%`** |
 | Evidence-Grounded · GLM-5.3 Pro | `198/200` (`129`) | `68/99` (`68.7%`) | `38/99` (`38.4%`) | `0.303` `[0.177, 0.436]` | `0.683` | `0.665` | `30.0%` / `51.5%` |
@@ -66,16 +75,30 @@ For live online runs, copy `.env.example` to `.env`, configure provider keys, an
 | OpenJudge Comprehensive · GLM-Flash | `183/200` (`125`) | `4/91` (`4.4%`) | `1/92` (`1.1%`) | `0.033` `[0.000, 0.074]` | `0.628` | `0.630` | `21.2%` / `31.9%` |
 | Rule · `observation_information_gain` | `200/200` (`131`) | `8/100` (`8.0%`) | `4/100` (`4.0%`) | `0.040` `[-0.031, 0.109]` | `0.612` | `0.600` | `14.0%` / `29.0%` |
 
-- **P1-6 Component Ablation & Prompt Stability (60 stratified τ-bench traces, `glm-5.3-flash`)**: `full` (`ROC-AUC 0.910`, `R@10% 74.1%`) > `no_veto` (`0.869`, `59.3%`) > `no_quarantine` (`0.822`, `48.3%`) > `no_ledger` (`0.794`, `27.6%`); across 3 prompt rewrites (`v0/v1/v2`), `ROC-AUC` mean is **`0.900` (SD `0.0092`)**.
-- **P1-5 Held-Out Injection & P2-A Best-of-4**: `Evidence-Grounded full` holds `tool_result` flip rate at `10/134 (7.5%)` vs `7/55 (12.7%)` without quarantine (`json_disguise` `3.5%` vs `15.8%`); Best-of-4 reaches `45.5% (20/44)` vs `42.0%` random (`57.1%` vs `57.1%` on `n=28` aligned tasks, `72.0%` DB Oracle).
-- **Demoted exploratory cohort**: The earlier 48-trace human-labeled Claw-Eval cohort (`κ = 0.250`) is archived in Appendix A of [FINAL_REPORT_v3.md](reports/FINAL_REPORT_v3.md).
+- **Exploratory & Pending Items**: `P1-5` held-out indirect injection (`exploratory`, `10/134 = 7.5%` vs `7/55 = 12.7%`, overlapping CIs); `P2-A` Best-of-4 (`exploratory`, only `25/50` mixed-outcome tasks, `45.5%` vs random `42.0%`, null effect); `P1-3` Silver-Label blindspot screening (`13/92` DB-pass candidates + `12` Claw-48 disagreements) currently in **`pending_human_review`** (`reports/p13_human_review.json`); early Claw-Eval 48-trace manual labels (`κ = 0.250`) archived in [FINAL_REPORT_v3.md Appendix A](reports/FINAL_REPORT_v3.md).
 
 ---
 
-## Limitations & Scope Disclosure
+## Repository Structure
 
-- **Two-vendor symmetry & backbone sensitivity ([D32 / D34](docs/DECISIONS.md))**: Cross-vendor evaluation covers full 200-trace **DeepSeek-Flash + GLM-Flash/Pro** pairs (third overseas commercial vendor omitted by budget) and surfaces reasoning-budget sensitivity on zero-thinking `deepseek-flash` (`ROC-AUC 0.629`, `R@10% 21.4% < Accuracy 33.0%`).
-- **Offline reranking boundary (P2-A) & deferred gate**: Best-of-4 demonstrates a `26.5 pp` gap vs the DB Oracle (`72.0%`) for execution-free single-trace ranking; LightClaw PR gating (P2-B) is deferred.
-- **Neutral wrapper coverage**: Retried to `10/16` valid pairs (`p = 0.0273`); remains `provisional` until rerun with strict `json_schema` support (`≥ 14/16`).
+```text
+src/trajjudge/            Core library (taubench_adapter, grounded_judge, openjudge_bridge, llm, perturb_v3, calibration)
+scripts/                  Experiment drivers, paired_auc/operating_points/relay_audit, P1-3 review kit & 8 SVG / HTML builders
+tasks/original/           Original Harbor containerized coding tasks & 5 black-box verifiers
+contributions/openjudge/  Merged OpenJudge PR #246 / PR #248 patches and Issue #247 archive
+reports/                  FINAL_REPORT_v3.md, 8 SVG figures, showcase.html & aggregated JSON reports
+docs/                     CLAIMS.md registry, RESUME_BULLETS_v3.md, PREREG_v3.md, DECISIONS.md & archive/
+notes/walkthrough/        8 milestone cards & interview prep guides (including 07 blindspots & 08 paired ΔAUC)
+tests/                    Offline socket-blocked unit tests (leakage, claims/wording & secret guards)
+```
 
-> **AI-Assisted Development Disclosure**: Implementation was assisted by an AI coding agent; experimental design, statistical verification, retractions, and result review were performed by the author.
+---
+
+## Known Limitations & Disclosures
+
+1. **Third-Party Relay & Vendor Scope ([`D32 / D34 / D35`](docs/DECISIONS.md))**: GLM runs executed via `api.hubcore.cn`, audited against `.cache/llm/` `raw_response.model` ([`relay_audit.json`](reports/relay_audit.json)); official `deepseek-flash` serves as the direct vendor baseline. Both show sensitivity to lightweight reasoning budget on 7KB policies (`DeepSeek-Flash` `thinking=off` `AUC 0.629`).
+2. **Independent Validation & Offline Reranking Limits**: Pre-registered `n = 100` validation (`96% retail`) did not replicate `Grounded vs Comprehensive` `ΔAUC` due to `airline -> retail` domain shift and the D33 reasoning confounder; cross-domain threshold calibration is required. Pure offline Best-of-4 reranking yields a null effect over random on mixed tasks.
+3. **Human Review & Neutral Control Status**: Phase 5 neutral-control paired comparison (`10/16`) remains `provisional`; `P1-3` Silver-Label `13/92` blindspot candidates await blinded human adjudication (`scripts/prepare_p13_review.py` -> `scripts/summarize_p13_review.py`).
+4. **Privacy**: Raw trajectories, private human labels, review packets, and API caches are gitignored and checked in CI.
+
+> **Collaboration Note**: Implemented with AI coding assistance; experimental design, statistical calibration, and final verification were directed by the author.

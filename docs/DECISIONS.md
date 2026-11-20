@@ -433,6 +433,28 @@ uses existing rows for the same cohort. The paid P4 run awaits approval.
 2. **诚实汇报的骨干与轻量推理敏感性边界**：不同于 `GLM-Flash`（轻推理平均 `1,511` comp tokens，`ROC-AUC 0.755`），`DeepSeek-Flash`（`thinking=off`，平均 `740` comp tokens）在看到 post-D31 完整 7KB 业务政策后判断更趋宽松（与旧 pre-D31 1.5KB 政策 `159` 条共同轨迹相比，模型 Verdict 由 `fail → pass` 翻转 `27` 条、反向 `7` 条），导致其 `ROC-AUC` 仅微弱领先 `Accuracy`（`0.629 [0.553, 0.707]` vs `0.620 [0.566, 0.672]`）、总准确率差异不显著（`60.4% vs 57.4%`, `p = 0.512`），且在极紧低误杀插值点 `R@FPR=10%` 上低于 `Accuracy`（`21.4%` vs `33.0%` interp / `30.0%` step），并与 `GLM-Flash Grounded`（`0.755`）存在明显差距（配对 `n=181` 失败 `p = 0.0106`, 总准确率 `p = 0.0275`）。这与 `GLM-Flash`（轻推理 `1,511` tok `AUC 0.755`）> `GLM-Pro`（零推理 `1,286` tok `AUC 0.683`）> `DeepSeek-Flash`（`thinking=off` `740` tok `AUC 0.629`）一致，共同揭示 `Extract-Audit-Veto` 面对 7KB 复杂政策长轨迹时对底层模型**轻量步骤推理预算**存在敏感性。
 2. 全量跑完 **P1-5 15 模板 Held-Out 间接提示注入三臂对照**（`Comprehensive` `220/297`, `orig0=11/12`；`Evidence-Grounded full` `273/297`, `orig0=12/12`；`Grounded no_quarantine` `155/297`, `orig0=9/12`），全部结论写入 `docs/CLAIMS.md`、`FINAL_REPORT_v3.md`、`fig7_p15_injection_and_p2_bon.svg`、讲解卡 06 与 P3 简历定稿 `docs/RESUME_BULLETS_v3.md`。
 
+---
+
+# D35 Roadmap v3 收尾：配对 ΔAUC / ITT 修正、中转审计异常、独立验证集与工作点分域校准（2026-11-20）
+
+**背景与范围变更**：
+1. 范围正式收窄：**不做 LightClaw 门禁**，全仓库及简历文档移除“LightClaw 评测子系统 / 配套 / 门禁”措辞，明确 TrajJudge 为独立多步工具调用 Agent 元评测框架。
+2. 补齐 `scripts/paired_auc.py`（配对 `ΔAUC` 与 ITT 意向性敏感性，无效行按判失败 `raw_score=0.0` 计入）与 `scripts/relay_audit.py`（从 `.cache/llm/` 逐条审计 `raw_response.model`）。
+3. 为回应 D31 在 200 条主队列上发现并修复后在同一数据报告结果的过拟合质疑，在 `PREREG_v3.md §9` 事前冻结 `100` 条独立验证集（`cohort_sha256 = 6716de02...766c1`，Commit `54619c3` 时间早于首次验证集在线调用）及主队列冻结工作点阈值。
+
+**关键实证发现与口径降调**：
+1. **主队列配对 `ΔAUC` 与统一解释**：
+   - `Grounded-GLMFlash` 排序能力显著优于 `Comprehensive`（complete `ΔAUC = +0.156 [+0.053, +0.260], p=0.001`；ITT `+0.121 [+0.023, +0.214], p=0.012`）；相对 `Accuracy`，主要差异在于将默认判定点推至高召回区（多抓约 `37pp` 失败、多误杀约 `18pp`）与提供 `46` 个可调连续分值，而非全局排序暴涨（`GLM-Flash` complete `+0.064, p=0.024` 但 ITT `+0.045, p=0.184` 跨 0；`GLM-Pro` `-0.017`；`DeepSeek-Flash` 同模型 `ΔAUC = 0.000` 而默认召回 `+31.6pp`）。
+   - P1-6 60 条消融子集本身偏容易（主队列同一批轨迹 AUC 同为 `0.910`，全量 200 条为 `0.755`），仅报共同样本配对差：证据账本（`+0.157, p=0.012`）与隔离槽（`+0.105, p=0.015`）complete-case 显著，Veto 方向为正（`+0.041`）但 CI 跨 0；且因 `full-v0` 早期有 `7/60` 报错，ITT 下 `full` AUC 降至 `0.837`。
+   - P1-5 Held-Out 注入降级为 `exploratory`；P1-4 自评偏好检查降级为 `exploratory`；P2-A 保留为设计局限负结果（50 任务仅 25 混合任务有区分力），不进简历。
+2. **中转站模型身份审计（`reports/relay_audit.json`）**：
+   - 扫描 `6,646` 条缓存：P1 主实验、P1-6、P1-3、P2-A 与 `p1val`（`324` 条）**100% 返回 GLM 系列**（含 `zai-org/GLM-5.3-Flash` 等渠道前缀），但 **`p15` 中有 `5/675 (0.74%)` 被静默路由至 `nvidia/nemotron-3-ultra-550b-a55b`**。已在局限节如实披露，并以官方 `deepseek-flash` 直连作对照。
+3. **独立验证集（`n=100`, `96% retail`）实测结果与两项根因（严禁重跑或改写假设）**：
+   - 预注册主假设 `Grounded > Comprehensive ΔAUC` 未在验证集复现：complete `ΔAUC = -0.034 [-0.273, +0.201] (n=69)`、ITT `+0.014 [-0.138, +0.169] (n=100)`；`Grounded vs Accuracy` complete `+0.034 [-0.084, +0.146]`、ITT `+0.008 [-0.108, +0.127]`。默认阈值表现仍复现：`Comprehensive` 仅抓 `2/39 (5.1%)`、`Accuracy` `6/49 (12.2%)`、`Grounded` `15/44 (34.1%)`（ITT `42.0%`）。
+   - **已验证双根因**：① **域分布漂移**：`p2bon-t50` 用尽 `gpt-4o-airline` 后验证集 `96%` 为高难度 `retail`（主队列 `airline` Grounded AUC `0.853` vs `retail 0.677`），而在**同域 `retail → retail`** 上 Grounded (`0.677 → 0.638`) 与 Accuracy (`0.598 → 0.597`) 均稳定，未见 D31 过拟合；② **D33 推理预算混杂**：主队列 `Comprehensive` 跑在 `reasoning_effort=low` 之前，仅 `59.6%` 调用含思考链（均 `1,274` tok，`retail AUC 0.580`），而验证集 `95.7%` 触发长思考链（均 `2,204` tok）抬高 complete-case 至 `0.661`、同时引发 `7` 条 `4096` 截断压低 ITT 至 `0.598`。
+   - **工作点迁移结论**：主队列冻结阈值直接迁移后，误杀率稳定（`8.6%→2.3%`, `25.8%→22.7%`, `59.1%→59.1%`），但召回因域漂移明显下降（`37.4%→9.1%`, `63.7%→34.1%`, `87.9%→77.3%`），实证跨领域部署必须**分领域校准工作点**；同时证实 `Accuracy` 三档离散分在验证集仍无法平滑调至 `≥80%` 召回。
+4. **Module C 人工复核工具包**：生成 `annotation/round3_review_packet/{blindspots_13.md, claw48_disagreements_12.md}`、模板 CSV 与汇总脚本 `summarize_p13_review.py`；在用户人工核对完成前，`reports/p13_human_review.json` 严格保持 `status = pending_human_review`，对外不冒充确认数。
+
 
 
 

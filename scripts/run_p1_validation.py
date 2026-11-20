@@ -308,9 +308,105 @@ def _eval_subset_metrics(
     }
 
 
+def _domain_shift_diagnostic(
+    main_traces: Sequence[Mapping[str, Any]],
+    val_traces: Sequence[Mapping[str, Any]],
+    val_rows: Mapping[str, Mapping[str, Mapping[str, Any]]],
+    pa: Any,
+) -> dict[str, Any]:
+    from trajjudge.scenario_stats import ALL_THRESHOLDS
+
+    def _slice_stats(traces: Sequence[Mapping[str, Any]], rows: Mapping[str, Mapping[str, Any]], grader: str) -> dict[str, Any]:
+        thr = ALL_THRESHOLDS.get(grader, 0.50)
+        ok_rows = []
+        for tr in traces:
+            r = rows.get(str(tr["trace_id"]))
+            if r is not None and r.get("status") == "ok" and type(r.get("score")) in (int, float) and math.isfinite(float(r["score"])):
+                ok_rows.append((tr, r, float(r["score"])))
+        if not ok_rows:
+            return {"n_valid": 0}
+        y_fail = [not bool(tr["objective_pass"]) for tr, _, _ in ok_rows]
+        fail_scores = [pa.row_to_fail_score(r, grader, itt=False) for _, r, _ in ok_rows]
+        auc_v = pa.roc_auc_fail(y_fail, fail_scores)
+        nf = sum(y_fail)
+        np_ = len(ok_rows) - nf
+        caught = sum(yf and sc < thr for yf, (_, _, sc) in zip(y_fail, ok_rows))
+        fk = sum((not yf) and sc < thr for yf, (_, _, sc) in zip(y_fail, ok_rows))
+        ctoks = [(r.get("usage") or {}).get("completion_tokens", 0) for _, r, _ in ok_rows]
+        return {
+            "n_valid": len(ok_rows),
+            "n_fail": nf,
+            "n_pass": np_,
+            "roc_auc": round(auc_v, 4) if auc_v is not None else None,
+            "failure_recall": round(caught / nf, 4) if nf else None,
+            "false_kill_rate": round(fk / np_, 4) if np_ else None,
+            "avg_completion_tokens": round(sum(ctoks) / len(ctoks), 1),
+        }
+
+    main_run_dirs = {
+        "evidence_grounded": root / "runs/p1-hubcore_glm_flash-evidence_grounded",
+        "trajectory_accuracy": root / "runs/p1-hubcore_glm_flash-accuracy",
+        "trajectory_comprehensive": root / "runs/p1-hubcore_glm_flash-comprehensive",
+    }
+    main_rows = {g: pa.load_run_rows_by_trace(rd) for g, rd in main_run_dirs.items()}
+    main_by_dom: dict[str, dict[str, Any]] = {}
+    for dom in ("airline", "retail"):
+        sub = [t for t in main_traces if t["domain"] == dom]
+        main_by_dom[dom] = {g: _slice_stats(sub, main_rows[g], g) for g in VALIDATION_GRADERS}
+
+    val_retail = [t for t in val_traces if t["domain"] == "retail"]
+    val_by_dom = {
+        "retail": {g: _slice_stats(val_retail, val_rows[g], g) for g in VALIDATION_GRADERS},
+        "all": {g: _slice_stats(val_traces, val_rows[g], g) for g in VALIDATION_GRADERS},
+    }
+    return {"main_cohort": main_by_dom, "validation_cohort": val_by_dom}
+
+
+def _reasoning_confounder_diagnostic() -> dict[str, Any]:
+    cache_root = root / ".cache/llm"
+    stats: dict[tuple[str, str], dict[str, int]] = {}
+    if cache_root.is_dir():
+        for cf in sorted(cache_root.rglob("*.json")):
+            try:
+                d = json.loads(cf.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            tag = str(d.get("tag") or "")
+            if not (tag.startswith("p1/") or tag.startswith("p1val/")):
+                continue
+            if d.get("model") != "glm-5.3-flash":
+                continue
+            prefix = tag.split("/")[0]
+            if "evidence_grounded" in tag:
+                g = "evidence_grounded"
+            elif "accuracy" in tag:
+                g = "trajectory_accuracy"
+            elif "comprehensive" in tag:
+                g = "trajectory_comprehensive"
+            else:
+                continue
+            k = (prefix, g)
+            s = stats.setdefault(k, {"n": 0, "has_reasoning": 0, "completion_tokens": 0})
+            s["n"] += 1
+            if d.get("reasoning_content"):
+                s["has_reasoning"] += 1
+            s["completion_tokens"] += int(d.get("completion_tokens") or 0)
+    out: dict[str, dict[str, Any]] = {"p1_main": {}, "p1val": {}}
+    for (prefix, g), s in sorted(stats.items()):
+        target = "p1_main" if prefix == "p1" else "p1val"
+        n = s["n"]
+        out[target][g] = {
+            "n_cached_calls": n,
+            "has_reasoning_rate": round(s["has_reasoning"] / n, 4) if n else None,
+            "avg_completion_tokens": round(s["completion_tokens"] / n, 1) if n else None,
+        }
+    return out
+
+
 def evaluate_validation_report(*, provider: str = "hubcore_glm_flash", resamples: int = 2000, seed: int = 0) -> dict[str, Any]:
     """Compute validation metrics, paired ΔAUC, ITT sensitivity, and scenario_seen stratification."""
     traces = load_val_cohort()
+    main_traces = json.loads(MAIN_COHORT_PATH.read_text(encoding="utf-8"))["traces"]
     pa = _load_script_mod("paired_auc", "scripts/paired_auc.py")
 
     run_dirs = {
@@ -399,6 +495,8 @@ def evaluate_validation_report(*, provider: str = "hubcore_glm_flash", resamples
         },
         "raters": raters_out,
         "paired_delta_auc": paired,
+        "domain_shift_diagnostic": _domain_shift_diagnostic(main_traces, traces, loaded_rows, pa),
+        "reasoning_confounder_diagnostic": _reasoning_confounder_diagnostic(),
     }
     atomic_text(VAL_REPORT_PATH, json.dumps(report, ensure_ascii=False, indent=2) + "\n")
     return report

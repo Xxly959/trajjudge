@@ -1,0 +1,1396 @@
+{
+  "generated_at": "2026-11-20T13:20:32+00:00",
+  "provider": "hubcore_glm_flash",
+  "cohort_n": 100,
+  "primary_hypothesis_check": {
+    "hypothesis": "Grounded-GLMFlash ΔAUC > Comprehensive-GLMFlash with 95% cluster CI excluding 0",
+    "supported_complete_case": false,
+    "supported_itt": false
+  },
+  "raters": {
+    "evidence_grounded": {
+      "run_dir": "p1val-hubcore_glm_flash-evidence_grounded",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 100,
+        "n_eval": 88,
+        "n_valid_ok": 88,
+        "n_errors": 12,
+        "invalid_rate": 0.12,
+        "n_scenarios": 37,
+        "n_fail": 44,
+        "n_pass": 44,
+        "default_threshold": 0.5,
+        "caught_failures": "15/44",
+        "failure_recall": 0.3409,
+        "false_kills": "10/44",
+        "false_kill_rate": 0.2273,
+        "kappa": 0.1136,
+        "kappa_ci": {
+          "ci": [
+            -0.09403177329325887,
+            0.311576354679803
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 37,
+          "contributing_clusters": 37,
+          "status": "ok",
+          "reason": null
+        },
+        "roc_auc": 0.6423,
+        "roc_auc_ci": {
+          "ci": [
+            0.5113756613756614,
+            0.7769679300291545
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 37,
+          "contributing_clusters": 37,
+          "status": "ok",
+          "reason": null
+        },
+        "pr_auc_fail": 0.6179,
+        "recall_at_fpr": {
+          "fpr_10_interp": 0.25,
+          "fpr_20_interp": 0.2955
+        }
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 100,
+        "n_eval": 100,
+        "n_valid_ok": 88,
+        "n_errors": 12,
+        "invalid_rate": 0.12,
+        "n_scenarios": 39,
+        "n_fail": 50,
+        "n_pass": 50,
+        "default_threshold": 0.5,
+        "caught_failures": "21/50",
+        "failure_recall": 0.42,
+        "false_kills": "16/50",
+        "false_kill_rate": 0.32,
+        "kappa": 0.1,
+        "kappa_ci": {
+          "ci": [
+            -0.1056056796331903,
+            0.29962546816479396
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "roc_auc": 0.6126,
+        "roc_auc_ci": {
+          "ci": [
+            0.4914388290527479,
+            0.7358540454785828
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "pr_auc_fail": 0.5684,
+        "recall_at_fpr": {
+          "fpr_10_interp": 0.1286,
+          "fpr_20_interp": 0.32
+        }
+      },
+      "by_scenario_seen": {
+        "unseen_complete": {
+          "mode": "complete_case",
+          "n_candidates": 93,
+          "n_eval": 83,
+          "n_valid_ok": 83,
+          "n_errors": 10,
+          "invalid_rate": 0.1075,
+          "n_scenarios": 32,
+          "n_fail": 39,
+          "n_pass": 44,
+          "default_threshold": 0.5,
+          "caught_failures": "14/39",
+          "failure_recall": 0.359,
+          "false_kills": "10/44",
+          "false_kill_rate": 0.2273,
+          "kappa": 0.1346,
+          "kappa_ci": {
+            "ci": [
+              -0.09425070688030168,
+              0.3571428571428572
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": 0.6349,
+          "roc_auc_ci": {
+            "ci": [
+              0.4939446366782007,
+              0.7671394799054374
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "pr_auc_fail": 0.586,
+          "recall_at_fpr": {
+            "fpr_10_interp": 0.2564,
+            "fpr_20_interp": 0.3077
+          }
+        },
+        "unseen_itt": {
+          "mode": "itt",
+          "n_candidates": 93,
+          "n_eval": 93,
+          "n_valid_ok": 83,
+          "n_errors": 10,
+          "invalid_rate": 0.1075,
+          "n_scenarios": 32,
+          "n_fail": 43,
+          "n_pass": 50,
+          "default_threshold": 0.5,
+          "caught_failures": "18/43",
+          "failure_recall": 0.4186,
+          "false_kills": "16/50",
+          "false_kill_rate": 0.32,
+          "kappa": 0.1001,
+          "kappa_ci": {
+            "ci": [
+              -0.11396011396011392,
+              0.31052865393158596
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": 0.5974,
+          "roc_auc_ci": {
+            "ci": [
+              0.4731240981240981,
+              0.7250900360144058
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "pr_auc_fail": 0.5184,
+          "recall_at_fpr": {
+            "fpr_10_interp": 0.1163,
+            "fpr_20_interp": 0.3023
+          }
+        },
+        "seen_complete": {
+          "mode": "complete_case",
+          "n_candidates": 7,
+          "n_eval": 5,
+          "n_valid_ok": 5,
+          "n_errors": 2,
+          "invalid_rate": 0.2857,
+          "n_scenarios": 5,
+          "n_fail": 5,
+          "n_pass": 0,
+          "default_threshold": 0.5,
+          "caught_failures": "1/5",
+          "failure_recall": 0.2,
+          "false_kills": "0/0",
+          "false_kill_rate": null,
+          "kappa": 0.0,
+          "kappa_ci": {
+            "ci": [
+              0.0,
+              6.938893903907228e-17
+            ],
+            "resamples": 2000,
+            "undefined_draws": 2,
+            "undefined_share": 0.001,
+            "defined_draws": 1998,
+            "clusters": 5,
+            "contributing_clusters": 5,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": null,
+          "roc_auc_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 2000,
+            "undefined_share": 1.0,
+            "defined_draws": 0,
+            "clusters": 5,
+            "contributing_clusters": 5,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "pr_auc_fail": null,
+          "recall_at_fpr": {
+            "fpr_10_interp": null,
+            "fpr_20_interp": null
+          }
+        },
+        "seen_itt": {
+          "mode": "itt",
+          "n_candidates": 7,
+          "n_eval": 7,
+          "n_valid_ok": 5,
+          "n_errors": 2,
+          "invalid_rate": 0.2857,
+          "n_scenarios": 7,
+          "n_fail": 7,
+          "n_pass": 0,
+          "default_threshold": 0.5,
+          "caught_failures": "3/7",
+          "failure_recall": 0.4286,
+          "false_kills": "0/0",
+          "false_kill_rate": null,
+          "kappa": -0.0,
+          "kappa_ci": {
+            "ci": [
+              -7.7715611723761e-16,
+              0.0
+            ],
+            "resamples": 2000,
+            "undefined_draws": 3,
+            "undefined_share": 0.0015,
+            "defined_draws": 1997,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": null,
+          "roc_auc_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 2000,
+            "undefined_share": 1.0,
+            "defined_draws": 0,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "pr_auc_fail": null,
+          "recall_at_fpr": {
+            "fpr_10_interp": null,
+            "fpr_20_interp": null
+          }
+        }
+      }
+    },
+    "trajectory_accuracy": {
+      "run_dir": "p1val-hubcore_glm_flash-accuracy",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 100,
+        "n_eval": 98,
+        "n_valid_ok": 98,
+        "n_errors": 2,
+        "invalid_rate": 0.02,
+        "n_scenarios": 39,
+        "n_fail": 49,
+        "n_pass": 49,
+        "default_threshold": 2.0,
+        "caught_failures": "6/49",
+        "failure_recall": 0.1224,
+        "false_kills": "3/49",
+        "false_kill_rate": 0.0612,
+        "kappa": 0.0612,
+        "kappa_ci": {
+          "ci": [
+            -0.031578947368421,
+            0.18942383583267575
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "roc_auc": 0.6085,
+        "roc_auc_ci": {
+          "ci": [
+            0.517757809157039,
+            0.7041446208112875
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "pr_auc_fail": 0.5739,
+        "recall_at_fpr": {
+          "fpr_10_interp": 0.3163,
+          "fpr_20_interp": 0.4
+        }
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 100,
+        "n_eval": 100,
+        "n_valid_ok": 98,
+        "n_errors": 2,
+        "invalid_rate": 0.02,
+        "n_scenarios": 39,
+        "n_fail": 50,
+        "n_pass": 50,
+        "default_threshold": 2.0,
+        "caught_failures": "7/50",
+        "failure_recall": 0.14,
+        "false_kills": "4/50",
+        "false_kill_rate": 0.08,
+        "kappa": 0.06,
+        "kappa_ci": {
+          "ci": [
+            -0.03493449781659388,
+            0.1920874544508068
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "roc_auc": 0.6042,
+        "roc_auc_ci": {
+          "ci": [
+            0.5162374020156775,
+            0.7013396375098503
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "pr_auc_fail": 0.5642,
+        "recall_at_fpr": {
+          "fpr_10_interp": 0.24,
+          "fpr_20_interp": 0.4
+        }
+      },
+      "by_scenario_seen": {
+        "unseen_complete": {
+          "mode": "complete_case",
+          "n_candidates": 93,
+          "n_eval": 91,
+          "n_valid_ok": 91,
+          "n_errors": 2,
+          "invalid_rate": 0.0215,
+          "n_scenarios": 32,
+          "n_fail": 42,
+          "n_pass": 49,
+          "default_threshold": 2.0,
+          "caught_failures": "6/42",
+          "failure_recall": 0.1429,
+          "false_kills": "3/49",
+          "false_kill_rate": 0.0612,
+          "kappa": 0.0865,
+          "kappa_ci": {
+            "ci": [
+              -0.022727272727272707,
+              0.24000000000000007
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": 0.6127,
+          "roc_auc_ci": {
+            "ci": [
+              0.5153343388637506,
+              0.7175707547169812
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "pr_auc_fail": 0.5433,
+          "recall_at_fpr": {
+            "fpr_10_interp": 0.3238,
+            "fpr_20_interp": 0.4061
+          }
+        },
+        "unseen_itt": {
+          "mode": "itt",
+          "n_candidates": 93,
+          "n_eval": 93,
+          "n_valid_ok": 91,
+          "n_errors": 2,
+          "invalid_rate": 0.0215,
+          "n_scenarios": 32,
+          "n_fail": 43,
+          "n_pass": 50,
+          "default_threshold": 2.0,
+          "caught_failures": "7/43",
+          "failure_recall": 0.1628,
+          "false_kills": "4/50",
+          "false_kill_rate": 0.08,
+          "kappa": 0.0873,
+          "kappa_ci": {
+            "ci": [
+              -0.015660985720865835,
+              0.24390243902439027
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": 0.6095,
+          "roc_auc_ci": {
+            "ci": [
+              0.5176744186046511,
+              0.7077777777777777
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "pr_auc_fail": 0.5344,
+          "recall_at_fpr": {
+            "fpr_10_interp": 0.2558,
+            "fpr_20_interp": 0.408
+          }
+        },
+        "seen_complete": {
+          "mode": "complete_case",
+          "n_candidates": 7,
+          "n_eval": 7,
+          "n_valid_ok": 7,
+          "n_errors": 0,
+          "invalid_rate": 0.0,
+          "n_scenarios": 7,
+          "n_fail": 7,
+          "n_pass": 0,
+          "default_threshold": 2.0,
+          "caught_failures": "0/7",
+          "failure_recall": 0.0,
+          "false_kills": "0/0",
+          "false_kill_rate": null,
+          "kappa": 0.0,
+          "kappa_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "roc_auc": null,
+          "roc_auc_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 2000,
+            "undefined_share": 1.0,
+            "defined_draws": 0,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "pr_auc_fail": null,
+          "recall_at_fpr": {
+            "fpr_10_interp": null,
+            "fpr_20_interp": null
+          }
+        },
+        "seen_itt": {
+          "mode": "itt",
+          "n_candidates": 7,
+          "n_eval": 7,
+          "n_valid_ok": 7,
+          "n_errors": 0,
+          "invalid_rate": 0.0,
+          "n_scenarios": 7,
+          "n_fail": 7,
+          "n_pass": 0,
+          "default_threshold": 2.0,
+          "caught_failures": "0/7",
+          "failure_recall": 0.0,
+          "false_kills": "0/0",
+          "false_kill_rate": null,
+          "kappa": 0.0,
+          "kappa_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "roc_auc": null,
+          "roc_auc_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 2000,
+            "undefined_share": 1.0,
+            "defined_draws": 0,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "pr_auc_fail": null,
+          "recall_at_fpr": {
+            "fpr_10_interp": null,
+            "fpr_20_interp": null
+          }
+        }
+      }
+    },
+    "trajectory_comprehensive": {
+      "run_dir": "p1val-hubcore_glm_flash-comprehensive",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 100,
+        "n_eval": 78,
+        "n_valid_ok": 78,
+        "n_errors": 22,
+        "invalid_rate": 0.22,
+        "n_scenarios": 34,
+        "n_fail": 39,
+        "n_pass": 39,
+        "default_threshold": 0.6,
+        "caught_failures": "2/39",
+        "failure_recall": 0.0513,
+        "false_kills": "0/39",
+        "false_kill_rate": 0.0,
+        "kappa": 0.0513,
+        "kappa_ci": {
+          "ci": [
+            0.0,
+            0.1549834310476675
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 34,
+          "contributing_clusters": 34,
+          "status": "ok",
+          "reason": null
+        },
+        "roc_auc": 0.6614,
+        "roc_auc_ci": {
+          "ci": [
+            0.48952702702702705,
+            0.8013937282229965
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 34,
+          "contributing_clusters": 34,
+          "status": "ok",
+          "reason": null
+        },
+        "pr_auc_fail": 0.7261,
+        "recall_at_fpr": {
+          "fpr_10_interp": 0.3846,
+          "fpr_20_interp": 0.4103
+        }
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 100,
+        "n_eval": 100,
+        "n_valid_ok": 78,
+        "n_errors": 22,
+        "invalid_rate": 0.22,
+        "n_scenarios": 39,
+        "n_fail": 50,
+        "n_pass": 50,
+        "default_threshold": 0.6,
+        "caught_failures": "13/50",
+        "failure_recall": 0.26,
+        "false_kills": "11/50",
+        "false_kill_rate": 0.22,
+        "kappa": 0.04,
+        "kappa_ci": {
+          "ci": [
+            -0.12459016393442626,
+            0.200847733941963
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "roc_auc": 0.5982,
+        "roc_auc_ci": {
+          "ci": [
+            0.4744350282485876,
+            0.7155301144848183
+          ],
+          "resamples": 2000,
+          "undefined_draws": 0,
+          "undefined_share": 0.0,
+          "defined_draws": 2000,
+          "clusters": 39,
+          "contributing_clusters": 39,
+          "status": "ok",
+          "reason": null
+        },
+        "pr_auc_fail": 0.5591,
+        "recall_at_fpr": {
+          "fpr_10_interp": 0.1,
+          "fpr_20_interp": 0.2
+        }
+      },
+      "by_scenario_seen": {
+        "unseen_complete": {
+          "mode": "complete_case",
+          "n_candidates": 93,
+          "n_eval": 72,
+          "n_valid_ok": 72,
+          "n_errors": 21,
+          "invalid_rate": 0.2258,
+          "n_scenarios": 28,
+          "n_fail": 33,
+          "n_pass": 39,
+          "default_threshold": 0.6,
+          "caught_failures": "2/33",
+          "failure_recall": 0.0606,
+          "false_kills": "0/39",
+          "false_kill_rate": 0.0,
+          "kappa": 0.0653,
+          "kappa_ci": {
+            "ci": [
+              0.0,
+              0.2138765117759391
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 28,
+            "contributing_clusters": 28,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": 0.674,
+          "roc_auc_ci": {
+            "ci": [
+              0.4885912698412698,
+              0.8285087719298245
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 28,
+            "contributing_clusters": 28,
+            "status": "ok",
+            "reason": null
+          },
+          "pr_auc_fail": 0.713,
+          "recall_at_fpr": {
+            "fpr_10_interp": 0.3939,
+            "fpr_20_interp": 0.4242
+          }
+        },
+        "unseen_itt": {
+          "mode": "itt",
+          "n_candidates": 93,
+          "n_eval": 93,
+          "n_valid_ok": 72,
+          "n_errors": 21,
+          "invalid_rate": 0.2258,
+          "n_scenarios": 32,
+          "n_fail": 43,
+          "n_pass": 50,
+          "default_threshold": 0.6,
+          "caught_failures": "12/43",
+          "failure_recall": 0.2791,
+          "false_kills": "11/50",
+          "false_kill_rate": 0.22,
+          "kappa": 0.0611,
+          "kappa_ci": {
+            "ci": [
+              -0.09589041095890424,
+              0.2563237774030355
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": 0.6105,
+          "roc_auc_ci": {
+            "ci": [
+              0.4931581828133552,
+              0.7286585365853658
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 32,
+            "contributing_clusters": 32,
+            "status": "ok",
+            "reason": null
+          },
+          "pr_auc_fail": 0.5322,
+          "recall_at_fpr": {
+            "fpr_10_interp": 0.1057,
+            "fpr_20_interp": 0.2114
+          }
+        },
+        "seen_complete": {
+          "mode": "complete_case",
+          "n_candidates": 7,
+          "n_eval": 6,
+          "n_valid_ok": 6,
+          "n_errors": 1,
+          "invalid_rate": 0.1429,
+          "n_scenarios": 6,
+          "n_fail": 6,
+          "n_pass": 0,
+          "default_threshold": 0.6,
+          "caught_failures": "0/6",
+          "failure_recall": 0.0,
+          "false_kills": "0/0",
+          "false_kill_rate": null,
+          "kappa": 0.0,
+          "kappa_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 6,
+            "contributing_clusters": 6,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "roc_auc": null,
+          "roc_auc_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 2000,
+            "undefined_share": 1.0,
+            "defined_draws": 0,
+            "clusters": 6,
+            "contributing_clusters": 6,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "pr_auc_fail": null,
+          "recall_at_fpr": {
+            "fpr_10_interp": null,
+            "fpr_20_interp": null
+          }
+        },
+        "seen_itt": {
+          "mode": "itt",
+          "n_candidates": 7,
+          "n_eval": 7,
+          "n_valid_ok": 6,
+          "n_errors": 1,
+          "invalid_rate": 0.1429,
+          "n_scenarios": 7,
+          "n_fail": 7,
+          "n_pass": 0,
+          "default_threshold": 0.6,
+          "caught_failures": "1/7",
+          "failure_recall": 0.1429,
+          "false_kills": "0/0",
+          "false_kill_rate": null,
+          "kappa": -0.0,
+          "kappa_ci": {
+            "ci": [
+              -9.71445146547012e-17,
+              0.0
+            ],
+            "resamples": 2000,
+            "undefined_draws": 0,
+            "undefined_share": 0.0,
+            "defined_draws": 2000,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "ok",
+            "reason": null
+          },
+          "roc_auc": null,
+          "roc_auc_ci": {
+            "ci": null,
+            "resamples": 2000,
+            "undefined_draws": 2000,
+            "undefined_share": 1.0,
+            "defined_draws": 0,
+            "clusters": 7,
+            "contributing_clusters": 7,
+            "status": "not_estimable",
+            "reason": "不可估（簇数不足）"
+          },
+          "pr_auc_fail": null,
+          "recall_at_fpr": {
+            "fpr_10_interp": null,
+            "fpr_20_interp": null
+          }
+        }
+      }
+    }
+  },
+  "paired_delta_auc": {
+    "grounded_vs_comprehensive": {
+      "all_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 100,
+        "n_paired": 69,
+        "n_scenarios": 32,
+        "n_fail": 33,
+        "n_pass": 36,
+        "auc_a": 0.612,
+        "auc_b": 0.6456,
+        "delta_auc": -0.0337,
+        "ci_95": [
+          -0.273,
+          0.2011
+        ],
+        "p_value": 0.84,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "all_itt": {
+        "mode": "itt",
+        "n_candidates": 100,
+        "n_paired": 100,
+        "n_scenarios": 39,
+        "n_fail": 50,
+        "n_pass": 50,
+        "auc_a": 0.6126,
+        "auc_b": 0.5982,
+        "delta_auc": 0.0144,
+        "ci_95": [
+          -0.1376,
+          0.1686
+        ],
+        "p_value": 0.815,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "unseen_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 93,
+        "n_paired": 65,
+        "n_scenarios": 28,
+        "n_fail": 29,
+        "n_pass": 36,
+        "auc_a": 0.6078,
+        "auc_b": 0.6557,
+        "delta_auc": -0.0479,
+        "ci_95": [
+          -0.2891,
+          0.2106
+        ],
+        "p_value": 0.778,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "unseen_itt": {
+        "mode": "itt",
+        "n_candidates": 93,
+        "n_paired": 93,
+        "n_scenarios": 32,
+        "n_fail": 43,
+        "n_pass": 50,
+        "auc_a": 0.5974,
+        "auc_b": 0.6105,
+        "delta_auc": -0.013,
+        "ci_95": [
+          -0.1771,
+          0.1433
+        ],
+        "p_value": 0.883,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "seen_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 7,
+        "n_paired": 4,
+        "n_scenarios": 4,
+        "auc_a": null,
+        "auc_b": null,
+        "delta_auc": null,
+        "ci_95": null,
+        "p_value": null,
+        "status": "not_estimable"
+      },
+      "seen_itt": {
+        "mode": "itt",
+        "n_candidates": 7,
+        "n_paired": 7,
+        "n_scenarios": 7,
+        "auc_a": null,
+        "auc_b": null,
+        "delta_auc": null,
+        "ci_95": null,
+        "p_value": null,
+        "status": "not_estimable"
+      }
+    },
+    "grounded_vs_accuracy": {
+      "all_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 100,
+        "n_paired": 87,
+        "n_scenarios": 37,
+        "n_fail": 43,
+        "n_pass": 44,
+        "auc_a": 0.6459,
+        "auc_b": 0.6115,
+        "delta_auc": 0.0344,
+        "ci_95": [
+          -0.084,
+          0.1463
+        ],
+        "p_value": 0.539,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "all_itt": {
+        "mode": "itt",
+        "n_candidates": 100,
+        "n_paired": 100,
+        "n_scenarios": 39,
+        "n_fail": 50,
+        "n_pass": 50,
+        "auc_a": 0.6126,
+        "auc_b": 0.6042,
+        "delta_auc": 0.0084,
+        "ci_95": [
+          -0.1083,
+          0.1273
+        ],
+        "p_value": 0.872,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "unseen_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 93,
+        "n_paired": 82,
+        "n_scenarios": 32,
+        "n_fail": 38,
+        "n_pass": 44,
+        "auc_a": 0.6388,
+        "auc_b": 0.6077,
+        "delta_auc": 0.0311,
+        "ci_95": [
+          -0.0879,
+          0.146
+        ],
+        "p_value": 0.583,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "unseen_itt": {
+        "mode": "itt",
+        "n_candidates": 93,
+        "n_paired": 93,
+        "n_scenarios": 32,
+        "n_fail": 43,
+        "n_pass": 50,
+        "auc_a": 0.5974,
+        "auc_b": 0.6095,
+        "delta_auc": -0.0121,
+        "ci_95": [
+          -0.138,
+          0.1039
+        ],
+        "p_value": 0.886,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "seen_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 7,
+        "n_paired": 5,
+        "n_scenarios": 5,
+        "auc_a": null,
+        "auc_b": null,
+        "delta_auc": null,
+        "ci_95": null,
+        "p_value": null,
+        "status": "not_estimable"
+      },
+      "seen_itt": {
+        "mode": "itt",
+        "n_candidates": 7,
+        "n_paired": 7,
+        "n_scenarios": 7,
+        "auc_a": null,
+        "auc_b": null,
+        "delta_auc": null,
+        "ci_95": null,
+        "p_value": null,
+        "status": "not_estimable"
+      }
+    },
+    "accuracy_vs_comprehensive": {
+      "all_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 100,
+        "n_paired": 77,
+        "n_scenarios": 34,
+        "n_fail": 39,
+        "n_pass": 38,
+        "auc_a": 0.5725,
+        "auc_b": 0.6667,
+        "delta_auc": -0.0941,
+        "ci_95": [
+          -0.2621,
+          0.1087
+        ],
+        "p_value": 0.329,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "all_itt": {
+        "mode": "itt",
+        "n_candidates": 100,
+        "n_paired": 100,
+        "n_scenarios": 39,
+        "n_fail": 50,
+        "n_pass": 50,
+        "auc_a": 0.6042,
+        "auc_b": 0.5982,
+        "delta_auc": 0.006,
+        "ci_95": [
+          -0.1415,
+          0.1561
+        ],
+        "p_value": 0.936,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "unseen_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 93,
+        "n_paired": 71,
+        "n_scenarios": 28,
+        "n_fail": 33,
+        "n_pass": 38,
+        "auc_a": 0.5837,
+        "auc_b": 0.679,
+        "delta_auc": -0.0953,
+        "ci_95": [
+          -0.269,
+          0.1457
+        ],
+        "p_value": 0.405,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "unseen_itt": {
+        "mode": "itt",
+        "n_candidates": 93,
+        "n_paired": 93,
+        "n_scenarios": 32,
+        "n_fail": 43,
+        "n_pass": 50,
+        "auc_a": 0.6095,
+        "auc_b": 0.6105,
+        "delta_auc": -0.0009,
+        "ci_95": [
+          -0.1564,
+          0.148
+        ],
+        "p_value": 1.0,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "seen_complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 7,
+        "n_paired": 6,
+        "n_scenarios": 6,
+        "auc_a": null,
+        "auc_b": null,
+        "delta_auc": null,
+        "ci_95": null,
+        "p_value": null,
+        "status": "not_estimable"
+      },
+      "seen_itt": {
+        "mode": "itt",
+        "n_candidates": 7,
+        "n_paired": 7,
+        "n_scenarios": 7,
+        "auc_a": null,
+        "auc_b": null,
+        "delta_auc": null,
+        "ci_95": null,
+        "p_value": null,
+        "status": "not_estimable"
+      }
+    }
+  },
+  "domain_shift_diagnostic": {
+    "main_cohort": {
+      "airline": {
+        "evidence_grounded": {
+          "n_valid": 67,
+          "n_fail": 41,
+          "n_pass": 26,
+          "roc_auc": 0.8532,
+          "failure_recall": 0.8537,
+          "false_kill_rate": 0.3846,
+          "avg_completion_tokens": 1465.0
+        },
+        "trajectory_accuracy": {
+          "n_valid": 72,
+          "n_fail": 43,
+          "n_pass": 29,
+          "roc_auc": 0.7634,
+          "failure_recall": 0.4651,
+          "false_kill_rate": 0.1724,
+          "avg_completion_tokens": 866.7
+        },
+        "trajectory_comprehensive": {
+          "n_valid": 67,
+          "n_fail": 40,
+          "n_pass": 27,
+          "roc_auc": 0.6843,
+          "failure_recall": 0.1,
+          "false_kill_rate": 0.037,
+          "avg_completion_tokens": 908.4
+        }
+      },
+      "retail": {
+        "evidence_grounded": {
+          "n_valid": 117,
+          "n_fail": 50,
+          "n_pass": 67,
+          "roc_auc": 0.6772,
+          "failure_recall": 0.46,
+          "false_kill_rate": 0.209,
+          "avg_completion_tokens": 1537.8
+        },
+        "trajectory_accuracy": {
+          "n_valid": 127,
+          "n_fail": 56,
+          "n_pass": 71,
+          "roc_auc": 0.5985,
+          "failure_recall": 0.125,
+          "false_kill_rate": 0.0423,
+          "avg_completion_tokens": 504.9
+        },
+        "trajectory_comprehensive": {
+          "n_valid": 116,
+          "n_fail": 51,
+          "n_pass": 65,
+          "roc_auc": 0.5796,
+          "failure_recall": 0.0,
+          "false_kill_rate": 0.0,
+          "avg_completion_tokens": 938.8
+        }
+      }
+    },
+    "validation_cohort": {
+      "retail": {
+        "evidence_grounded": {
+          "n_valid": 85,
+          "n_fail": 42,
+          "n_pass": 43,
+          "roc_auc": 0.6379,
+          "failure_recall": 0.3333,
+          "false_kill_rate": 0.2326,
+          "avg_completion_tokens": 1729.3
+        },
+        "trajectory_accuracy": {
+          "n_valid": 94,
+          "n_fail": 46,
+          "n_pass": 48,
+          "roc_auc": 0.5974,
+          "failure_recall": 0.1304,
+          "false_kill_rate": 0.0625,
+          "avg_completion_tokens": 504.1
+        },
+        "trajectory_comprehensive": {
+          "n_valid": 76,
+          "n_fail": 37,
+          "n_pass": 39,
+          "roc_auc": 0.6445,
+          "failure_recall": 0.0541,
+          "false_kill_rate": 0.0,
+          "avg_completion_tokens": 1761.3
+        }
+      },
+      "all": {
+        "evidence_grounded": {
+          "n_valid": 88,
+          "n_fail": 44,
+          "n_pass": 44,
+          "roc_auc": 0.6423,
+          "failure_recall": 0.3409,
+          "false_kill_rate": 0.2273,
+          "avg_completion_tokens": 1738.7
+        },
+        "trajectory_accuracy": {
+          "n_valid": 98,
+          "n_fail": 49,
+          "n_pass": 49,
+          "roc_auc": 0.6085,
+          "failure_recall": 0.1224,
+          "false_kill_rate": 0.0612,
+          "avg_completion_tokens": 529.2
+        },
+        "trajectory_comprehensive": {
+          "n_valid": 78,
+          "n_fail": 39,
+          "n_pass": 39,
+          "roc_auc": 0.6614,
+          "failure_recall": 0.0513,
+          "false_kill_rate": 0.0,
+          "avg_completion_tokens": 1887.8
+        }
+      }
+    }
+  },
+  "reasoning_confounder_diagnostic": {
+    "p1_main": {
+      "evidence_grounded": {
+        "n_cached_calls": 236,
+        "has_reasoning_rate": 0.9831,
+        "avg_completion_tokens": 1697.6
+      },
+      "trajectory_accuracy": {
+        "n_cached_calls": 203,
+        "has_reasoning_rate": 0.7931,
+        "avg_completion_tokens": 654.9
+      },
+      "trajectory_comprehensive": {
+        "n_cached_calls": 235,
+        "has_reasoning_rate": 0.5957,
+        "avg_completion_tokens": 1274.4
+      }
+    },
+    "p1val": {
+      "evidence_grounded": {
+        "n_cached_calls": 109,
+        "has_reasoning_rate": 0.9908,
+        "avg_completion_tokens": 1640.3
+      },
+      "trajectory_accuracy": {
+        "n_cached_calls": 98,
+        "has_reasoning_rate": 0.8469,
+        "avg_completion_tokens": 529.2
+      },
+      "trajectory_comprehensive": {
+        "n_cached_calls": 117,
+        "has_reasoning_rate": 0.9573,
+        "avg_completion_tokens": 2203.7
+      }
+    }
+  }
+}

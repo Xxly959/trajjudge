@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<rect width="980" height="520" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="28" y="34" font-size="17.2" font-weight="700" fill="#0f172a">图 8 · 独立验证集工作点阈值迁移（n=100）与配对 ΔAUC / ITT 森林图</text>
+<text x="28" y="55" font-size="11.5" fill="#475569">左：主队列冻结阈值直接迁移至未见验证集（Grounded 连续可调 vs Accuracy 3 分制离散上限）；右：场景簇 Bootstrap 95% CI（B=2000）</text>
+<text x="254.0" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. Recall–FPR 工作点曲线与冻结阈值迁移</text>
+<rect x="74" y="96" width="360" height="340" fill="#f8fafc" stroke="#cbd5e1"/>
+<line x1="74.0" y1="96" x2="74.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<line x1="74" y1="436.0" x2="434" y2="436.0" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<text x="74.0" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">0%</text>
+<text x="67" y="439.0" text-anchor="end" font-size="9.5" fill="#64748b">0%</text>
+<line x1="164.0" y1="96" x2="164.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<line x1="74" y1="351.0" x2="434" y2="351.0" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<text x="164.0" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">25%</text>
+<text x="67" y="354.0" text-anchor="end" font-size="9.5" fill="#64748b">25%</text>
+<line x1="254.0" y1="96" x2="254.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<line x1="74" y1="266.0" x2="434" y2="266.0" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<text x="254.0" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">50%</text>
+<text x="67" y="269.0" text-anchor="end" font-size="9.5" fill="#64748b">50%</text>
+<line x1="344.0" y1="96" x2="344.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<line x1="74" y1="181.0" x2="434" y2="181.0" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<text x="344.0" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">75%</text>
+<text x="67" y="184.0" text-anchor="end" font-size="9.5" fill="#64748b">75%</text>
+<line x1="434.0" y1="96" x2="434.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<line x1="74" y1="96.0" x2="434" y2="96.0" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+<text x="434.0" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">100%</text>
+<text x="67" y="99.0" text-anchor="end" font-size="9.5" fill="#64748b">100%</text>
+<line x1="74" y1="436" x2="434" y2="96" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,4"/>
+<line x1="110.0" y1="96" x2="110.0" y2="436" stroke="#94a3b8" stroke-dasharray="2,3"/>
+<line x1="74" y1="164.0" x2="434" y2="164.0" stroke="#94a3b8" stroke-dasharray="2,3"/>
+<text x="113.0" y="108" font-size="8.5" fill="#64748b">FPR=10%</text>
+<text x="430.0" y="160.0" text-anchor="end" font-size="8.5" fill="#64748b">Recall=80%</text>
+<text x="254.0" y="466" text-anchor="middle" font-size="10.5" fill="#334155">误杀率 FPR (Pass 被误判 Fail)</text>
+<text x="20" y="266.0" text-anchor="middle" font-size="10.5" fill="#334155" transform="rotate(-90 20 266.0)">失败召回率 Recall</text>
+<polyline fill="none" stroke="#10b981" stroke-width="2.2" points="74.0,436.0 93.4,335.1 93.4,331.4 93.4,327.6 93.4,323.9 93.4,320.2 93.4,316.5 97.2,312.7 105.0,309.0 108.8,309.0 112.7,309.0 112.7,305.2 112.7,297.8 116.6,286.5 116.6,282.8 116.6,271.6 116.6,267.9 120.4,260.4 120.4,256.6 120.4,252.9 124.3,252.9 124.3,249.2 124.3,245.5 124.3,241.7 124.3,238.0 132.1,238.0 135.9,238.0 139.8,238.0 139.8,234.2 139.8,230.5 143.7,230.5 147.5,230.5 163.0,230.5 166.9,230.5 166.9,223.0 166.9,219.3 170.8,215.5 170.8,204.4 174.7,196.9 225.0,174.5 225.0,170.7 286.9,137.1 317.9,129.6 321.8,125.9 406.9,111.0 430.1,96.0 434.0,96.0"/>
+<polyline fill="none" stroke="#047857" stroke-width="2.2" stroke-dasharray="5,3" points="74.0,436.0 82.2,412.8 82.2,405.1 90.4,405.1 90.4,397.4 98.6,397.4 98.6,389.6 98.6,381.9 98.6,374.2 106.7,358.7 106.7,351.0 123.1,351.0 131.3,343.3 139.4,335.5 147.6,335.5 155.8,335.5 155.8,327.8 155.8,320.1 155.8,312.4 164.0,312.4 164.0,289.2 188.6,273.7 229.4,250.5 229.4,242.8 286.7,173.3 294.9,126.9 303.1,126.9 401.3,96.0 425.8,96.0 434.0,96.0"/>
+<polyline fill="none" stroke="#3b82f6" stroke-width="1.7" points="74.0,436.0 102.8,343.3 138.8,250.5 434.0,96.0"/>
+<polyline fill="none" stroke="#1d4ed8" stroke-width="1.7" stroke-dasharray="5,3" points="74.0,436.0 96.0,394.4 110.7,325.0 434.0,96.0"/>
+<polyline fill="none" stroke="#f97316" stroke-width="1.4" points="74.0,436.0 74.0,432.3 77.9,432.3 77.9,428.5 77.9,424.8 77.9,421.0 77.9,417.3 81.8,417.3 81.8,413.6 81.8,409.9 81.8,406.1 81.8,402.4 81.8,398.6 81.8,394.9 85.7,394.9 85.7,391.2 85.7,387.4 85.7,383.7 89.7,383.7 93.5,376.2 93.5,372.5 93.5,368.7 97.5,368.7 97.5,365.0 101.4,365.0 105.3,365.0 120.9,361.3 120.9,357.5 124.9,357.5 124.9,353.8 124.9,350.1 128.8,346.3 128.8,342.6 128.8,338.9 128.8,335.1 132.7,335.1 132.7,331.4 136.6,331.4 140.5,331.4 140.5,327.6 148.3,327.6 152.3,323.9 152.3,320.2 152.3,312.7 156.2,312.7 156.2,305.2 160.1,301.5 160.1,297.8 160.1,294.0 160.1,286.5 160.1,282.8 171.8,252.9 175.7,252.9 183.5,252.9 191.4,252.9 199.2,252.9 203.1,249.2 207.1,249.2 210.9,249.2 218.8,245.5 218.8,238.0 234.5,238.0 234.5,238.0 234.5,226.8 238.3,226.8 242.3,226.8 246.2,223.0 246.2,215.5 246.2,211.8 246.2,211.8 254.0,211.8 257.9,204.4 261.8,204.4 273.5,196.9 273.5,193.1 281.4,189.4 285.3,181.9 285.3,181.9 289.2,181.9 289.2,178.2 289.2,178.2 300.9,174.5 300.9,174.5 308.8,170.7 308.8,167.0 312.7,167.0 312.7,163.3 324.5,159.5 328.3,159.5 332.3,155.8 332.3,152.0 336.2,152.0 336.2,148.3 340.1,148.3 379.2,129.6 383.1,122.1 383.1,114.7 383.1,111.0 387.1,111.0 387.1,111.0 394.9,107.2 398.8,107.2 398.8,103.5 402.7,103.5 402.7,99.7 434.0,96.0"/>
+<line x1="105.0" y1="309.0" x2="82.2" y2="405.1" stroke="#047857" stroke-width="1.3" stroke-dasharray="2,2"/>
+<circle cx="105.0" cy="309.0" r="4.2" fill="#ffffff" stroke="#047857" stroke-width="2"/>
+<circle cx="82.2" cy="405.1" r="4.8" fill="#047857" stroke="#ffffff" stroke-width="1"/>
+<text x="88.2" y="408.1" font-size="8.8" font-weight="700" fill="#047857">严(9/2)</text>
+<line x1="166.9" y1="219.3" x2="155.8" y2="320.1" stroke="#10b981" stroke-width="1.3" stroke-dasharray="2,2"/>
+<circle cx="166.9" cy="219.3" r="4.2" fill="#ffffff" stroke="#10b981" stroke-width="2"/>
+<circle cx="155.8" cy="320.1" r="4.8" fill="#10b981" stroke="#ffffff" stroke-width="1"/>
+<text x="161.8" y="323.1" font-size="8.8" font-weight="700" fill="#10b981">默(34/23)</text>
+<line x1="286.9" y1="137.1" x2="286.7" y2="173.3" stroke="#065f46" stroke-width="1.3" stroke-dasharray="2,2"/>
+<circle cx="286.9" cy="137.1" r="4.2" fill="#ffffff" stroke="#065f46" stroke-width="2"/>
+<circle cx="286.7" cy="173.3" r="4.8" fill="#065f46" stroke="#ffffff" stroke-width="1"/>
+<text x="292.7" y="176.3" font-size="8.8" font-weight="700" fill="#065f46">宽(77/59)</text>
+<line x1="472" y1="74" x2="472" y2="462" stroke="#cbd5e1" stroke-dasharray="4,4"/>
+<text x="775.5" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 配对 ΔAUC 与 95% 场景簇 CI</text>
+<line x1="707.6" y1="96" x2="707.6" y2="436" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3"/>
+<text x="707.6" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">-0.25</text>
+<line x1="766.5" y1="96" x2="766.5" y2="436" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3"/>
+<text x="766.5" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">-0.10</text>
+<line x1="805.7" y1="96" x2="805.7" y2="436" stroke="#0f172a" stroke-width="1.4" stroke-dasharray="3,3"/>
+<text x="805.7" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">+0.00</text>
+<line x1="844.9" y1="96" x2="844.9" y2="436" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3"/>
+<text x="844.9" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">+0.10</text>
+<line x1="884.2" y1="96" x2="884.2" y2="436" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3"/>
+<text x="884.2" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">+0.20</text>
+<line x1="923.4" y1="96" x2="923.4" y2="436" stroke="#e2e8f0" stroke-width="1.0" stroke-dasharray="3,3"/>
+<text x="923.4" y="451" text-anchor="middle" font-size="9.5" fill="#64748b">+0.30</text>
+<text x="815.5" y="466" text-anchor="middle" font-size="10.5" fill="#334155">配对 ΔAUC（右偏大于 0 表示前者排序更优）</text>
+<text x="680" y="118.3" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">主队列 Grd vs Comp (n=200)</text>
+<line x1="826.5" y1="108.8" x2="907.8" y2="108.8" stroke="#10b981" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="866.9" cy="108.8" r="3.6" fill="#10b981"/>
+<text x="911.8" y="111.8" font-size="8.4" fill="#334155">+0.156</text>
+<line x1="814.8" y1="121.7" x2="889.6" y2="121.7" stroke="#10b981" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="850.2" y="118.7" width="6" height="6" fill="#ffffff" stroke="#10b981" stroke-width="1.5"/>
+<text x="680" y="156.0" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">验证集 Grd vs Comp (n=100)</text>
+<line x1="698.6" y1="146.6" x2="884.6" y2="146.6" stroke="#047857" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="792.5" cy="146.6" r="3.6" fill="#047857"/>
+<text x="888.6" y="149.6" font-size="8.4" fill="#334155">-0.034</text>
+<line x1="751.7" y1="159.5" x2="871.8" y2="159.5" stroke="#047857" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="808.3" y="156.5" width="6" height="6" fill="#ffffff" stroke="#047857" stroke-width="1.5"/>
+<text x="680" y="193.8" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">主队列 Grd vs Acc-Flash</text>
+<line x1="808.8" y1="184.4" x2="853.9" y2="184.4" stroke="#3b82f6" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="831.0" cy="184.4" r="3.6" fill="#3b82f6"/>
+<text x="857.9" y="187.4" font-size="8.4" fill="#334155">+0.064</text>
+<line x1="797.6" y1="197.2" x2="847.4" y2="197.2" stroke="#3b82f6" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="820.2" y="194.2" width="6" height="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="680" y="231.6" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">验证集 Grd vs Acc-Flash</text>
+<line x1="772.7" y1="222.2" x2="863.1" y2="222.2" stroke="#1d4ed8" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="819.2" cy="222.2" r="3.6" fill="#1d4ed8"/>
+<text x="867.1" y="225.2" font-size="8.4" fill="#334155">+0.034</text>
+<line x1="763.2" y1="235.0" x2="855.6" y2="235.0" stroke="#1d4ed8" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="806.0" y="232.0" width="6" height="6" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.5"/>
+<text x="680" y="269.4" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">主队列 Grd vs Acc-Pro</text>
+<line x1="799.8" y1="260.0" x2="854.3" y2="260.0" stroke="#6366f1" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="826.9" cy="260.0" r="3.6" fill="#6366f1"/>
+<text x="858.3" y="263.0" font-size="8.4" fill="#334155">+0.054</text>
+<line x1="787.7" y1="272.8" x2="844.5" y2="272.8" stroke="#6366f1" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="814.7" y="269.8" width="6" height="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.5"/>
+<text x="680" y="307.2" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">主队列 DS Grd vs DS Acc</text>
+<line x1="778.8" y1="297.7" x2="831.8" y2="297.7" stroke="#8b5cf6" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="805.7" cy="297.7" r="3.6" fill="#8b5cf6"/>
+<text x="835.8" y="300.7" font-size="8.4" fill="#334155">+0.000</text>
+<line x1="782.9" y1="310.6" x2="836.1" y2="310.6" stroke="#8b5cf6" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="806.6" y="307.6" width="6" height="6" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.5"/>
+<text x="680" y="344.9" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">消融 full vs no_ledger (n=60)</text>
+<line x1="818.3" y1="335.5" x2="917.4" y2="335.5" stroke="#f59e0b" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="867.2" cy="335.5" r="3.6" fill="#f59e0b"/>
+<text x="921.4" y="338.5" font-size="8.4" fill="#334155">+0.157</text>
+<line x1="770.6" y1="348.4" x2="886.3" y2="348.4" stroke="#f59e0b" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="826.0" y="345.4" width="6" height="6" fill="#ffffff" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="680" y="382.7" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">消融 full vs no_quarantine</text>
+<line x1="812.4" y1="373.3" x2="881.8" y2="373.3" stroke="#d97706" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="847.0" cy="373.3" r="3.6" fill="#d97706"/>
+<text x="885.8" y="376.3" font-size="8.4" fill="#334155">+0.105</text>
+<line x1="767.4" y1="386.1" x2="862.3" y2="386.1" stroke="#d97706" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="814.5" y="383.1" width="6" height="6" fill="#ffffff" stroke="#d97706" stroke-width="1.5"/>
+<text x="680" y="420.5" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">消融 full vs no_veto</text>
+<line x1="803.0" y1="411.1" x2="845.5" y2="411.1" stroke="#b45309" stroke-width="1.6" stroke-opacity="0.95"/>
+<circle cx="821.9" cy="411.1" r="3.6" fill="#b45309"/>
+<text x="849.5" y="414.1" font-size="8.4" fill="#334155">+0.041</text>
+<line x1="810.1" y1="423.9" x2="853.9" y2="423.9" stroke="#b45309" stroke-width="1.6" stroke-opacity="0.55"/>
+<rect x="827.8" y="420.9" width="6" height="6" fill="#ffffff" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="34" cy="486" r="4" fill="#ffffff" stroke="#047857" stroke-width="2"/><text x="44" y="490" font-size="9.5" fill="#334155">主队列冻结工作点 (空心)</text>
+<circle cx="176" cy="486" r="4.5" fill="#047857"/><text x="186" y="490" font-size="9.5" fill="#334155">验证集迁移点 (实心: 严/默/宽 召回/误杀%)</text>
+<circle cx="430" cy="486" r="3.6" fill="#334155"/><text x="440" y="490" font-size="9.5" fill="#334155">右图实心圆: Complete-Case ΔAUC</text>
+<rect x="615" y="483" width="6" height="6" fill="#ffffff" stroke="#334155" stroke-width="1.5"/><text x="627" y="490" font-size="9.5" fill="#334155">空心方框: ITT ΔAUC（无效行记 score=0）</text>
+<text x="28" y="509" font-size="9.8" fill="#64748b">数据源：reports/operating_points_v3.json · reports/p1_validation_v3.json · reports/paired_auc_v3.json</text>
+</svg>

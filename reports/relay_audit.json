@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-20T11:29:14+00:00",
+  "generated_at": "2026-11-20T13:20:16+00:00",
   "audit_note": "Run row JSON files record only request-side `judge_model` (response_model=0 across historical runs); actual HTTP response `model` identity is audited directly from `.cache/llm/` `raw_response.model`.",
-  "total_cache_entries_scanned": 6322,
+  "total_cache_entries_scanned": 6646,
   "by_requested_model": {
     "deepseek-flash": {
       "total": 3563,
@@ -42,20 +42,20 @@
       }
     },
     "glm-5.3-flash": {
-      "total": 2008,
+      "total": 2332,
       "response_models": {
-        "cb/glm-5.3-flash": 11,
+        "cb/glm-5.3-flash": 13,
         "cbcn/glm-5.3-flash": 1,
         "codearts/glm-5.3-flash": 27,
-        "glm-5.3-flash": 1458,
+        "glm-5.3-flash": 1678,
         "nvidia/nemotron-3-ultra-550b-a55b": 5,
         "z-ai/glm-5.3-flash": 2,
-        "zai-org/GLM-5.3-Flash": 504
+        "zai-org/GLM-5.3-Flash": 606
       },
       "classification": {
         "cross_model_mismatch": 5,
-        "exact_match": 1458,
-        "same_family_prefixed": 545
+        "exact_match": 1678,
+        "same_family_prefixed": 649
       }
     },
     "unknown": {
@@ -338,6 +338,20 @@
     },
     {
       "requested_model": "glm-5.3-flash",
+      "experiment_prefix": "p1val",
+      "total_cached_calls": 324,
+      "response_models": {
+        "cb/glm-5.3-flash": 2,
+        "glm-5.3-flash": 220,
+        "zai-org/GLM-5.3-Flash": 102
+      },
+      "classification": {
+        "exact_match": 220,
+        "same_family_prefixed": 104
+      }
+    },
+    {
+      "requested_model": "glm-5.3-flash",
       "experiment_prefix": "p2bon",
       "total_cached_calls": 397,
       "response_models": {
@@ -532,6 +546,27 @@
       "n_rows": 60,
       "request_judge_models": {
         "glm-5.3-flash": 60
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1val-hubcore_glm_flash-accuracy": {
+      "n_rows": 100,
+      "request_judge_models": {
+        "glm-5.3-flash": 100
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1val-hubcore_glm_flash-comprehensive": {
+      "n_rows": 100,
+      "request_judge_models": {
+        "glm-5.3-flash": 100
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1val-hubcore_glm_flash-evidence_grounded": {
+      "n_rows": 100,
+      "request_judge_models": {
+        "glm-5.3-flash": 100
       },
       "row_level_response_model_count": 0
     },

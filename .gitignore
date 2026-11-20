@@ -24,6 +24,9 @@ annotation/round2_labels.csv
 annotation/GUIDE.md
 annotation/exclusions.jsonl
 annotation/amendments.jsonl
+annotation/round3_blindspots.csv
+annotation/round3_claw48_adjudication.csv
+annotation/round3_review_packet/
 runs/
 
 # Eval-family original-task holdout answers stay local (prevent public benchmark contamination)

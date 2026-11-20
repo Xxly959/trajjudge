@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 505" width="960" height="505" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
 <rect width="960" height="505" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
-<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 6 · P1 客观标签 τ-bench 两厂商全量对比（n=200 / 131 场景）与四路组件单调消融（P1-6）</text>
-<text x="28" y="55" font-size="11.8" fill="#475569">基于 DB 可执行真值：Evidence-Grounded 显著提升两厂商默认失败召回（GLM-Flash 全指标第一；DeepSeek-Flash 呈现轻量推理敏感性）</text>
+<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 6 · P1 客观标签 τ-bench 两厂商全量对比（n=200 / 131 场景）与组件消融（P1-6）</text>
+<text x="28" y="55" font-size="11.5" fill="#475569">相对 Comprehensive ΔAUC +0.156 显著胜出；相对 Accuracy 主差异为高召回判定点（DeepSeek 同模型 ΔAUC = 0.000）</text>
 <text x="317.5" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. τ-bench 客观标签全量对比 (n=200)</text>
 <line x1="205.0" y1="96" x2="205.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>
 <text x="205.0" y="451" text-anchor="middle" font-size="10" fill="#64748b">0.00</text>
@@ -70,7 +70,7 @@
 <rect x="205" y="416.5" width="76.8" height="8.5" rx="2" fill="#64748b" fill-opacity="0.30"/>
 <text x="285.9" y="424.0" font-size="9" fill="#334155">R@20 29.0%</text>
 <line x1="538" y1="74" x2="538" y2="455" stroke="#cbd5e1" stroke-dasharray="4,4"/>
-<text x="758.0" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 组件消融单调阶梯 (n=60 分层)</text>
+<text x="758.0" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 组件消融共同样本配对比较 (n=60 分层子集)</text>
 <line x1="678.0" y1="96" x2="678.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>
 <text x="678.0" y="451" text-anchor="middle" font-size="10" fill="#64748b">0.00</text>
 <line x1="728.0" y1="96" x2="728.0" y2="436" stroke="#e2e8f0" stroke-dasharray="3,3"/>

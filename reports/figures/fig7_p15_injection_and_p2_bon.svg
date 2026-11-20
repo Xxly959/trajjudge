@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" width="960" height="460" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
 <rect width="960" height="460" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
-<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 7 · P1-5 Held-Out 15 模板注入防御（tool_result）与 P2-A Best-of-4 重排闭环</text>
-<text x="28" y="55" font-size="12" fill="#475569">左：未见过攻击测试集决策翻转率与涨分率对照无攻击噪声底（GLM-Flash）；右：Best-of-4 通过率与 95% 场景簇置信区间</text>
-<text x="297.5" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. Held-Out 15 模板注入 (tool_result)</text>
+<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 7 · P1-5 Held-Out 注入（exploratory, n=12）与 P2-A Best-of-4（负结果）</text>
+<text x="28" y="55" font-size="11.6" fill="#475569">左：15 模板探索性对比（12 轨迹/8 场景，CI 高度重叠）；右：Best-of-4 仅 25/50 个混合任务可区分选法，总体零效应</text>
+<text x="297.5" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. Held-Out 15 模板注入 (exploratory)</text>
 <line x1="185.0" y1="96" x2="185.0" y2="386" stroke="#e2e8f0" stroke-dasharray="3,3"/>
 <text x="185.0" y="401" text-anchor="middle" font-size="10" fill="#64748b">0%</text>
 <line x1="251.2" y1="96" x2="251.2" y2="386" stroke="#e2e8f0" stroke-dasharray="3,3"/>
@@ -72,5 +72,5 @@
 <text x="889.0" y="358.0" font-size="10" font-weight="700" fill="#0f172a">72.0%</text>
 <rect x="28" y="416" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.95"/><text x="45" y="424" font-size="10" fill="#334155">主指标：fail→pass 决策翻转率</text>
 <rect x="220" y="416" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.38"/><text x="237" y="424" font-size="10" fill="#334155">次指标：涨分率 vs 无攻击噪声底</text>
-<text x="28" y="444" font-size="10.2" fill="#64748b">*注：Comprehensive 仅 32/50 任务完整（遗漏 18 个难题造成偏差）；在 28 个共同完整任务上两者完全打平 57.1% vs 57.1% (McNemar p=1.0)。数据源：p15_heldout_injection.json &amp; p2_best_of_n.json</text>
+<text x="28" y="444" font-size="10.2" fill="#64748b">*注：Comprehensive 仅 32/50 完整；共同 28 题打平 57.1% (McNemar p=1.0)；50 题中仅 25 混合任务可区分选法，且 P1-5 样本 12 条（5/675 中转路由至 nemotron）属 exploratory。</text>
 </svg>

@@ -1,56 +1,46 @@
-# 简历项目话术与面试应答定稿（P3，严格溯源至 `docs/CLAIMS.md`）
+# TrajJudge 简历与面试口径包（v3，严格对齐 `CLAIMS.md`）
 
-> **排版定位（遵循路线图 §5）**：将 `LightClaw` 作为第一主打 Agent 运行时项目；将 **TrajJudge** 定位为「`LightClaw` 配套的多步工具 Agent 轨迹元评测与质量审计子系统」，控制在 **3–4 条高密度 STAR Bullet**（所有数字与 [CLAIMS.md](CLAIMS.md) 100% 一致，零夸大、零禁用词）。
-
----
-
-## 一、中文简历版（可直接复制，推荐 AI Agent / LLM Eval / 后训练数据岗位）
-
-### TrajJudge — 多步工具调用 Agent 轨迹元评测与证据锚定裁判系统（`LightClaw` 评测子系统）
-**项目定位**：面向多步工具调用 Agent 的元评测与质量审计框架，系统诊断通用 LLM-as-a-Judge 失效边界、设计证据锚定裁判架构、修复上游开源缺陷并打通多源轨迹数据管线。
-
-- **开源审计与通用裁判失效诊断**：对主流评测框架 `OpenJudge` 做源码级审计与零改动 Transport 桥接，定位并提交修复 **2 项官方合入 PR**（[PR #246](https://github.com/agentscope-ai/OpenJudge/pull/246) 保留越界 `raw_score`；[PR #248](https://github.com/agentscope-ai/OpenJudge/pull/248) 暴露 `VotingEvaluationStrategy` 在连续分上 `15/22 (68.2%)` 面板退化为 `min-of-3` 的平局缺陷）。在 **200 条数据库可执行验证的 τ-bench 轨迹（131 独立场景）** 上定量证明通用裁判因逐步均值稀释与打分饱和造成严重漏判（`Comprehensive` 默认阈值失败召回仅 `4/91 = 4.4%`），且单纯扩大模型规模无显著收益（`Accuracy` 从 Flash 升至 Pro 召回 `27/99 → 21/100`，Exact McNemar `p = 0.167`）。
-- **核心算法 `Extract-Audit-Veto` 证据锚定裁判与消融验证**：设计「确定性工具副作用账本抽取 + `<untrusted_tool_data>` 隔离槽 + 原子义务绑定与 Python Veto 一票否决」三层架构。在 200 条客观 τ-bench 队列上以 `glm-5.3-flash` 取得 **`ROC-AUC = 0.755`、`PR-AUC = 0.739`、`Recall@FPR=20% = 60.4%`、`κ = 0.380`** 全指标领先（配对 Exact McNemar 失败召回 `p < 1e-9`、总体准确率 `p ≤ 0.033`）；完成官方 `deepseek-flash` `200/200` 对称复现，将同底座默认失败召回显著提升 `+31.6 pp`（`16/98 → 47/98 = 48.0%`, `p = 7.92e-09`）并定位到零推理底座敏感性边界（`AUC 0.629`）。4 路组件消融呈严格单调阶梯（`ROC-AUC`: `full 0.910 > no_veto 0.869 > no_quarantine 0.822 > no_ledger 0.794`，`R@10%` 从 `74.1%` 递减至 `27.6%`），3 套等价提示词方差极低（`ROC-AUC` 均值 `0.900`，SD `0.0092`），且 `unauthorized_side_effect` 越权标志在 **GLM-Flash (`84.4%`, `27/32`) / GLM-Pro (`75.0%`, `30/40`) / DeepSeek-Flash (`74.1%`, `20/27`)** 上保持稳定精确率。
-- **抗间接提示注入、银标盲区审计与评测边界界定**：建立带 3 次重复无攻击噪声底（`26.4%–47.6%`）与 3-gram CI 防泄漏守卫的冻结 **15 模板 Held-Out** 注入集，验证 `<untrusted_tool_data>` 隔离槽将 `tool_result` 决策翻转率控制在 **`10/134 (7.5%)`**（涨分率 `20.1%` 低于无攻击噪声底 `26.4%`，`no_quarantine` 组为 `7/55 = 12.7%`，JSON 伪装翻转由 `15.8%` 降至 `3.5%`）。同时利用跨厂商银标在 `92` 条 DB 通过轨迹中检出 **`13/92 (14.1%)`** 流程盲区，并在 Best-of-4 重排（`50` 任务）中诚实界定无执行反馈离线排序（`45.5%` vs 随机 `42.0%`，共同对齐 `n=28` 与 `Comprehensive` 同为 `57.1%`）相对 DB Oracle（`72.0%`）的 `26.5 pp` 边界。
-- **多源轨迹数据工程与容器防刷分（Track B）**：设计统一 `task / trial / outcome / judgments` 四层 Schema 汇聚 **920 条标准化轨迹**（τ-bench `825` + Claw-Eval `87` + SWE-bench `8`）；构建断网容器化原创编程题与黑盒 Verifier，对照实证「只看末轮声明会 `2/2` 误选无产物幻觉」，全库配备 **537 项 Socket 断网单测**与 Fail-Closed 预算守卫。
-
-*(如简历版面极紧，可合并后两条为 3 条 Bullet：第 1 条“诊断 + OpenJudge 2 PRs”；第 2 条“Extract-Audit-Veto + 200 条 τ-bench + 单调消融”；第 3 条“15 模板 Held-Out 注入 + 920 条多源轨迹与容器防刷分”。)*
+> 所有数字均可在 `docs/CLAIMS.md` 与 `reports/` JSON 产物中逐一溯源；不含已撤回口径（v1 `75%`、Stage 3 `6.25%`、`62.5%` 误杀误报）与非确证探索结果（Best-of-N、P1-5 注入）；P1-3 `13/92` 疑似盲区明确标为待人工复核状态。
 
 ---
 
-## 二、English Resume Version
+## 一、中文简历 Bullet（3 条高密度版，适配 Agent Eval / Infra 实习）
 
-### TrajJudge — Trajectory Meta-Evaluation & Evidence-Grounded Audit Framework (for `LightClaw`)
-- **Failure Diagnosis & Upstream Open-Source Fixes**: Audited `OpenJudge` at source level via a zero-patch `HTTPX` transport bridge and merged **2 upstream PRs** into `agentscope-ai/OpenJudge:main` ([PR #246](https://github.com/agentscope-ai/OpenJudge/pull/246) preserving unclamped `raw_score`; [PR #248](https://github.com/agentscope-ai/OpenJudge/pull/248) exposing `VotingEvaluationStrategy` tie metadata where `15/22 (68.2%)` continuous panels degenerated to `min-of-3`). Quantified generic judge failure on **200 DB-verified τ-bench traces (131 scenarios)** (`Comprehensive` default recall `4/91 = 4.4%`; scaling generic `Accuracy` Flash→Pro yielded no gain, `27/99 → 21/100`, exact McNemar `p = 0.167`).
-- **Evidence-Grounded Judge (`Extract-Audit-Veto`) & Monotonic Ablation**: Built a three-stage judge combining deterministic tool-ledger extraction, `<untrusted_tool_data>` isolation slots, and obligation-bound Python veto gates. On the 200-trace τ-bench benchmark with `glm-5.3-flash`, it led across all metrics (**`ROC-AUC 0.755`**, **`PR-AUC 0.739`**, **`R@FPR=20% 60.4%`**, **`κ 0.380`**; paired McNemar `p < 1e-9` fail recall, `p ≤ 0.033` overall accuracy), and on a full 200-trace official `deepseek-flash` symmetry run it lifted failure capture by `+31.6 pp` (`16/98 → 47/98 = 48.0%`, `p = 7.92e-09`) while surfacing zero-thinking reasoning-budget sensitivity (`AUC 0.629`). Verified strict monotonic degradation across 4-way ablation (`ROC-AUC`: `full 0.910 > no_veto 0.869 > no_quarantine 0.822 > no_ledger 0.794`), low cross-prompt variance (`ROC-AUC SD = 0.0092` over 3 rewrites), and steady `unauthorized_side_effect` precision across **GLM-Flash (`27/32 = 84.4%`)**, **GLM-Pro (`30/40 = 75.0%`)**, and **DeepSeek-Flash (`20/27 = 74.1%`)**.
-- **Held-Out Prompt Injection & Verification Boundaries**: Evaluated against a frozen **15-template held-out injection suite** (`SHA-256`-pinned, guarded by 3-gram leakage tests in CI) paired with an unperturbed repeat noise floor; full quarantine kept `tool_result` flip rate at **`10/134 (7.5%)`** with inflation (`20.1%`) below the `26.4%` noise floor (vs `7/55 = 12.7%` without quarantine; JSON disguise flips `3.5%` vs `15.8%`). Identified `13/92 (14.1%)` DB-pass process blind spots via cross-vendor silver-label audits and benchmarked Best-of-4 reranking (`45.5%` vs `42.0%` random, `72.0%` DB oracle).
-- **Multi-Source Trajectory Engineering & Anti-Reward-Hacking**: Unified **920 trajectories** (τ-bench, Claw-Eval, SWE-bench) into a 4-tier schema, built Dockerized offline verifier tasks exposing claim-only hallucination selection (`2/2` false positives on naive text-only screening), and enforced quality with **537 socket-blocked unit tests**.
+1. **证据锚定轨迹裁判与可调风险工作点**：针对多步 Agent 评测中通用裁判漏判率高且离散 Likert 分无法调节阈值的问题，基于 `Extract-Audit-Veto` 架构（确定性副作用账本 + `<untrusted_tool_data>` 隔离槽 + 证据索引与 Veto 门控）搭建离线可审计裁判；在 `200` 条 τ-bench 客观数据库真值轨迹（`131` 独立场景）上，配对 `ΔAUC` 较 OpenJudge `Comprehensive` 提升 **`+0.156`**（`0.764 vs 0.608`, `p = 0.001`；ITT 补齐失误后 **`+0.121`**, `p = 0.012`），并在 `GLM-Flash` / `DeepSeek-Flash` 双底座上将默阈失败召回推高 **`+36.9 pp / +31.6 pp`**（至 `63.7% / 48.0%`，越权精确率 `84.4% / 74.1%`），提供 46 档连续阈值（对比 `Accuracy` `{1,2,3}` 离散死区）。
+2. **Pre-registered 独立验证与组件消融审计**：采用事前提交哈希锁定 `100` 条未进主队列 τ-bench 轨迹完成独立验证与冻结阈值跨分布迁移实验（`reports/p1_validation_v3.json` / `operating_points_v3.json`），严格区分“排序能力边界（受 `airline 36.5%→4%` 域漂移与 `D33 reasoning_effort` 混淆影响，`ΔAUC = -0.034`）”与“工作点可迁移性（默阈召回维持 `34.1% vs 5.1%`，需分域重标定阈值）”；`60` 条分层组件消融证实账本（`ΔAUC +0.157, p=0.012`）与隔离槽（`+0.105, p=0.015`）构成主要贡献，`3` 套等价提示词 `AUC` 均值 `0.900`（`SD = 0.009`）。
+3. **上游开源贡献与评测工程基础设施**：无侵入打通 Claw-Eval 沙箱与阿里 OpenJudge，定位并修复 `raw_score` 钳制覆盖缺陷与连续分投票 `15/22 (68.2%)` 面板退化为 `min-of-3` 两处上游 Bug，合入 **[OpenJudge PR #246](https://github.com/agentscope-ai/OpenJudge/pull/246)** 与 **[PR #248](https://github.com/agentscope-ai/OpenJudge/pull/248)**（关闭 **Issue #247**）；沉淀跨源 `920` 条标准化轨迹 Schema、SHA-256 去重缓存、中转模型响应审计（`relay_audit.py`）、Socket 断网回归单测与防泄漏/防幻觉守卫。
 
 ---
 
-## 三、90 秒面试口头自述（标准版，数字 ≤ 5 个）
+## 二、English Resume Bullets (3-Bullet Version)
 
-> “我在做 **LightClaw** 这个多步工具调用 Agent 运行时的时候，碰到一个很实际的问题：改完 Prompt 或记忆策略后，怎么可靠地判断 Agent 是真的变好了，还是在‘嘴硬没干活’或者越权操作？我接入业界常用的 OpenJudge 之后发现，通用裁判在多步长轨迹上经常因为前面查询步骤拿满分把最后一步的致命漏判稀释掉——在 200 条数据库验证的 τ-bench 上，默认阈值只抓出了 4% 多的失败，而且单纯换更大的 Pro 模型也没有统计提升。同时我还顺手定位并给 OpenJudge 官方合入了 2 个修复 PR。
->
-> 所以我做了 **TrajJudge**：核心不是换提示词，而是一个 **Extract-Audit-Veto** 的三层混合裁判——先用确定性代码抽取工具调用与写操作账本并隔离 `<untrusted_tool_data>`，再强制 LLM 逐条核对用户义务并绑定证据索引，最后用 Python 规则对越权或无依据声明一票否决。最终在 200 条客观真值 τ-bench 上，这套架构把 `ROC-AUC` 从 0.628 拉到 **0.755**、同 20% 误杀率下召回拉到 **60.4%**；四路组件消融呈严格单调下降（`0.910 → 0.794`），换三套提示词标准差不到 `0.01`，在开发期完全未见的 15 类注入模板上也把 `tool_result` 翻转率压到 **7.5%**。我也用 AI 编程助手来加速工程实现，但实验预注册、统计纠偏、包括**主动撤回早期有偏样本和模板泄漏结论**，全程都是我按规范复核把关的。”
-
----
-
-## 四、关于 AI 协作与自我纠错的加分话术（路线图 §5）
-
-> “项目中代码模块和批跑脚本用 coding agent 加速开发，但我坚持**实验设计、统计口径、与结果审计全部人工复核**：开发过程中我先后三次自己抓出并公开撤回了问题——一是早期 `75%` 翻转率其实源于同一条失败轨迹的伪重复（已降级为 Case Study）；二是自研早期正则启发式直接撞上了开发期攻击短语构成特征泄漏（立即删除并写进 CI 3-gram 守卫测试，全部改用冻结的 15 模板 Held-Out 重测）；三是修复了画图脚本把 LOSO 漏判率误报成误杀率、以及 JSON 外层 Markdown 代码块导致 40 条缓存有效样本被丢弃的问题。所有公开数字都只能在唯一账本 `CLAIMS.md` 里查到出处。”
+1. **Evidence-Grounded Trajectory Judge & Auditable Operating Points**: Designed `EvidenceGroundedGrader` (deterministic side-effect ledger, `<untrusted_tool_data>` quarantine, `[index]` citations, and Python veto gate) to replace coarse `{1, 2, 3}` generic rubrics in multi-step tool-use evaluation. On `200` objective τ-bench trajectories (`131` scenarios), it outperforms OpenJudge `Comprehensive` in paired `ΔAUC` under both complete-case (**`+0.156`**, `p = 0.001`) and error-imputed ITT (**`+0.121`**, `p = 0.012`), shifts default failure recall by **`+36.9 pp` / `+31.6 pp`** across GLM and DeepSeek backbones (`84.4% / 74.1%` unauthorized-action precision), and provides continuous threshold tuning.
+2. **Pre-Registered Independent Validation & Ablation Diagnostics**: Executed a pre-registered `n = 100` out-of-sample τ-bench validation and frozen threshold transfer study, diagnosing non-replicated `ΔAUC` (`-0.034, p = 0.840`) to `airline → retail` domain shift (`36.5% → 4%`) and `reasoning_effort` confounding while confirming default operating-point separation (`34.1% vs 5.1%`) and domain-calibration needs. Paired ablation (`n = 60`) verifies significant `ΔAUC` gains from the ledger (`+0.157, p = 0.012`) and tool quarantine (`+0.105, p = 0.015`), with `0.900` mean AUC (`SD = 0.009`) across 3 prompt paraphrases.
+3. **Upstream Open-Source Fixes & Reproducible Evaluation Infra**: Built a non-invasive OpenJudge bridge and reproducible runner featuring SHA-256 deduplicated caching, relay model-response auditing (`relay_audit.py`), normalized `920`-trace storage, and socket-blocked CI tests; upstreamed **[OpenJudge PR #246](https://github.com/agentscope-ai/OpenJudge/pull/246)** (`raw_score` preservation) and **[PR #248](https://github.com/agentscope-ai/OpenJudge/pull/248)** (closing **Issue #247** on `15/22` voting `min-of-3` collapse).
 
 ---
 
-## 五、高频深度追问 Top 5 备忘
+## 三、90 秒面试口头自述（统一口径）
 
-1. **Claw-Eval 48 条上 Grounded 为何没超过调阈值后的 Comprehensive，到了 200 条 τ-bench 却全面领先？**
-   - 详见讲解卡 05：一是 48 条人工复测 `κ = 0.250` 本身噪声过大、置信区间宽达 40–60 pp；二是 **D31** 发现并修复了多轮对话终止态误杀（`###STOP###` / `transfer_to_human_agents`）与 6KB 业务政策截断 + 加入连续 `confidence_pass`；三是 τ-bench 的授权/写操作场景直接匹配 `EvidenceGrounded` 设计，同时仍把早期 48 条保留在报告附录 A 不删不改。
-2. **四路消融里贡献最大的是哪一块？Veto 到底有没有用？**
-   - 严格单调阶梯：**证据账本（`R@10%` 降 `46.5 pp`）> 隔离槽（降 `25.8 pp`，且在干净轨迹上也把误杀率从 `44.8%` 压到 `34.6%`）> Veto 门控（降 `14.8 pp`，在客观 τ-bench 上实际覆写模型误放过 `6/184` 与 `3/53`，而在旧 48 条离线审计上诚实汇报为 `0/109`）**。
-3. **跨厂商自评偏好（Self-Preference）测得怎么样？有哪些局限？**
-   - 严格按两厂商（GLM + DeepSeek）完整 `200/200` 对称范围披露：在 DeepSeek-V3.2 与 GPT-4o 50/50 考卷上，两厂商裁判均未出现放水同源轨迹的自评偏倚（`DeepSeek-Flash Grounded` 审 DeepSeek 轨迹 `AUC 0.659` / 召回 `48.0%` vs GPT-4o `0.599` / `47.9%`；`DeepSeek Accuracy` 亦为 `20.0%` vs `12.0%`），且 `unauthorized_side_effect` 精确率跨厂商稳定在 **GLM-Flash `84.4%` (`27/32`)**、**GLM-Pro `75.0%` (`30/40`)**、**DeepSeek-Flash `74.1%` (`20/27`)**。核心局限：(a) `DeepSeek-Flash (thinking=off)` 在完整 7KB 政策下判断更宽松，`AUC 0.629` 与低误杀 `R@10% 21.4%` 表现明显弱于带轻量推理的 `GLM-Flash (0.755)`，证明长政策核验需要轻量推理预算；(b) 出于预算未纳入第三家海外闭源厂商。
-4. **Best-of-4 为什么和数据库 Oracle 差了 26.5 pp？P2-B LightClaw 门禁为什么没接？**
-   - 无执行反馈的单轨迹排序无法可靠分辨同题 4 路试跑里细微的数据库参数错误，这也倒逼我们将「确定性规则 + 过程审计 + 可执行校验」分层设计（并在 P1-3 用银标反向发现 `13/92 = 14.1%` 数据库通过但过程越权的盲区）。LightClaw PR 门禁按当前范围暂缓，但底层接口与四层 Schema 已就绪。
-5. **代码仓库中最熟的 5 个核心文件怎么讲？**
-   - `llm.py`（统一缓存/重试/预算熔断 + `reasoning_effort` + `parse_json_object`）、`openjudge_bridge.py`（`HTTPX Transport` 零侵入拦截 + `repeat_id.{subcall}`）、`grounded_judge.py`（Extract-Audit-Veto + D31 多轮终止态）、`scenario_stats.py`（场景簇统计 + P0-3 噪声底 + Holm）、`taubench_adapter.py`（`reward` 零泄漏隔离适配）。
+> 「我独立做了 TrajJudge 多步 Agent 轨迹评测项目。起因是现有通用 LLM 裁判经常被助手末轮流畅话术蒙蔽，比如阿里开源 OpenJudge 的 `Comprehensive` 在 200 条客观 τ-bench 上只抓出 `4.4%` 的失败，而 `Accuracy` 也只有 `27.3%` 且 `{1,2,3}` 三分制调不动阈值。
+> 我做了两件事：先是源码审计，向 OpenJudge 合入了 PR #246 和 PR #248 修复两个上游缺陷；然后设计了证据锚定裁判，按“抽取确定性账本 -> 工具输出放进隔离槽 -> `[消息编号]` 逐条审计 + Python Veto 兜底”三步走。
+> 实测时我刻意用**配对 `ΔAUC` 和 ITT 失误归零**双口径做严格自检。结论非常诚实：**结构化架构没有凭空拔高模型本身的判别天花板，它的真实价值有三点：① 把近乎失效的 `Comprehensive` 显著拉到可用区间（`ΔAUC +0.156`, ITT `+0.121`）；② 在 GLM 和 DeepSeek 上把默认判定点稳定推向高召回可调区（+36.9 pp / +31.6 pp）；③ 每条判定都附带可溯源的 `[index]` 证据和越权标志，允许针对具体误杀审计和调参。** 另外我还事先Commit锁定并跑了 100 条独立验证集，实事求是诊断出了 `airline→retail` 域漂移和推理预算混杂问题。」
+
+---
+
+## 四、协作声明模板（简历/面试统一表述）
+
+> 「本项目使用 AI 编程助手辅助实现；实验预设、指标与配对检验口径设计、前后端防泄漏/防幻觉守卫及全部负结果排查由作者独立设计与拍板。」
+
+---
+
+## 五、面试高频 6 问速查（对应 Roadmap v3 模块 F3）
+
+| 问题 | 核心回答要点（30 秒口径） |
+| :--- | :--- |
+| **Q1：为什么 McNemar 召回显著提升，但和 `Accuracy` 比 `ΔAUC` 不显著？** | McNemar 只比单一默认阈值的二值召回：`Accuracy` 卡在 `3%–8%` 低误杀区，`Grounded` 处在 `26%` 高召回区；`ROC-AUC` 衡量全阈值排序力，DeepSeek-Flash 上 `ΔAUC = 0.000` 而默认召回 `+31.6 pp` 正好证明两者差异在工作点位置而非全局排序暴涨。 |
+| **Q2：你的架构到底带来了什么，又没带来什么？** | **没有**凭空提升模型对疑难边界样本的排序天花板；**真正带来**的是：① 让近乎失效的 `Comprehensive` 可用（`+0.156` / `+0.121`）；② 把判定点推至高召回区并把 3 分制离散死区变成 `46` 档连续阈值；③ 输出带 `[index]` 索引和 `unauthorized_side_effect` 的可审计账本。 |
+| **Q3：D31 修复是在主队列上发现的，怎么证明没过拟合？100 条独立验证集结果如何？** | ① D31 只修工程 bug（多轮 `###STOP###` 终止识别 + 取消 1.5KB 政策截断）；② 事前 `PREREG_v3 §9` Commit 1 哈希锁定 100 条未用轨迹并冻结阈值再跑：`retail → retail` 同域下 `Grounded AUC 0.677 → 0.638`、`Accuracy 0.599 → 0.597`，没有过拟合；③ 验证集上 `Grounded vs Comprehensive ΔAUC` 未复现（`-0.034`），系 `airline (36.5%→4%)` 域漂移及 `D33 reasoning_effort=low` 拉高 `Comprehensive` 推理率（`59.6%→95.7%`, 代价是 7 条截断令 ITT 仅 `0.598`）双重混杂，而默阈工作点差距仍在（`34.1% vs 5.1%`），说明部署需按领域重标定阈值。 |
+| **Q4：API 报错或截断的无效轨迹怎么算？会造成幸存者偏差吗？** | 同时报告 **Complete-Case（共同有效样本）** 与 **ITT（全部样本纳入，失败/缺失赋 `score = 0.0`）**。主结论 `Grounded vs Comprehensive` 两种口径均显著；`Grounded vs Accuracy`（GLM-Flash）与 `60` 条消融因 `full-v0` 有 `7/60` D33 前截断，在 ITT 下有所衰减，已全部透明写入 `CLAIMS.md` 与报告。 |
+| **Q5：为什么 `no_veto` 消融在配对 `ΔAUC` 上不显著（`+0.041, p=0.105`），还要保留 Veto？** | ① 点估计与 ITT（`+0.064, p=0.023`）均为正且 **0 API 成本**；② 连续 AUC 看重排序，Veto 的工程定位是**确定性安全护栏**，在默认阈值处把 `84.4%` 高精确率越权告警刚性否决（消融 `+7.4 pp` 召回、`+0.037 κ`）；③ 当模型自身输出「账本发现越权但 verdict 仍写 pass」的自相矛盾时，Veto 是可测试的兜底门控。 |
+| **Q6：P1-3 检出的 `13/92` DB 通过疑似盲区能算最终实锤吗？** | 不能。`glm-5.3` 在此处仅作 Silver Label 初筛，仓库已提供结构化离线盲审包（`annotation/round3_review_packet/`）及 `pending_human_review` 状态报告（`reports/p13_human_review.json`）；未经过人工独立盲审前，不作为确证盲区数写进简历成果。 |

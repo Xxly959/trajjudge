@@ -44,6 +44,11 @@ def gather_dashboard_data() -> dict[str, Any]:
     p13_bs = _load_json("reports/p13_blindspot_summary.json")
     p15_inj = _load_json("reports/p15_heldout_injection.json")
     p2_bon = _load_json("reports/p2_best_of_n.json")
+    paired_auc = _load_json("reports/paired_auc_v3.json")
+    relay_audit = _load_json("reports/relay_audit.json")
+    p1_val = _load_json("reports/p1_validation_v3.json")
+    op_pts = _load_json("reports/operating_points_v3.json")
+    p13_human = _load_json("reports/p13_human_review.json")
 
     raters_s3 = ((stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("raters") or {})
     fac_cells = (((factorial.get("views") or {}).get("v2_labels") or {}).get("cells") or {})
@@ -104,6 +109,11 @@ def gather_dashboard_data() -> dict[str, Any]:
             "silver_blindspot": p13_bs,
             "heldout_injection": p15_inj.get("arm_summary") or {},
             "best_of_n": p2_bon,
+            "paired_auc": paired_auc,
+            "relay_audit": relay_audit,
+            "validation": p1_val,
+            "operating_points": op_pts,
+            "human_review": p13_human,
         },
         "v1_vs_v2": {
             "v1": {
@@ -195,13 +205,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <header>
   <div class="wrap">
     <div class="badge-row">
-      <span class="badge ok">离线禁网单测 537 Passed</span>
+      <span class="badge ok">离线禁网单测 547 Passed</span>
       <span class="badge">预注册统计口径 PREREG v3</span>
       <span class="badge">τ-bench (200) × Claw-Eval × OpenJudge × SWE-bench</span>
       <span class="badge">零私钥/零原始第三方语料泄漏</span>
     </div>
     <h1>TrajJudge · Agent 轨迹评分器元评测、组件消融与可验证数据工程</h1>
-    <p>在 200 条数据库客观验证的 τ-bench 多轮工具轨迹（131 独立场景）上实证通用 LLM-as-a-Judge 失效边界，并验证「证据账本 + 隔离槽 + Veto 门控」架构的全指标超越与三组件单调贡献。</p>
+    <p>结构化架构没有凭空提升模型的辨别能力。它的价值在于：① 让通用裁判从基本失效变为可用（相对 Comprehensive ΔAUC +0.156 显著提升）；② 把判定点推到高召回区，并提供可调阈值；③ 每个判定都附带证据索引和越权标记，可以审计。</p>
   </div>
 </header>
 
@@ -240,7 +250,39 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       </div>
     </div>
     <div class="card" style="margin-bottom:20px;">
-      <h3 style="margin-top:0;">P1-6 组件消融单调阶梯与提示词稳定性（60 条分层 τ-bench，GLM-Flash）</h3>
+      <h3 style="margin-top:0;">配对 ΔAUC、ITT 敏感性（主队列 n=200 &amp; 独立验证集 n=100）与工作点阈值迁移</h3>
+      <p style="color:var(--muted);font-size:13.5px;margin-top:-4px;">场景簇 Bootstrap (B=2000, seed=0)；ITT 将缺失/错误行按判失败、<code>raw_score = 0.0</code> 计入；主队列冻结工作点直接迁移至未见验证集。</p>
+      <div style="overflow-x:auto;">
+        <table id="paired-auc-table">
+          <thead>
+            <tr>
+              <th>对比组 / 数据集</th>
+              <th>Complete-Case ΔAUC (95% CI, p)</th>
+              <th>ITT ΔAUC (95% CI, p)</th>
+              <th>判读说明</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="overflow-x:auto;margin-top:14px;">
+        <table id="val-op-table">
+          <thead>
+            <tr>
+              <th>评分器 &amp; 冻结工作点档位</th>
+              <th>主队列阈值</th>
+              <th>主队列 召回 / 误杀</th>
+              <th>验证集 召回 / 误杀</th>
+              <th>验证集漂移 (pp)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="relay-audit-note" style="font-size:12.5px;color:var(--muted);margin-top:10px;margin-bottom:0;"></p>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <h3 style="margin-top:0;">P1-6 组件消融共同样本配对比较与提示词稳定性（60 条分层 τ-bench 子集，GLM-Flash）</h3>
       <p id="prompt-sensitivity-note" style="color:var(--muted);font-size:13.5px;margin-top:-4px;"></p>
       <div style="overflow-x:auto;">
         <table id="ablation-table">
@@ -320,8 +362,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
   <section id="tab-injection" class="panel">
     <div class="card" style="margin-bottom:20px;">
-      <h3 style="margin-top:0;">P1-5 Held-Out 15 模板间接提示注入（开发期未见过测试集，SHA-256 冻结，GLM-Flash）</h3>
-      <p style="font-size:13.5px;color:var(--muted);">12 条客观失败轨迹（8 独立场景）× 3 位置 × 3 重复无攻击噪声底，直接检验 <code>&lt;untrusted_tool_data&gt;</code> 隔离槽对未见模板的因果防御效应：</p>
+      <h3 style="margin-top:0;">P1-5 Held-Out 15 模板间接提示注入（exploratory，n=12 失败轨迹 / 8 场景，SHA-256 冻结）</h3>
+      <p style="font-size:13.5px;color:var(--muted);">12 条客观失败轨迹（8 独立场景）× 3 位置 × 3 重复无攻击噪声底（注：因样本量小且 CI 重叠，另中转审计查出 5/675 调用路由异常，定性为 <code>exploratory</code> 探索性方法学验证）：</p>
       <div style="overflow-x:auto;">
         <table id="p15-table">
           <thead>
@@ -494,11 +536,23 @@ function renderOverview() {
     unauth_prec: ds.unauthorized_side_effect_precision, unauth_true: ds.unauthorized_side_effect_true_fails, unauth_count: ds.unauthorized_side_effect_count,
   } : {});
 
+  const hr = p1.human_review || {};
+  const hrC1 = hr.blindspots_c1 || {};
+  const hrStatus = hr.status === 'completed'
+    ? `人工确认 ${(hrC1.verdict_counts || {}).confirmed || 0}/13`
+    : `AI 银标筛出 ${bs.n_flagged_blindspots || 13}/${bs.n_audited_passes || 92}（待人工复核确认）`;
+  const valRep = p1.validation || {};
+  const valPrim = ((valRep.paired_delta_auc || {}).grounded_vs_comprehensive || {}).all_complete_case || {};
+  const paucMain = (p1.paired_auc || {}).main_cohort || {};
+  const paucAbl = (p1.paired_auc || {}).ablation_60 || {};
+  const grdVsComp = (paucMain.grd_glm_flash_vs_comp_glm_flash || {}).complete_case || {};
+
+  const signed3 = (v) => v == null ? '待运行' : ((v >= 0 ? '+' : '') + num(v, 3));
   const kpis = [
-    { label: "P1-1 客观 τ-bench 主指标 (GLM-Flash)", val: `AUC ${num(egF.roc_auc, 3)}`, sub: `Grounded vs Comprehensive ${num(compF.roc_auc, 3)} · R@20% ${pct(egF.r20)} vs ${pct(compF.r20)} (Exact McNemar p=0.0006)`, color: "var(--green)" },
-    { label: "跨厂商越权副作用精确率", val: `${pct(egF.unauth_prec)} / ${pct(dsView.unauth_prec)}`, sub: `GLM-Flash ${egF.unauth_true}/${egF.unauth_count} · DeepSeek-Flash ${dsView.unauth_true}/${dsView.unauth_count}（2 厂商对照）`, color: "var(--brand)" },
-    { label: "P1-6 三组件消融单调阶梯 (R@10%)", val: `${pct((abl.full || {}).recall_at_fpr_10)} → ${pct((abl.no_ledger || {}).recall_at_fpr_10)}`, sub: `AUC ${num((abl.full || {}).roc_auc, 3)} → no_veto ${num((abl.no_veto || {}).roc_auc, 3)} → no_quar ${num((abl.no_quarantine || {}).roc_auc, 3)} → no_ledger ${num((abl.no_ledger || {}).roc_auc, 3)}`, color: "var(--amber)" },
-    { label: "P1-3 数据库校验盲区审计", val: `${bs.n_flagged_blindspots || 13}/${bs.n_audited_passes || 92} (${pct(bs.blindspot_rate)})`, sub: "旗舰 GLM-5.3 在客观 reward=1.0 通过轨迹中筛出流程/越权盲区（Silver Label）", color: "var(--slate)" },
+    { label: "主队列 & 验证集 配对 ΔAUC (vs Comprehensive)", val: `${signed3(grdVsComp.delta_auc)} / ${signed3(valPrim.delta_auc)}`, sub: `主队列 CI ${grdVsComp.ci_95 ? '['+num(grdVsComp.ci_95[0],3)+','+num(grdVsComp.ci_95[1],3)+']' : ''} · 验证集 (n=100, 96% retail) CI ${valPrim.ci_95 ? '['+num(valPrim.ci_95[0],3)+','+num(valPrim.ci_95[1],3)+']' : '待运行'}`, color: "var(--green)" },
+    { label: "跨厂商越权副作用精确率", val: `${pct(egF.unauth_prec)} / ${pct(dsView.unauth_prec)}`, sub: `GLM-Flash ${egF.unauth_true}/${egF.unauth_count} · DeepSeek-Flash ${dsView.unauth_true}/${dsView.unauth_count}（探索性自评检查未见明显偏倚）`, color: "var(--brand)" },
+    { label: "P1-6 组件共同样本配对 ΔAUC (n=60 子集)", val: `账本 +${num(((paucAbl.full_vs_no_ledger || {}).complete_case || {}).delta_auc, 3)} / 隔离 +${num(((paucAbl.full_vs_no_quarantine || {}).complete_case || {}).delta_auc, 3)}`, sub: `Veto +${num(((paucAbl.full_vs_no_veto || {}).complete_case || {}).delta_auc, 3)} (CI 跨 0)；该子集主实验 AUC 亦为 0.910 (偏容易)`, color: "var(--amber)" },
+    { label: "P1-3 数据库校验盲区审计 (Silver Label)", val: `${bs.n_flagged_blindspots || 13}/${bs.n_audited_passes || 92} (${pct(bs.blindspot_rate)})`, sub: hrStatus, color: "var(--slate)" },
   ];
   document.getElementById('kpi-cards').innerHTML = kpis.map(k => `
     <div class="card">
@@ -533,6 +587,61 @@ function renderOverview() {
     </tr>`;
   }).join('');
 
+  const fmtPair = (st) => {
+    if (!st || st.delta_auc == null) return "—";
+    const s = (st.delta_auc >= 0 ? "+" : "") + num(st.delta_auc, 3);
+    const ci = st.ci_95 ? `[${st.ci_95[0] >= 0 ? '+' : ''}${num(st.ci_95[0], 3)}, ${st.ci_95[1] >= 0 ? '+' : ''}${num(st.ci_95[1], 3)}]` : "";
+    return `<b>${s}</b> ${ci} (p=${st.p_value}, n=${st.n_paired})`;
+  };
+  const valP = (valRep.paired_delta_auc || {});
+  const pairedRows = [
+    ["主队列 · Grounded-GLMFlash vs Comprehensive-GLMFlash", paucMain.grd_glm_flash_vs_comp_glm_flash, "complete_case", "itt", "两种口径均显著领先通用综合裁判"],
+    ["独立验证集 · Grounded-GLMFlash vs Comprehensive-GLMFlash", valP.grounded_vs_comprehensive, "all_complete_case", "all_itt", "96%-retail 验证集主假设未复现（域漂移 + D33 推理预算差异），但默认阈值 Comprehensive 仍失效 (5.1%)、同域 retail AUC 稳定 (0.677→0.638)"],
+    ["主队列 · Grounded-GLMFlash vs Accuracy-GLMFlash", paucMain.grd_glm_flash_vs_acc_glm_flash, "complete_case", "itt", "cc 有迹象，ITT 跨 0；主差异为高召回判定点"],
+    ["独立验证集 · Grounded-GLMFlash vs Accuracy-GLMFlash", valP.grounded_vs_accuracy, "all_complete_case", "all_itt", "次要对照，CI 跨 0；同域 retail AUC 稳定 (0.598→0.597)"],
+    ["主队列 · Grounded-GLMFlash vs Accuracy-GLMPro", paucMain.grd_glm_flash_vs_acc_glm_pro, "complete_case", "itt", "跨尺度比较排序差不显著（主差异在判定点）"],
+    ["主队列 · DeepSeek-Flash Grounded vs Accuracy", paucMain.grd_ds_flash_vs_acc_ds_flash, "complete_case", "itt", "默认召回 +31.6pp 但 ΔAUC = 0.000，印证判定点移动"],
+    ["消融 (n=60) · full vs no_ledger", paucAbl.full_vs_no_ledger, "complete_case", "itt", "账本 cc 贡献最大（ITT 因 full-v0 7 条截断衰减）"],
+    ["消融 (n=60) · full vs no_quarantine", paucAbl.full_vs_no_quarantine, "complete_case", "itt", "隔离槽 cc 贡献显著（ITT 受缺失行影响跨 0）"],
+    ["消融 (n=60) · full vs no_veto", paucAbl.full_vs_no_veto, "complete_case", "itt", "方向为正，cc CI 跨 0（低覆写率硬约束）"],
+  ];
+  document.querySelector('#paired-auc-table tbody').innerHTML = pairedRows.map(([lbl, obj, k1, k2, note]) => {
+    const o = obj || {};
+    return `<tr><td>${lbl}</td><td>${fmtPair(o[k1])}</td><td>${fmtPair(o[k2])}</td><td style="font-size:12.5px;color:var(--muted);">${note}</td></tr>`;
+  }).join('');
+
+  const opR = (p1.operating_points || {}).raters || {};
+  const opRows = [];
+  for (const [rk, rlbl] of [
+    ["evidence_grounded|glm-5.3-flash", "Grounded-GLMFlash"],
+    ["trajectory_accuracy|glm-5.3-flash", "Accuracy-GLMFlash"],
+    ["trajectory_comprehensive|glm-5.3-flash", "Comprehensive-GLMFlash"],
+  ]) {
+    const trMap = (opR[rk] || {}).transfer || {};
+    for (const [tk, tlbl] of [
+      ["strict_fpr_le_10", "严格档 (主 FPR ≤ 10%)"],
+      ["default", "默认档"],
+      ["loose_recall_ge_80", "宽松档 (主 Recall ≥ 80%)"],
+      ["best_nondegenerate_high_recall", "非退化高召回档 (<3.0)"],
+    ]) {
+      const td = trMap[tk];
+      if (!td) continue;
+      const mc = td.main_complete_case || {}, vc = td.val_complete_case || {}, dr = td.drift_cc_pp || {};
+      opRows.push(`<tr>
+        <td>${rlbl} · ${tlbl}</td>
+        <td><code>&lt; ${td.frozen_threshold}</code></td>
+        <td>${pct(mc.recall)} / ${pct(mc.fpr)}</td>
+        <td><b>${pct(vc.recall)} / ${pct(vc.fpr)}</b></td>
+        <td>Rec ${dr.recall_pp >= 0 ? '+' : ''}${dr.recall_pp} pp · FPR ${dr.fpr_pp >= 0 ? '+' : ''}${dr.fpr_pp} pp</td>
+      </tr>`);
+    }
+  }
+  document.querySelector('#val-op-table tbody').innerHTML = opRows.join('') || '<tr><td colspan="5">运行独立验证集后自动填充</td></tr>';
+  const ra = p1.relay_audit || {};
+  const raCross = ((ra.cross_model_mismatches || {}).summary_by_experiment_and_model) || {};
+  document.getElementById('relay-audit-note').textContent =
+    `中转站模型身份审计（扫描 ${ra.total_cache_entries_scanned || 0} 条缓存）：GLM 主实验/消融/银标/BoN/验证集以 raw_response.model 为准；跨模型异常路由：${Object.keys(raCross).length ? JSON.stringify(raCross) : '无'}；DeepSeek 为官方直连对照。`;
+
   const ablOrder = [
     ["full", "Full 完整架构（账本 + 隔离槽 + Veto）", true],
     ["no_veto", "w/o Veto（关闭 Python 强制否决门控）", false],
@@ -562,8 +671,8 @@ function renderOverview() {
   const bonMcn = (((p1.best_of_n || {}).mcnemar_pass_rate || {})["trajectory_comprehensive|glm-5.3-flash_vs_evidence_grounded|glm-5.3-flash"]) || {};
   const bonOrder = [
     ["final_confidence", "末轮语气启发式 (final_confidence)", "纯末轮回复长度与自信关键词，无工具核验", false],
-    ["random", "随机期望基线 (random)", "每任务 4 次采样平均通过率期望值", false],
-    ["evidence_grounded|glm-5.3-flash", "Evidence-Grounded (glm-5.3-flash)", `相对随机 +3.5 pp；共同对齐 n=${bonMcn.n || 28} 任务与 Comprehensive 完全打平 (${pct(bonMcn.rate_a)} vs ${pct(bonMcn.rate_b)}, p=1.0)`, true],
+    ["random", "随机期望基线 (random)", "每任务 4 次采样平均通过率期望值（50 任务中仅 25 混合任务可区分选法）", false],
+    ["evidence_grounded|glm-5.3-flash", "Evidence-Grounded (glm-5.3-flash, 负结果)", `相对随机零显著效应；共同对齐 n=${bonMcn.n || 28} 任务与 Comprehensive 完全打平 (${pct(bonMcn.rate_a)} vs ${pct(bonMcn.rate_b)}, p=1.0)`, true],
     ["trajectory_comprehensive|glm-5.3-flash", "OpenJudge Comprehensive (32/50*)", "仅 32/50 完整（18 难题缺失带来偏差）；对齐共同 28 任务为 57.1%", false],
     ["oracle", "DB Oracle 上界 (可执行校验)", "数据库终态校验至少 1 条通过即成功（揭示 26.5 pp 离线重排差距）", false],
   ].filter(([k]) => bonSels[k]);

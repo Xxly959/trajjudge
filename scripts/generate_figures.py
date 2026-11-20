@@ -462,8 +462,8 @@ def build_fig6_p1_taubench_and_ablation(
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
         f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
-        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 6 · P1 客观标签 τ-bench 两厂商全量对比（n=200 / 131 场景）与四路组件单调消融（P1-6）</text>',
-        '<text x="28" y="55" font-size="11.8" fill="#475569">基于 DB 可执行真值：Evidence-Grounded 显著提升两厂商默认失败召回（GLM-Flash 全指标第一；DeepSeek-Flash 呈现轻量推理敏感性）</text>',
+        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 6 · P1 客观标签 τ-bench 两厂商全量对比（n=200 / 131 场景）与组件消融（P1-6）</text>',
+        '<text x="28" y="55" font-size="11.5" fill="#475569">相对 Comprehensive ΔAUC +0.156 显著胜出；相对 Accuracy 主差异为高召回判定点（DeepSeek 同模型 ΔAUC = 0.000）</text>',
     ]
 
     # Panel A (Left): P1-1 τ-bench
@@ -490,7 +490,7 @@ def build_fig6_p1_taubench_and_ablation(
 
     # Panel B (Right): P1-6 Ablation
     rx, ry, rpw, rph = 678, 96, 200, 340
-    parts.append(f'<text x="{rx + rpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 组件消融单调阶梯 (n=60 分层)</text>')
+    parts.append(f'<text x="{rx + rpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 组件消融共同样本配对比较 (n=60 分层子集)</text>')
     for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
         x = rx + tick * rpw
         parts.append(f'<line x1="{x:.1f}" y1="{ry}" x2="{x:.1f}" y2="{ry + rph}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
@@ -567,13 +567,13 @@ def build_fig7_p15_injection_and_p2_bon(p15: dict[str, Any], p2_bon: dict[str, A
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
         f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
-        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 7 · P1-5 Held-Out 15 模板注入防御（tool_result）与 P2-A Best-of-4 重排闭环</text>',
-        '<text x="28" y="55" font-size="12" fill="#475569">左：未见过攻击测试集决策翻转率与涨分率对照无攻击噪声底（GLM-Flash）；右：Best-of-4 通过率与 95% 场景簇置信区间</text>',
+        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 7 · P1-5 Held-Out 注入（exploratory, n=12）与 P2-A Best-of-4（负结果）</text>',
+        '<text x="28" y="55" font-size="11.6" fill="#475569">左：15 模板探索性对比（12 轨迹/8 场景，CI 高度重叠）；右：Best-of-4 仅 25/50 个混合任务可区分选法，总体零效应</text>',
     ]
 
     # Panel A (Left)
     lx, ly, lpw, lph = 185, 96, 265, 290
-    parts.append(f'<text x="{lx + lpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. Held-Out 15 模板注入 (tool_result)</text>')
+    parts.append(f'<text x="{lx + lpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. Held-Out 15 模板注入 (exploratory)</text>')
     for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
         x = lx + tick * lpw
         parts.append(f'<line x1="{x:.1f}" y1="{ly}" x2="{x:.1f}" y2="{ly + lph}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
@@ -622,7 +622,146 @@ def build_fig7_p15_injection_and_p2_bon(p15: dict[str, Any], p2_bon: dict[str, A
 
     parts.append('<rect x="28" y="416" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.95"/><text x="45" y="424" font-size="10" fill="#334155">主指标：fail→pass 决策翻转率</text>')
     parts.append('<rect x="220" y="416" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.38"/><text x="237" y="424" font-size="10" fill="#334155">次指标：涨分率 vs 无攻击噪声底</text>')
-    parts.append(f'<text x="28" y="444" font-size="10.2" fill="#64748b">*注：Comprehensive 仅 32/50 任务完整（遗漏 18 个难题造成偏差）；在 {paired_n} 个共同完整任务上两者完全打平 {_pct(paired_r)} vs {_pct(paired_r)} (McNemar p=1.0)。数据源：p15_heldout_injection.json &amp; p2_best_of_n.json</text>')
+    parts.append(f'<text x="28" y="444" font-size="10.2" fill="#64748b">*注：Comprehensive 仅 32/50 完整；共同 {paired_n} 题打平 {_pct(paired_r)} (McNemar p=1.0)；50 题中仅 25 混合任务可区分选法，且 P1-5 样本 12 条（5/675 中转路由至 nemotron）属 exploratory。</text>')
+    parts.append("</svg>\n")
+    return "\n".join(parts)
+
+
+def build_fig8_operating_points_v3(
+    op_pts: dict[str, Any],
+    val_rep: dict[str, Any],
+    paired_auc: dict[str, Any],
+) -> str:
+    """SVG 8 (v3): Operating-point transfer (Main->Val) and Paired ΔAUC forest plot (CC & ITT)."""
+    w, h = 980, 520
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
+        f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
+        '<text x="28" y="34" font-size="17.2" font-weight="700" fill="#0f172a">图 8 · 独立验证集工作点阈值迁移（n=100）与配对 ΔAUC / ITT 森林图</text>',
+        '<text x="28" y="55" font-size="11.5" fill="#475569">左：主队列冻结阈值直接迁移至未见验证集（Grounded 连续可调 vs Accuracy 3 分制离散上限）；右：场景簇 Bootstrap 95% CI（B=2000）</text>',
+    ]
+
+    # Panel A (Left): Recall-FPR Operating Curve & Frozen Transfer Points
+    ax, ay, aw, ah = 74, 96, 360, 340
+    parts.append(f'<text x="{ax + aw / 2:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. Recall–FPR 工作点曲线与冻结阈值迁移</text>')
+    parts.append(f'<rect x="{ax}" y="{ay}" width="{aw}" height="{ah}" fill="#f8fafc" stroke="#cbd5e1"/>')
+    for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
+        tx = ax + tick * aw
+        ty = ay + (1.0 - tick) * ah
+        parts.append(f'<line x1="{tx:.1f}" y1="{ay}" x2="{tx:.1f}" y2="{ay + ah}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
+        parts.append(f'<line x1="{ax}" y1="{ty:.1f}" x2="{ax + aw}" y2="{ty:.1f}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
+        parts.append(f'<text x="{tx:.1f}" y="{ay + ah + 15}" text-anchor="middle" font-size="9.5" fill="#64748b">{int(tick*100)}%</text>')
+        parts.append(f'<text x="{ax - 7}" y="{ty + 3:.1f}" text-anchor="end" font-size="9.5" fill="#64748b">{int(tick*100)}%</text>')
+    # Diagonal chance line
+    parts.append(f'<line x1="{ax}" y1="{ay + ah}" x2="{ax + aw}" y2="{ay}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,4"/>')
+    # Reference FPR=10% & Recall=80% guides
+    x_fpr10 = ax + 0.10 * aw
+    y_rec80 = ay + (1.0 - 0.80) * ah
+    parts.append(f'<line x1="{x_fpr10:.1f}" y1="{ay}" x2="{x_fpr10:.1f}" y2="{ay + ah}" stroke="#94a3b8" stroke-dasharray="2,3"/>')
+    parts.append(f'<line x1="{ax}" y1="{y_rec80:.1f}" x2="{ax + aw}" y2="{y_rec80:.1f}" stroke="#94a3b8" stroke-dasharray="2,3"/>')
+    parts.append(f'<text x="{x_fpr10 + 3:.1f}" y="{ay + 12}" font-size="8.5" fill="#64748b">FPR=10%</text>')
+    parts.append(f'<text x="{ax + aw - 4:.1f}" y="{y_rec80 - 4:.1f}" text-anchor="end" font-size="8.5" fill="#64748b">Recall=80%</text>')
+    parts.append(f'<text x="{ax + aw / 2:.1f}" y="{ay + ah + 30}" text-anchor="middle" font-size="10.5" fill="#334155">误杀率 FPR (Pass 被误判 Fail)</text>')
+    parts.append(f'<text x="20" y="{ay + ah / 2:.1f}" text-anchor="middle" font-size="10.5" fill="#334155" transform="rotate(-90 20 {ay + ah / 2:.1f})">失败召回率 Recall</text>')
+
+    raters_op = op_pts.get("raters") or {}
+    curve_specs = [
+        ("evidence_grounded|glm-5.3-flash", "main", "#10b981", "2.2", ""),
+        ("evidence_grounded|glm-5.3-flash", "val", "#047857", "2.2", "5,3"),
+        ("trajectory_accuracy|glm-5.3-flash", "main", "#3b82f6", "1.7", ""),
+        ("trajectory_accuracy|glm-5.3-flash", "val", "#1d4ed8", "1.7", "5,3"),
+        ("trajectory_comprehensive|glm-5.3-flash", "main", "#f97316", "1.4", ""),
+    ]
+    for rkey, split, col, sw, dash in curve_specs:
+        rd = raters_op.get(rkey) or {}
+        pts = (rd.get("main_complete_case") or {}).get("curve") if split == "main" else rd.get("val_complete_case_curve")
+        if not pts:
+            continue
+        sorted_pts = sorted(
+            [(float(p["fpr"]), float(p["recall"])) for p in pts if p.get("fpr") is not None and p.get("recall") is not None]
+        )
+        if not sorted_pts:
+            continue
+        coords = " ".join(f"{ax + fpr * aw:.1f},{ay + (1.0 - rec) * ah:.1f}" for fpr, rec in sorted_pts)
+        dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
+        parts.append(f'<polyline fill="none" stroke="{col}" stroke-width="{sw}"{dash_attr} points="{coords}"/>')
+
+    # Highlight Grounded & Accuracy frozen transfer points
+    grd_tr = (raters_op.get("evidence_grounded|glm-5.3-flash") or {}).get("transfer") or {}
+    for tier, sym_label, col_pt in (
+        ("strict_fpr_le_10", "严", "#047857"),
+        ("default", "默", "#10b981"),
+        ("loose_recall_ge_80", "宽", "#065f46"),
+    ):
+        td = grd_tr.get(tier) or {}
+        mp = td.get("main_complete_case") or {}
+        vp = td.get("val_complete_case") or {}
+        if mp.get("fpr") is not None and vp.get("fpr") is not None:
+            mx, my = ax + float(mp["fpr"]) * aw, ay + (1.0 - float(mp["recall"])) * ah
+            vx, vy = ax + float(vp["fpr"]) * aw, ay + (1.0 - float(vp["recall"])) * ah
+            parts.append(f'<line x1="{mx:.1f}" y1="{my:.1f}" x2="{vx:.1f}" y2="{vy:.1f}" stroke="{col_pt}" stroke-width="1.3" stroke-dasharray="2,2"/>')
+            parts.append(f'<circle cx="{mx:.1f}" cy="{my:.1f}" r="4.2" fill="#ffffff" stroke="{col_pt}" stroke-width="2"/>')
+            parts.append(f'<circle cx="{vx:.1f}" cy="{vy:.1f}" r="4.8" fill="{col_pt}" stroke="#ffffff" stroke-width="1"/>')
+            parts.append(f'<text x="{vx + 6:.1f}" y="{vy + 3:.1f}" font-size="8.8" font-weight="700" fill="{col_pt}">{sym_label}({int(round(vp["recall"]*100))}/{int(round(vp["fpr"]*100))})</text>')
+
+    # Divider
+    parts.append('<line x1="472" y1="74" x2="472" y2="462" stroke="#cbd5e1" stroke-dasharray="4,4"/>')
+
+    # Panel B (Right): Paired Delta AUC Forest Plot
+    fx, fy, fw, fh = 688, 96, 255, 340
+    parts.append(f'<text x="{fx + fw / 2 - 40:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. 配对 ΔAUC 与 95% 场景簇 CI</text>')
+    dmin, dmax = -0.30, 0.35
+    def _dx(v: float) -> float:
+        return fx + ((max(dmin, min(dmax, v)) - dmin) / (dmax - dmin)) * fw
+
+    for tick in (-0.25, -0.10, 0.0, 0.10, 0.20, 0.30):
+        tx = _dx(tick)
+        col_g = "#0f172a" if tick == 0.0 else "#e2e8f0"
+        sw_g = "1.4" if tick == 0.0 else "1.0"
+        parts.append(f'<line x1="{tx:.1f}" y1="{fy}" x2="{tx:.1f}" y2="{fy + fh}" stroke="{col_g}" stroke-width="{sw_g}" stroke-dasharray="3,3"/>')
+        parts.append(f'<text x="{tx:.1f}" y="{fy + fh + 15}" text-anchor="middle" font-size="9.5" fill="#64748b">{tick:+.2f}</text>')
+    parts.append(f'<text x="{fx + fw / 2:.1f}" y="{fy + fh + 30}" text-anchor="middle" font-size="10.5" fill="#334155">配对 ΔAUC（右偏大于 0 表示前者排序更优）</text>')
+
+    main_p = paired_auc.get("main_cohort") or {}
+    abl_p = paired_auc.get("ablation_60") or {}
+    val_p = val_rep.get("paired_delta_auc") or {}
+    forest_specs = [
+        ("主队列 Grd vs Comp (n=200)", main_p.get("grd_glm_flash_vs_comp_glm_flash") or {}, "complete_case", "itt", "#10b981"),
+        ("验证集 Grd vs Comp (n=100)", val_p.get("grounded_vs_comprehensive") or {}, "all_complete_case", "all_itt", "#047857"),
+        ("主队列 Grd vs Acc-Flash", main_p.get("grd_glm_flash_vs_acc_glm_flash") or {}, "complete_case", "itt", "#3b82f6"),
+        ("验证集 Grd vs Acc-Flash", val_p.get("grounded_vs_accuracy") or {}, "all_complete_case", "all_itt", "#1d4ed8"),
+        ("主队列 Grd vs Acc-Pro", main_p.get("grd_glm_flash_vs_acc_glm_pro") or {}, "complete_case", "itt", "#6366f1"),
+        ("主队列 DS Grd vs DS Acc", main_p.get("grd_ds_flash_vs_acc_ds_flash") or {}, "complete_case", "itt", "#8b5cf6"),
+        ("消融 full vs no_ledger (n=60)", abl_p.get("full_vs_no_ledger") or {}, "complete_case", "itt", "#f59e0b"),
+        ("消融 full vs no_quarantine", abl_p.get("full_vs_no_quarantine") or {}, "complete_case", "itt", "#d97706"),
+        ("消融 full vs no_veto", abl_p.get("full_vs_no_veto") or {}, "complete_case", "itt", "#b45309"),
+    ]
+    rh = fh / len(forest_specs)
+    for idx, (label, blk, cc_k, itt_k, col) in enumerate(forest_specs):
+        yc = fy + idx * rh + rh * 0.34
+        yi = fy + idx * rh + rh * 0.68
+        parts.append(f'<text x="{fx - 8}" y="{(yc + yi) / 2 + 3:.1f}" text-anchor="end" font-size="9.8" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
+        for y_pos, key_m, filled in ((yc, cc_k, True), (yi, itt_k, False)):
+            st = blk.get(key_m) or {}
+            d_val = st.get("delta_auc")
+            ci = st.get("ci_95")
+            if d_val is None or not ci:
+                continue
+            x0, x1, xm = _dx(float(ci[0])), _dx(float(ci[1])), _dx(float(d_val))
+            op = "0.95" if filled else "0.55"
+            parts.append(f'<line x1="{x0:.1f}" y1="{y_pos:.1f}" x2="{x1:.1f}" y2="{y_pos:.1f}" stroke="{col}" stroke-width="1.6" stroke-opacity="{op}"/>')
+            if filled:
+                parts.append(f'<circle cx="{xm:.1f}" cy="{y_pos:.1f}" r="3.6" fill="{col}"/>')
+                parts.append(f'<text x="{x1 + 4:.1f}" y="{y_pos + 3:.1f}" font-size="8.4" fill="#334155">{d_val:+.3f}</text>')
+            else:
+                parts.append(f'<rect x="{xm - 3:.1f}" y="{y_pos - 3:.1f}" width="6" height="6" fill="#ffffff" stroke="{col}" stroke-width="1.5"/>')
+
+    # Legend
+    parts.append('<circle cx="34" cy="486" r="4" fill="#ffffff" stroke="#047857" stroke-width="2"/><text x="44" y="490" font-size="9.5" fill="#334155">主队列冻结工作点 (空心)</text>')
+    parts.append('<circle cx="176" cy="486" r="4.5" fill="#047857"/><text x="186" y="490" font-size="9.5" fill="#334155">验证集迁移点 (实心: 严/默/宽 召回/误杀%)</text>')
+    parts.append('<circle cx="430" cy="486" r="3.6" fill="#334155"/><text x="440" y="490" font-size="9.5" fill="#334155">右图实心圆: Complete-Case ΔAUC</text>')
+    parts.append('<rect x="615" y="483" width="6" height="6" fill="#ffffff" stroke="#334155" stroke-width="1.5"/><text x="627" y="490" font-size="9.5" fill="#334155">空心方框: ITT ΔAUC（无效行记 score=0）</text>')
+    parts.append('<text x="28" y="509" font-size="9.8" fill="#64748b">数据源：reports/operating_points_v3.json · reports/p1_validation_v3.json · reports/paired_auc_v3.json</text>')
     parts.append("</svg>\n")
     return "\n".join(parts)
 
@@ -650,6 +789,12 @@ def main() -> int:
     p15_heldout = json.loads(p15_path.read_text(encoding="utf-8")) if p15_path.is_file() else {}
     p2_path = root / "reports/p2_best_of_n.json"
     p2_bon = json.loads(p2_path.read_text(encoding="utf-8")) if p2_path.is_file() else {}
+    op_path = root / "reports/operating_points_v3.json"
+    op_pts = json.loads(op_path.read_text(encoding="utf-8")) if op_path.is_file() else {}
+    val_path = root / "reports/p1_validation_v3.json"
+    val_rep = json.loads(val_path.read_text(encoding="utf-8")) if val_path.is_file() else {}
+    pauc_path = root / "reports/paired_auc_v3.json"
+    paired_auc = json.loads(pauc_path.read_text(encoding="utf-8")) if pauc_path.is_file() else {}
 
     outputs = {
         FIG_DIR / "fig1_judge_reliability.svg": build_fig1_judge_reliability(stage3, agreement, factorial),
@@ -666,6 +811,10 @@ def main() -> int:
     if p15_heldout and p2_bon:
         outputs[FIG_DIR / "fig7_p15_injection_and_p2_bon.svg"] = build_fig7_p15_injection_and_p2_bon(
             p15_heldout, p2_bon
+        )
+    if op_pts and val_rep and paired_auc:
+        outputs[FIG_DIR / "fig8_operating_points_v3.svg"] = build_fig8_operating_points_v3(
+            op_pts, val_rep, paired_auc
         )
     for path, content in outputs.items():
         atomic_text(path, content)
