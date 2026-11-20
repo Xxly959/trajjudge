@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-11-20T11:30:29+00:00",
+  "seed": 20261120,
+  "cohort_sha256": "6716de02fa66a8e7214333d88a504886809d92202266d8c3066c592a28f766c1",
+  "source_pool_total": 825,
+  "excluded_main_n": 200,
+  "excluded_bon_union_n": 363,
+  "remaining_pool_n": 462,
+  "n_total": 100,
+  "n_failures": 50,
+  "n_passes": 50,
+  "n_scenarios": 39,
+  "scenario_seen_split": {
+    "unseen": {
+      "n_traces": 93,
+      "n_failures": 43,
+      "n_passes": 50,
+      "n_scenarios": 32
+    },
+    "seen": {
+      "n_traces": 7,
+      "n_failures": 7,
+      "n_passes": 0,
+      "n_scenarios": 7
+    }
+  },
+  "by_domain": {
+    "airline": 4,
+    "retail": 96
+  },
+  "by_agent_and_outcome": {
+    "deepseek-ai/DeepSeek-V3.2-Exp-thinking-off|fail": 10,
+    "deepseek-ai/DeepSeek-V3.2-Exp-thinking-off|pass": 10,
+    "gpt-4o|fail": 40,
+    "gpt-4o|pass": 40
+  },
+  "pool_constraint_note": "DeepSeek-V3.2 has only 10 unused failures remaining after the 200-trace main cohort, and p2bon-t50 consumed all 50 gpt-4o-airline tasks; therefore the 100-trace validation cohort balances 50/50 pass/fail within each agent (DeepSeek 10+10, GPT-4o 40+40 retail) and exhausts unseen scenarios first."
+}

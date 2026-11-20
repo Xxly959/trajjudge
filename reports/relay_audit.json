@@ -1,0 +1,658 @@
+{
+  "generated_at": "2026-11-20T11:29:14+00:00",
+  "audit_note": "Run row JSON files record only request-side `judge_model` (response_model=0 across historical runs); actual HTTP response `model` identity is audited directly from `.cache/llm/` `raw_response.model`.",
+  "total_cache_entries_scanned": 6322,
+  "by_requested_model": {
+    "deepseek-flash": {
+      "total": 3563,
+      "response_models": {
+        "<missing>": 5,
+        "deepseek-flash": 3558
+      },
+      "classification": {
+        "exact_match": 3558,
+        "missing": 5
+      }
+    },
+    "deepseek-v4-pro": {
+      "total": 140,
+      "response_models": {
+        "deepseek-v4-pro": 140
+      },
+      "classification": {
+        "exact_match": 140
+      }
+    },
+    "deepseek-v4.1-flash-1017": {
+      "total": 24,
+      "response_models": {
+        "deepseek-v4.1-flash-1017": 24
+      },
+      "classification": {
+        "exact_match": 24
+      }
+    },
+    "glm-5.3": {
+      "total": 586,
+      "response_models": {
+        "glm-5.3": 586
+      },
+      "classification": {
+        "exact_match": 586
+      }
+    },
+    "glm-5.3-flash": {
+      "total": 2008,
+      "response_models": {
+        "cb/glm-5.3-flash": 11,
+        "cbcn/glm-5.3-flash": 1,
+        "codearts/glm-5.3-flash": 27,
+        "glm-5.3-flash": 1458,
+        "nvidia/nemotron-3-ultra-550b-a55b": 5,
+        "z-ai/glm-5.3-flash": 2,
+        "zai-org/GLM-5.3-Flash": 504
+      },
+      "classification": {
+        "cross_model_mismatch": 5,
+        "exact_match": 1458,
+        "same_family_prefixed": 545
+      }
+    },
+    "unknown": {
+      "total": 1,
+      "response_models": {
+        "<missing>": 1
+      },
+      "classification": {
+        "missing": 1
+      }
+    }
+  },
+  "by_experiment": [
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "p1",
+      "total_cached_calls": 582,
+      "response_models": {
+        "deepseek-flash": 582
+      },
+      "classification": {
+        "exact_match": 582
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "p2",
+      "total_cached_calls": 959,
+      "response_models": {
+        "deepseek-flash": 959
+      },
+      "classification": {
+        "exact_match": 959
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "p3",
+      "total_cached_calls": 191,
+      "response_models": {
+        "deepseek-flash": 191
+      },
+      "classification": {
+        "exact_match": 191
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "p4",
+      "total_cached_calls": 1680,
+      "response_models": {
+        "deepseek-flash": 1680
+      },
+      "classification": {
+        "exact_match": 1680
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "p5",
+      "total_cached_calls": 51,
+      "response_models": {
+        "deepseek-flash": 51
+      },
+      "classification": {
+        "exact_match": 51
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "probe",
+      "total_cached_calls": 17,
+      "response_models": {
+        "deepseek-flash": 17
+      },
+      "classification": {
+        "exact_match": 17
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "s2",
+      "total_cached_calls": 5,
+      "response_models": {
+        "<missing>": 5
+      },
+      "classification": {
+        "missing": 5
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "s3",
+      "total_cached_calls": 1,
+      "response_models": {
+        "deepseek-flash": 1
+      },
+      "classification": {
+        "exact_match": 1
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "s5",
+      "total_cached_calls": 9,
+      "response_models": {
+        "deepseek-flash": 9
+      },
+      "classification": {
+        "exact_match": 9
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "s6",
+      "total_cached_calls": 4,
+      "response_models": {
+        "deepseek-flash": 4
+      },
+      "classification": {
+        "exact_match": 4
+      }
+    },
+    {
+      "requested_model": "deepseek-flash",
+      "experiment_prefix": "stage3",
+      "total_cached_calls": 64,
+      "response_models": {
+        "deepseek-flash": 64
+      },
+      "classification": {
+        "exact_match": 64
+      }
+    },
+    {
+      "requested_model": "deepseek-v4-pro",
+      "experiment_prefix": "p3",
+      "total_cached_calls": 48,
+      "response_models": {
+        "deepseek-v4-pro": 48
+      },
+      "classification": {
+        "exact_match": 48
+      }
+    },
+    {
+      "requested_model": "deepseek-v4-pro",
+      "experiment_prefix": "p6",
+      "total_cached_calls": 44,
+      "response_models": {
+        "deepseek-v4-pro": 44
+      },
+      "classification": {
+        "exact_match": 44
+      }
+    },
+    {
+      "requested_model": "deepseek-v4-pro",
+      "experiment_prefix": "p6_grounded",
+      "total_cached_calls": 48,
+      "response_models": {
+        "deepseek-v4-pro": 48
+      },
+      "classification": {
+        "exact_match": 48
+      }
+    },
+    {
+      "requested_model": "deepseek-v4.1-flash-1017",
+      "experiment_prefix": "p1smoke",
+      "total_cached_calls": 24,
+      "response_models": {
+        "deepseek-v4.1-flash-1017": 24
+      },
+      "classification": {
+        "exact_match": 24
+      }
+    },
+    {
+      "requested_model": "glm-5.3",
+      "experiment_prefix": "p1",
+      "total_cached_calls": 414,
+      "response_models": {
+        "glm-5.3": 414
+      },
+      "classification": {
+        "exact_match": 414
+      }
+    },
+    {
+      "requested_model": "glm-5.3",
+      "experiment_prefix": "p13",
+      "total_cached_calls": 92,
+      "response_models": {
+        "glm-5.3": 92
+      },
+      "classification": {
+        "exact_match": 92
+      }
+    },
+    {
+      "requested_model": "glm-5.3",
+      "experiment_prefix": "p13-claw",
+      "total_cached_calls": 45,
+      "response_models": {
+        "glm-5.3": 45
+      },
+      "classification": {
+        "exact_match": 45
+      }
+    },
+    {
+      "requested_model": "glm-5.3",
+      "experiment_prefix": "p15",
+      "total_cached_calls": 35,
+      "response_models": {
+        "glm-5.3": 35
+      },
+      "classification": {
+        "exact_match": 35
+      }
+    },
+    {
+      "requested_model": "glm-5.3-flash",
+      "experiment_prefix": "p1",
+      "total_cached_calls": 674,
+      "response_models": {
+        "cbcn/glm-5.3-flash": 1,
+        "glm-5.3-flash": 493,
+        "zai-org/GLM-5.3-Flash": 180
+      },
+      "classification": {
+        "exact_match": 493,
+        "same_family_prefixed": 181
+      }
+    },
+    {
+      "requested_model": "glm-5.3-flash",
+      "experiment_prefix": "p15",
+      "total_cached_calls": 675,
+      "response_models": {
+        "codearts/glm-5.3-flash": 15,
+        "glm-5.3-flash": 431,
+        "nvidia/nemotron-3-ultra-550b-a55b": 5,
+        "z-ai/glm-5.3-flash": 2,
+        "zai-org/GLM-5.3-Flash": 222
+      },
+      "classification": {
+        "cross_model_mismatch": 5,
+        "exact_match": 431,
+        "same_family_prefixed": 239
+      }
+    },
+    {
+      "requested_model": "glm-5.3-flash",
+      "experiment_prefix": "p16",
+      "total_cached_calls": 252,
+      "response_models": {
+        "codearts/glm-5.3-flash": 3,
+        "glm-5.3-flash": 216,
+        "zai-org/GLM-5.3-Flash": 33
+      },
+      "classification": {
+        "exact_match": 216,
+        "same_family_prefixed": 36
+      }
+    },
+    {
+      "requested_model": "glm-5.3-flash",
+      "experiment_prefix": "p1smoke",
+      "total_cached_calls": 9,
+      "response_models": {
+        "glm-5.3-flash": 8,
+        "zai-org/GLM-5.3-Flash": 1
+      },
+      "classification": {
+        "exact_match": 8,
+        "same_family_prefixed": 1
+      }
+    },
+    {
+      "requested_model": "glm-5.3-flash",
+      "experiment_prefix": "p2bon",
+      "total_cached_calls": 397,
+      "response_models": {
+        "cb/glm-5.3-flash": 11,
+        "codearts/glm-5.3-flash": 9,
+        "glm-5.3-flash": 309,
+        "zai-org/GLM-5.3-Flash": 68
+      },
+      "classification": {
+        "exact_match": 309,
+        "same_family_prefixed": 88
+      }
+    },
+    {
+      "requested_model": "glm-5.3-flash",
+      "experiment_prefix": "probe_reasoning_low_sanity",
+      "total_cached_calls": 1,
+      "response_models": {
+        "glm-5.3-flash": 1
+      },
+      "classification": {
+        "exact_match": 1
+      }
+    },
+    {
+      "requested_model": "unknown",
+      "experiment_prefix": "untagged",
+      "total_cached_calls": 1,
+      "response_models": {
+        "<missing>": 1
+      },
+      "classification": {
+        "missing": 1
+      }
+    }
+  ],
+  "cross_model_mismatches": {
+    "total_mismatches": 5,
+    "summary_by_experiment_and_model": {
+      "p15|glm-5.3-flash->nvidia/nemotron-3-ultra-550b-a55b": 5
+    }
+  },
+  "official_direct_control": {
+    "models": [
+      "deepseek-flash",
+      "deepseek-v4-pro"
+    ],
+    "note": "Official api.deepseek.com calls serve as direct-endpoint control without third-party relay routing."
+  },
+  "runs_row_level_audit": {
+    "archive-pre-d31-p1-deepseek-evidence_grounded": {
+      "n_rows": 168,
+      "request_judge_models": {
+        "deepseek-flash": 168
+      },
+      "row_level_response_model_count": 0
+    },
+    "controls-deepseek-flash": {
+      "n_rows": 900,
+      "request_judge_models": {
+        "None": 900
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1-deepseek-accuracy": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "deepseek-flash": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1-deepseek-evidence_grounded": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "deepseek-flash": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1-hubcore_glm_flash-accuracy": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "glm-5.3-flash": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1-hubcore_glm_flash-comprehensive": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "glm-5.3-flash": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1-hubcore_glm_flash-evidence_grounded": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "glm-5.3-flash": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1-hubcore_glm_pro-accuracy": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "glm-5.3": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p1-hubcore_glm_pro-evidence_grounded": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "glm-5.3": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p15-hubcore_glm_flash-comprehensive-f12": {
+      "n_rows": 297,
+      "request_judge_models": {
+        "glm-5.3-flash": 297
+      },
+      "row_level_response_model_count": 0
+    },
+    "p15-hubcore_glm_flash-evidence_grounded-f12": {
+      "n_rows": 297,
+      "request_judge_models": {
+        "glm-5.3-flash": 297
+      },
+      "row_level_response_model_count": 0
+    },
+    "p15-hubcore_glm_flash-evidence_grounded-no_quarantine-f12": {
+      "n_rows": 297,
+      "request_judge_models": {
+        "glm-5.3-flash": 297
+      },
+      "row_level_response_model_count": 0
+    },
+    "p15-hubcore_glm_pro-comprehensive-f12": {
+      "n_rows": 297,
+      "request_judge_models": {
+        "glm-5.3": 297
+      },
+      "row_level_response_model_count": 0
+    },
+    "p15-hubcore_glm_pro-evidence_grounded-f12": {
+      "n_rows": 297,
+      "request_judge_models": {
+        "glm-5.3": 297
+      },
+      "row_level_response_model_count": 0
+    },
+    "p15-hubcore_glm_pro-evidence_grounded-no_quarantine-f12": {
+      "n_rows": 297,
+      "request_judge_models": {
+        "glm-5.3": 297
+      },
+      "row_level_response_model_count": 0
+    },
+    "p16-hubcore_glm_flash-full-v0-n60": {
+      "n_rows": 60,
+      "request_judge_models": {
+        "glm-5.3-flash": 60
+      },
+      "row_level_response_model_count": 0
+    },
+    "p16-hubcore_glm_flash-full-v1-n60": {
+      "n_rows": 60,
+      "request_judge_models": {
+        "glm-5.3-flash": 60
+      },
+      "row_level_response_model_count": 0
+    },
+    "p16-hubcore_glm_flash-full-v2-n60": {
+      "n_rows": 60,
+      "request_judge_models": {
+        "glm-5.3-flash": 60
+      },
+      "row_level_response_model_count": 0
+    },
+    "p16-hubcore_glm_flash-no_ledger-v0-n60": {
+      "n_rows": 60,
+      "request_judge_models": {
+        "glm-5.3-flash": 60
+      },
+      "row_level_response_model_count": 0
+    },
+    "p16-hubcore_glm_flash-no_quarantine-v0-n60": {
+      "n_rows": 60,
+      "request_judge_models": {
+        "glm-5.3-flash": 60
+      },
+      "row_level_response_model_count": 0
+    },
+    "p16-hubcore_glm_flash-no_veto-v0-n60": {
+      "n_rows": 60,
+      "request_judge_models": {
+        "glm-5.3-flash": 60
+      },
+      "row_level_response_model_count": 0
+    },
+    "p2-deepseek-flash": {
+      "n_rows": 100,
+      "request_judge_models": {
+        "deepseek-flash": 100
+      },
+      "row_level_response_model_count": 0
+    },
+    "p2-deepseek-flash-replay": {
+      "n_rows": 100,
+      "request_judge_models": {
+        "deepseek-flash": 100
+      },
+      "row_level_response_model_count": 0
+    },
+    "p2bon-hubcore_glm_flash-comprehensive-t50": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "glm-5.3-flash": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p2bon-hubcore_glm_flash-comprehensive-t60": {
+      "n_rows": 9,
+      "request_judge_models": {
+        "glm-5.3-flash": 9
+      },
+      "row_level_response_model_count": 0
+    },
+    "p2bon-hubcore_glm_flash-evidence_grounded-t50": {
+      "n_rows": 200,
+      "request_judge_models": {
+        "glm-5.3-flash": 200
+      },
+      "row_level_response_model_count": 0
+    },
+    "p3-flash-direct-pilot": {
+      "n_rows": 120,
+      "request_judge_models": {
+        "deepseek-flash": 120
+      },
+      "row_level_response_model_count": 0
+    },
+    "p3-flash-strategies-4": {
+      "n_rows": 144,
+      "request_judge_models": {
+        "deepseek-flash": 144
+      },
+      "row_level_response_model_count": 0
+    },
+    "p3-pro-direct-4": {
+      "n_rows": 48,
+      "request_judge_models": {
+        "deepseek-v4-pro": 48
+      },
+      "row_level_response_model_count": 0
+    },
+    "p4-flash-human-fail-16": {
+      "n_rows": 1728,
+      "request_judge_models": {
+        "deepseek-flash": 1728
+      },
+      "row_level_response_model_count": 0
+    },
+    "p4-phase3-replay-check": {
+      "n_rows": 1728,
+      "request_judge_models": {
+        "deepseek-flash": 1728
+      },
+      "row_level_response_model_count": 0
+    },
+    "p5-neutral-l3-16": {
+      "n_rows": 32,
+      "request_judge_models": {
+        "deepseek-flash": 32
+      },
+      "row_level_response_model_count": 0
+    },
+    "p5-neutral-l3-16-retry2": {
+      "n_rows": 32,
+      "request_judge_models": {
+        "deepseek-flash": 32
+      },
+      "row_level_response_model_count": 0
+    },
+    "p6-pro-accuracy-48": {
+      "n_rows": 48,
+      "request_judge_models": {
+        "deepseek-v4-pro": 48
+      },
+      "row_level_response_model_count": 0
+    },
+    "p6-pro-grounded-48": {
+      "n_rows": 48,
+      "request_judge_models": {
+        "deepseek-v4-pro": 48
+      },
+      "row_level_response_model_count": 0
+    },
+    "probe-deepseek-flash": {
+      "n_rows": 18,
+      "request_judge_models": {
+        "deepseek-flash": 18
+      },
+      "row_level_response_model_count": 0
+    },
+    "probe-deepseek-flash-replay": {
+      "n_rows": 18,
+      "request_judge_models": {
+        "deepseek-flash": 18
+      },
+      "row_level_response_model_count": 0
+    },
+    "stage3-grounded-flash-64": {
+      "n_rows": 64,
+      "request_judge_models": {
+        "deepseek-flash": 64
+      },
+      "row_level_response_model_count": 0
+    }
+  }
+}

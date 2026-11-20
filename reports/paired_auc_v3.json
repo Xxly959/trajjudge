@@ -1,0 +1,523 @@
+{
+  "generated_at": "2026-11-20T11:28:35+00:00",
+  "bootstrap": {
+    "unit": "scenario_id",
+    "resamples": 2000,
+    "seed": 0
+  },
+  "itt_rule": "missing/error rows assigned predicted failure with raw_score=0.0",
+  "main_cohort": {
+    "grd_glm_flash_vs_comp_glm_flash": {
+      "label_a": "Grounded-GLMFlash",
+      "label_b": "Comprehensive-GLMFlash",
+      "run_a": "p1-hubcore_glm_flash-evidence_grounded",
+      "run_b": "p1-hubcore_glm_flash-comprehensive",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 168,
+        "n_scenarios": 116,
+        "n_fail": 83,
+        "n_pass": 85,
+        "auc_a": 0.7639,
+        "auc_b": 0.6077,
+        "delta_auc": 0.1561,
+        "ci_95": [
+          0.0531,
+          0.2604
+        ],
+        "p_value": 0.001,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.7332,
+        "auc_b": 0.6119,
+        "delta_auc": 0.1212,
+        "ci_95": [
+          0.0231,
+          0.2139
+        ],
+        "p_value": 0.012,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "grd_glm_flash_vs_acc_glm_flash": {
+      "label_a": "Grounded-GLMFlash",
+      "label_b": "Accuracy-GLMFlash",
+      "run_a": "p1-hubcore_glm_flash-evidence_grounded",
+      "run_b": "p1-hubcore_glm_flash-accuracy",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 184,
+        "n_scenarios": 123,
+        "n_fail": 91,
+        "n_pass": 93,
+        "auc_a": 0.7552,
+        "auc_b": 0.6908,
+        "delta_auc": 0.0644,
+        "ci_95": [
+          0.0078,
+          0.1229
+        ],
+        "p_value": 0.024,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.7332,
+        "auc_b": 0.6886,
+        "delta_auc": 0.0446,
+        "ci_95": [
+          -0.0206,
+          0.1062
+        ],
+        "p_value": 0.184,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "grd_glm_flash_vs_acc_glm_pro": {
+      "label_a": "Grounded-GLMFlash",
+      "label_b": "Accuracy-GLMPro",
+      "run_a": "p1-hubcore_glm_flash-evidence_grounded",
+      "run_b": "p1-hubcore_glm_pro-accuracy",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 184,
+        "n_scenarios": 123,
+        "n_fail": 91,
+        "n_pass": 93,
+        "auc_a": 0.7552,
+        "auc_b": 0.7011,
+        "delta_auc": 0.0541,
+        "ci_95": [
+          -0.0151,
+          0.1239
+        ],
+        "p_value": 0.121,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.7332,
+        "auc_b": 0.7025,
+        "delta_auc": 0.0307,
+        "ci_95": [
+          -0.0459,
+          0.0989
+        ],
+        "p_value": 0.404,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "grd_ds_flash_vs_acc_ds_flash": {
+      "label_a": "Grounded-DSFlash",
+      "label_b": "Accuracy-DSFlash",
+      "run_a": "p1-deepseek-evidence_grounded",
+      "run_b": "p1-deepseek-accuracy",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 197,
+        "n_scenarios": 130,
+        "n_fail": 98,
+        "n_pass": 99,
+        "auc_a": 0.6288,
+        "auc_b": 0.6288,
+        "delta_auc": 0.0,
+        "ci_95": [
+          -0.0685,
+          0.0666
+        ],
+        "p_value": 0.973,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.6303,
+        "auc_b": 0.6203,
+        "delta_auc": 0.01,
+        "ci_95": [
+          -0.058,
+          0.0774
+        ],
+        "p_value": 0.764,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "grd_glm_pro_vs_acc_glm_pro": {
+      "label_a": "Grounded-GLMPro",
+      "label_b": "Accuracy-GLMPro",
+      "run_a": "p1-hubcore_glm_pro-evidence_grounded",
+      "run_b": "p1-hubcore_glm_pro-accuracy",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 198,
+        "n_scenarios": 129,
+        "n_fail": 99,
+        "n_pass": 99,
+        "auc_a": 0.6833,
+        "auc_b": 0.6998,
+        "delta_auc": -0.0165,
+        "ci_95": [
+          -0.0902,
+          0.0568
+        ],
+        "p_value": 0.65,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.6806,
+        "auc_b": 0.7025,
+        "delta_auc": -0.0219,
+        "ci_95": [
+          -0.1,
+          0.0499
+        ],
+        "p_value": 0.535,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "acc_glm_pro_vs_acc_glm_flash": {
+      "label_a": "Accuracy-GLMPro",
+      "label_b": "Accuracy-GLMFlash",
+      "run_a": "p1-hubcore_glm_pro-accuracy",
+      "run_b": "p1-hubcore_glm_flash-accuracy",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 199,
+        "n_scenarios": 131,
+        "n_fail": 99,
+        "n_pass": 100,
+        "auc_a": 0.6997,
+        "auc_b": 0.6855,
+        "delta_auc": 0.0142,
+        "ci_95": [
+          -0.0448,
+          0.075
+        ],
+        "p_value": 0.614,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.7025,
+        "auc_b": 0.6886,
+        "delta_auc": 0.0139,
+        "ci_95": [
+          -0.0441,
+          0.0737
+        ],
+        "p_value": 0.622,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "grd_glm_flash_vs_grd_ds_flash": {
+      "label_a": "Grounded-GLMFlash",
+      "label_b": "Grounded-DSFlash",
+      "run_a": "p1-hubcore_glm_flash-evidence_grounded",
+      "run_b": "p1-deepseek-evidence_grounded",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 181,
+        "n_scenarios": 121,
+        "n_fail": 89,
+        "n_pass": 92,
+        "auc_a": 0.7555,
+        "auc_b": 0.6292,
+        "delta_auc": 0.1263,
+        "ci_95": [
+          0.048,
+          0.2056
+        ],
+        "p_value": 0.002,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.7332,
+        "auc_b": 0.6303,
+        "delta_auc": 0.1029,
+        "ci_95": [
+          0.0189,
+          0.1777
+        ],
+        "p_value": 0.013,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    }
+  },
+  "ablation_60": {
+    "full_vs_no_veto": {
+      "label_a": "Ablation full",
+      "label_b": "no_veto",
+      "run_a": "p16-hubcore_glm_flash-full-v0-n60",
+      "run_b": "p16-hubcore_glm_flash-no_veto-v0-n60",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 60,
+        "n_paired": 53,
+        "n_scenarios": 36,
+        "n_fail": 27,
+        "n_pass": 26,
+        "auc_a": 0.9103,
+        "auc_b": 0.8689,
+        "delta_auc": 0.0413,
+        "ci_95": [
+          -0.0068,
+          0.1015
+        ],
+        "p_value": 0.105,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 60,
+        "n_paired": 60,
+        "n_scenarios": 40,
+        "n_fail": 30,
+        "n_pass": 30,
+        "auc_a": 0.8372,
+        "auc_b": 0.7733,
+        "delta_auc": 0.0639,
+        "ci_95": [
+          0.0112,
+          0.1229
+        ],
+        "p_value": 0.023,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "full_vs_no_quarantine": {
+      "label_a": "Ablation full",
+      "label_b": "no_quarantine",
+      "run_a": "p16-hubcore_glm_flash-full-v0-n60",
+      "run_b": "p16-hubcore_glm_flash-no_quarantine-v0-n60",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 60,
+        "n_paired": 51,
+        "n_scenarios": 36,
+        "n_fail": 26,
+        "n_pass": 25,
+        "auc_a": 0.9046,
+        "auc_b": 0.7992,
+        "delta_auc": 0.1054,
+        "ci_95": [
+          0.017,
+          0.1941
+        ],
+        "p_value": 0.015,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 60,
+        "n_paired": 60,
+        "n_scenarios": 40,
+        "n_fail": 30,
+        "n_pass": 30,
+        "auc_a": 0.8372,
+        "auc_b": 0.8072,
+        "delta_auc": 0.03,
+        "ci_95": [
+          -0.0976,
+          0.1442
+        ],
+        "p_value": 0.671,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "full_vs_no_ledger": {
+      "label_a": "Ablation full",
+      "label_b": "no_ledger",
+      "run_a": "p16-hubcore_glm_flash-full-v0-n60",
+      "run_b": "p16-hubcore_glm_flash-no_ledger-v0-n60",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 60,
+        "n_paired": 51,
+        "n_scenarios": 36,
+        "n_fail": 26,
+        "n_pass": 25,
+        "auc_a": 0.91,
+        "auc_b": 0.7531,
+        "delta_auc": 0.1569,
+        "ci_95": [
+          0.0321,
+          0.2847
+        ],
+        "p_value": 0.012,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 60,
+        "n_paired": 60,
+        "n_scenarios": 40,
+        "n_fail": 30,
+        "n_pass": 30,
+        "auc_a": 0.8372,
+        "auc_b": 0.7778,
+        "delta_auc": 0.0594,
+        "ci_95": [
+          -0.0894,
+          0.2054
+        ],
+        "p_value": 0.445,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    }
+  },
+  "ablation_subset_easiness_check": {
+    "n_subset": 60,
+    "main_full_200_auc_cc": 0.7552,
+    "main_on_60_vs_abl_full": {
+      "label_a": "Main Grounded-GLMFlash (on 60 subset)",
+      "label_b": "Ablation full-v0 (60 subset)",
+      "run_a": "p1-hubcore_glm_flash-evidence_grounded",
+      "run_b": "p16-hubcore_glm_flash-full-v0-n60",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 60,
+        "n_paired": 53,
+        "n_scenarios": 36,
+        "n_fail": 27,
+        "n_pass": 26,
+        "auc_a": 0.9103,
+        "auc_b": 0.9103,
+        "delta_auc": 0.0,
+        "ci_95": [
+          0.0,
+          0.0
+        ],
+        "p_value": 1.0,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 60,
+        "n_paired": 60,
+        "n_scenarios": 40,
+        "n_fail": 30,
+        "n_pass": 30,
+        "auc_a": 0.8372,
+        "auc_b": 0.8372,
+        "delta_auc": 0.0,
+        "ci_95": [
+          0.0,
+          0.0
+        ],
+        "p_value": 1.0,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    }
+  }
+}
