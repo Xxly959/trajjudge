@@ -59,6 +59,7 @@ providers:
     base_url_env: HUBCORE_GLM_BASE_URL
     base_url: https://api.hubcore.cn/v1
     thinking_style: deepseek
+    reasoning_effort: low
     models:
       judge: glm-5.3-flash
       agent: glm-5.3-flash

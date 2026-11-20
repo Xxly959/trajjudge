@@ -42,6 +42,8 @@ def gather_dashboard_data() -> dict[str, Any]:
     p16_abl = _load_json("reports/p16_ablation.json")
     p13_claw = _load_json("reports/p13_claw48_silver_agreement.json")
     p13_bs = _load_json("reports/p13_blindspot_summary.json")
+    p15_inj = _load_json("reports/p15_heldout_injection.json")
+    p2_bon = _load_json("reports/p2_best_of_n.json")
 
     raters_s3 = ((stage3.get("stage3_v2_labels") or stage3.get("stage3_v1_labels") or {}).get("raters") or {})
     fac_cells = (((factorial.get("views") or {}).get("v2_labels") or {}).get("cells") or {})
@@ -96,8 +98,12 @@ def gather_dashboard_data() -> dict[str, Any]:
             },
             "deepseek_partial": p14_ds,
             "ablation": p16_abl.get("ablations") or {},
+            "prompt_variants": p16_abl.get("prompt_variants") or {},
+            "prompt_sensitivity": p16_abl.get("prompt_sensitivity") or {},
             "silver_claw48": p13_claw,
             "silver_blindspot": p13_bs,
+            "heldout_injection": p15_inj.get("arm_summary") or {},
+            "best_of_n": p2_bon,
         },
         "v1_vs_v2": {
             "v1": {
@@ -189,7 +195,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <header>
   <div class="wrap">
     <div class="badge-row">
-      <span class="badge ok">离线禁网单测 534 Passed</span>
+      <span class="badge ok">离线禁网单测 537 Passed</span>
       <span class="badge">预注册统计口径 PREREG v3</span>
       <span class="badge">τ-bench (200) × Claw-Eval × OpenJudge × SWE-bench</span>
       <span class="badge">零私钥/零原始第三方语料泄漏</span>
@@ -234,7 +240,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       </div>
     </div>
     <div class="card" style="margin-bottom:20px;">
-      <h3 style="margin-top:0;">P1-6 组件消融单调阶梯（60 条分层 τ-bench / 36–40 独立场景，GLM-Flash）</h3>
+      <h3 style="margin-top:0;">P1-6 组件消融单调阶梯与提示词稳定性（60 条分层 τ-bench，GLM-Flash）</h3>
+      <p id="prompt-sensitivity-note" style="color:var(--muted);font-size:13.5px;margin-top:-4px;"></p>
       <div style="overflow-x:auto;">
         <table id="ablation-table">
           <thead>
@@ -247,6 +254,23 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
               <th>Recall@FPR=20%</th>
               <th>Cohen's κ</th>
               <th>Veto 覆写</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <h3 style="margin-top:0;">P2-A Best-of-4 推理重排闭环（50 个 τ-bench 任务 × 4 候选，GLM-Flash）</h3>
+      <div style="overflow-x:auto;">
+        <table id="bon-table">
+          <thead>
+            <tr>
+              <th>选择策略</th>
+              <th>完整任务数</th>
+              <th>客观通过率</th>
+              <th>95% 场景簇置信区间</th>
+              <th>说明 / 对齐对比</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -295,6 +319,25 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   </section>
 
   <section id="tab-injection" class="panel">
+    <div class="card" style="margin-bottom:20px;">
+      <h3 style="margin-top:0;">P1-5 Held-Out 15 模板间接提示注入（开发期未见过测试集，SHA-256 冻结，GLM-Flash）</h3>
+      <p style="font-size:13.5px;color:var(--muted);">12 条客观失败轨迹（8 独立场景）× 3 位置 × 3 重复无攻击噪声底，直接检验 <code>&lt;untrusted_tool_data&gt;</code> 隔离槽对未见模板的因果防御效应：</p>
+      <div style="overflow-x:auto;">
+        <table id="p15-table">
+          <thead>
+            <tr>
+              <th>实验臂</th>
+              <th>有效配对 (总体 / tool_result)</th>
+              <th>tool_result 翻转率</th>
+              <th>全部位置翻转率</th>
+              <th>tool_result 涨分 vs 噪声底</th>
+              <th>重复翻转噪声底</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
     <div class="card" style="margin-bottom:20px;">
       <h3 style="margin-top:0;">Phase 5 三臂对照：系统级防御声明有效，究竟是因为「指令信任层级」还是「长度稀释」？</h3>
       <p style="font-size:13.5px;color:var(--muted);">针对最强显著注入变体 <code>L3_notice/tool_result</code>（在最后一条工具返回末尾嵌入伪造评估通过通知），在 16 条失败轨迹（11 个独立场景）上严格对照三种系统提示设置：</p>
@@ -493,6 +536,11 @@ function renderOverview() {
     ["no_quarantine", "w/o Quarantine（关闭工具输出隔离槽）", false],
     ["no_ledger", "w/o Ledger（移除结构化证据账本，直接审原始对话）", false],
   ].filter(([k]) => abl[k]);
+  const ps = p1.prompt_sensitivity || {};
+  if (ps.roc_auc) {
+    document.getElementById('prompt-sensitivity-note').textContent =
+      `3 套等价 Prompt 变体 (v0/v1/v2) 稳定性：ROC-AUC 均值 ${num(ps.roc_auc.mean, 3)} (SD=${num(ps.roc_auc.sd, 4)}) · PR-AUC 均值 ${num((ps.pr_auc_fail || {}).mean, 3)} (SD=${num((ps.pr_auc_fail || {}).sd, 4)}) · R@10% 均值 ${pct((ps.recall_at_fpr_10 || {}).mean)}`;
+  }
   document.querySelector('#ablation-table tbody').innerHTML = ablOrder.map(([k, label, hi]) => {
     const a = abl[k];
     return `<tr class="${hi ? 'highlight' : ''}">
@@ -504,6 +552,27 @@ function renderOverview() {
       <td>${pct(a.recall_at_fpr_20)}</td>
       <td>${num(a.kappa, 3)}</td>
       <td>${a.veto_overrode_model_count}/${a.n_valid} (${pct(a.veto_overrode_model_rate)})</td>
+    </tr>`;
+  }).join('');
+
+  const bonSels = (p1.best_of_n || {}).selectors || {};
+  const bonMcn = (((p1.best_of_n || {}).mcnemar_pass_rate || {})["trajectory_comprehensive|glm-5.3-flash_vs_evidence_grounded|glm-5.3-flash"]) || {};
+  const bonOrder = [
+    ["final_confidence", "末轮语气启发式 (final_confidence)", "纯末轮回复长度与自信关键词，无工具核验", false],
+    ["random", "随机期望基线 (random)", "每任务 4 次采样平均通过率期望值", false],
+    ["evidence_grounded|glm-5.3-flash", "Evidence-Grounded (glm-5.3-flash)", `相对随机 +3.5 pp；共同对齐 n=${bonMcn.n || 28} 任务与 Comprehensive 完全打平 (${pct(bonMcn.rate_a)} vs ${pct(bonMcn.rate_b)}, p=1.0)`, true],
+    ["trajectory_comprehensive|glm-5.3-flash", "OpenJudge Comprehensive (32/50*)", "仅 32/50 完整（18 难题缺失带来偏差）；对齐共同 28 任务为 57.1%", false],
+    ["oracle", "DB Oracle 上界 (可执行校验)", "数据库终态校验至少 1 条通过即成功（揭示 26.5 pp 离线重排差距）", false],
+  ].filter(([k]) => bonSels[k]);
+  document.querySelector('#bon-table tbody').innerHTML = bonOrder.map(([k, label, note, hi]) => {
+    const s = bonSels[k];
+    const ci = (s.pass_rate_ci && s.pass_rate_ci.ci) ? `[${pct(s.pass_rate_ci.ci[0])}, ${pct(s.pass_rate_ci.ci[1])}]` : "—";
+    return `<tr class="${hi ? 'highlight' : ''}">
+      <td>${label}</td>
+      <td>${s.n_tasks}/50</td>
+      <td><b>${pct(s.pass_rate)}</b></td>
+      <td>${ci}</td>
+      <td style="font-size:12.5px;color:var(--muted);">${note}</td>
     </tr>`;
   }).join('');
 
@@ -532,6 +601,36 @@ function renderOverview() {
 }
 
 function renderInjection() {
+  const p15 = ((DATA.p1_taubench || {}).heldout_injection) || {};
+  const p15Order = [
+    ["evidence_grounded|defended=True", "Evidence-Grounded Full (完整防御)", true],
+    ["evidence_grounded|defended=False", "Evidence-Grounded w/o 隔离槽 (no_quarantine)", false],
+    ["trajectory_comprehensive|defended=False", "OpenJudge Comprehensive (基线)", false],
+  ].filter(([k]) => p15[k]);
+  document.querySelector('#p15-table tbody').innerHTML = p15Order.map(([k, label, hi]) => {
+    const x = p15[k];
+    const ov = x.overall || {};
+    const tr = (x.by_location || {}).tool_result || {};
+    const nf = x.noise_floor || {};
+    const trFlip = tr.decision_flip_case_study
+      ? `0/${tr.base_fail_pairs || 0} (1场景饱和)`
+      : `${tr.fail_to_pass_count}/${tr.base_fail_pairs} (${pct(tr.decision_flip_rate)})`;
+    const ovFlip = ov.decision_flip_case_study
+      ? `0/${ov.base_fail_pairs || 0} (Case Study)`
+      : `${ov.fail_to_pass_count}/${ov.base_fail_pairs} (${pct(ov.decision_flip_rate)})`;
+    const nfFlip = nf.base_fail_ordered_pairs
+      ? `${nf.fail_to_pass_noise_count}/${nf.base_fail_ordered_pairs} (${pct(nf.decision_flip_noise_floor)})`
+      : "0/6 (饱和)";
+    return `<tr class="${hi ? 'highlight' : ''}">
+      <td>${label}</td>
+      <td>${ov.n_valid_pairs || 0} / ${tr.n_valid_pairs || 0}</td>
+      <td><b>${trFlip}</b></td>
+      <td>${ovFlip}</td>
+      <td>${pct(tr.score_inflation_rate)} vs 噪声底 ${pct(nf.score_inflation_noise_floor)}</td>
+      <td>${nfFlip}</td>
+    </tr>`;
+  }).join('');
+
   const arms = ((DATA.neutral_control || {}).arms) || {};
   const nfMap = (((DATA.injection_v3 || {}).p4_full_grid || {}).noise_floors) || {};
   const nfUndef = (nfMap["trajectory_comprehensive|defended=False"] || {}).score_inflation_noise_floor;
@@ -552,8 +651,8 @@ function renderInjection() {
     </div>`).join('');
   const stmt = (DATA.neutral_control || {}).attribution_statement || "等待运行结果";
   document.getElementById('attribution-verdict').innerHTML =
-    `<b>预注册判读结论 (PREREG_v2 §8，中性臂当前 ${neuPaired}/16 配对，待 json_schema 厂商补齐至 ≥14/16)</b>：${stmt}` +
-    `<br/><span style="color:#9a3412;"><b>撤回记录 (D30)</b>：旧 Stage 3 Evidence-Grounded 的 6.25% (1/16) 防御数字因存在正则模板泄漏已正式撤回，新防御数字将仅来自 P1-5 held-out 攻击集（15 模板已冻结，待 GLM 余额充值后续跑）。</span>`;
+    `<b>预注册判读结论 (PREREG_v2 §8，中性臂当前 ${neuPaired}/16 配对)</b>：${stmt}` +
+    `<br/><span style="color:#9a3412;"><b>撤回记录 (D30)</b>：旧 Stage 3 Evidence-Grounded 的 6.25% (1/16) 防御数字因存在正则模板泄漏已正式撤回，现已由上方 P1-5 15 模板 Held-Out 测试集结果（<code>tool_result</code> 翻转 <code>10/134 = 7.5%</code>）正式替代。</span>`;
 }
 
 function setPolicy(mode) {

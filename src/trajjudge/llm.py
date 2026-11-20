@@ -35,6 +35,16 @@ RETRYABLE_STATUS = frozenset({408, 409, 429, *range(500, 600)})
 CACHE_VERSION = 2
 
 
+def parse_json_object(text: str) -> Any:
+    """Decode JSON after stripping outer markdown code fences when present."""
+    s = text.strip()
+    if s.startswith("```"):
+        lines = s.splitlines()
+        if len(lines) >= 2 and lines[-1].strip() == "```":
+            s = "\n".join(lines[1:-1]).strip()
+    return json.loads(s)
+
+
 class LLMError(RuntimeError):
     """Raised when a request fails for good or the response is unusable."""
 
@@ -322,8 +332,9 @@ class LLMClient:
             request["tools"] = list(tools)
         if tool_choice is not None:
             request["tool_choice"] = tool_choice
-        if reasoning_effort is not None:
-            request["reasoning_effort"] = reasoning_effort
+        eff = reasoning_effort if reasoning_effort is not None else self.settings.reasoning_effort
+        if eff is not None:
+            request["reasoning_effort"] = eff
         if response_format is not None:
             request["response_format"] = dict(response_format)
         if self.settings.thinking_style == "deepseek":

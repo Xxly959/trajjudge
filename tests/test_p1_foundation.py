@@ -220,6 +220,48 @@ def test_multi_vendor_provider_loading_and_thinking_style(tmp_path: Path, monkey
     assert "extra_body" not in seen_requests[1]
 
 
+def test_reasoning_effort_wired_to_llm_and_openjudge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import asyncio
+    from trajjudge.openjudge_bridge import openjudge_model
+
+    monkeypatch.setenv("HUBCORE_GLM_API_KEY", "test-glm-token")
+    s = load_provider_settings("hubcore_glm_flash", env_file=tmp_path / "missing.env")
+    assert s.judge_model == "glm-5.3-flash"
+    assert s.reasoning_effort == "low"
+
+    seen: list[dict[str, Any]] = []
+
+    def fake_transport(req: dict[str, Any]) -> dict[str, Any]:
+        seen.append(req)
+        return {
+            "id": "mock",
+            "choices": [{"index": 0, "finish_reason": "stop", "message": {"role": "assistant", "content": '{"score": 3, "reason": "ok"}'}}],
+            "usage": {"prompt_tokens": 12, "completion_tokens": 6},
+        }
+
+    pricing = tmp_path / "p.yaml"
+    pricing.write_text(
+        "currency: USD\nper: 1M_tokens\nmodels:\n  glm-5.3-flash:\n    input_per_mtok: 0.3\n    output_per_mtok: 1.2\n",
+        encoding="utf-8",
+    )
+    local_s = Settings(
+        api_key="k", base_url=s.base_url, judge_model=s.judge_model, agent_model=s.agent_model,
+        judge_thinking=s.judge_thinking, agent_thinking=s.agent_thinking,
+        cache_dir=tmp_path / "c", usage_log=tmp_path / "u.jsonl", pricing_file=pricing,
+        provider=s.provider, thinking_style=s.thinking_style, reasoning_effort=s.reasoning_effort,
+    )
+    client = LLMClient(local_s, transport=fake_transport)
+    client.complete([{"role": "user", "content": "hi"}])
+    assert seen[-1]["reasoning_effort"] == "low"
+
+    async def _call_bridge() -> None:
+        async with openjudge_model(client, thinking=False, max_tokens=256, repeat_id=0) as (model, _bridge):
+            await model.achat([{"role": "user", "content": "hi2"}])
+
+    asyncio.run(_call_bridge())
+    assert seen[-1]["reasoning_effort"] == "low"
+
+
 # ------------------------------------------------------------------ P1-6 ablations & prompt variants
 
 
@@ -268,3 +310,48 @@ def test_grounded_ablation_modes_and_prompt_variants(settings: Settings) -> None
     for pv in PROMPT_VARIANTS:
         row = grade_trajectory_grounded("t-pv", messages, client, prompt_variant=pv)
         assert row["status"] == "ok" and row["prompt_variant"] == pv
+
+
+def test_markdown_fenced_json_parses_cleanly_while_malformed_fails(settings: Settings) -> None:
+    from trajjudge.judging import _parse_json_object
+
+    assert _parse_json_object('```json\n{"score": 2, "reason": "ok"}\n```') == {"score": 2, "reason": "ok"}
+    with pytest.raises(json.JSONDecodeError):
+        _parse_json_object('```json\n{not_valid_json}\n```')
+
+    messages = adapt_taubench_record(_sample_tau_record(3, 0, 0.0)).messages
+    payload = {
+        "obligations": [
+            {"id": "O1", "requirement": "Verify order before cancel", "status": "omitted", "evidence_indices": [1], "note": "Missing"}
+        ],
+        "unauthorized_side_effect": False,
+        "critical_defect": "skipped confirm",
+        "verdict": "fail",
+        "confidence_pass": 10,
+        "reason": "Skipped confirmation",
+    }
+    fenced_reply = {
+        "id": "m",
+        "choices": [{
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {"role": "assistant", "content": f"```json\n{json.dumps(payload)}\n```"},
+        }],
+        "usage": {"prompt_tokens": 100, "completion_tokens": 50},
+    }
+    client = LLMClient(settings, transport=lambda req: fenced_reply)
+    row = grade_trajectory_grounded("t-fence", messages, client)
+    assert row["status"] == "ok" and row["audit"]["verdict"] == "fail"
+
+    bad_fenced_reply = {
+        "id": "m2",
+        "choices": [{
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {"role": "assistant", "content": "```json\n{broken: true\n```"},
+        }],
+        "usage": {"prompt_tokens": 100, "completion_tokens": 20},
+    }
+    bad_client = LLMClient(settings, transport=lambda req: bad_fenced_reply)
+    bad_row = grade_trajectory_grounded("t-fence-bad", messages, bad_client, repeat_id=99)
+    assert bad_row["status"] == "error"

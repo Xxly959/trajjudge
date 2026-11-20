@@ -497,6 +497,117 @@ def build_fig6_p1_taubench_and_ablation(
     return "\n".join(parts)
 
 
+def build_fig7_p15_injection_and_p2_bon(p15: dict[str, Any], p2_bon: dict[str, Any]) -> str:
+    """SVG 7 (P1-5 + P2-A): Held-Out 15-Template Injection & Best-of-4 Reranking."""
+    arms = p15.get("arm_summary") or {}
+    sels = p2_bon.get("selectors") or {}
+    mcn = p2_bon.get("mcnemar_pass_rate") or {}
+
+    left_specs = [
+        ("evidence_grounded|defended=True", "Grounded · Full (完整防御)", "#10b981"),
+        ("evidence_grounded|defended=False", "Grounded · w/o 隔离槽", "#f59e0b"),
+        ("trajectory_comprehensive|defended=False", "OpenJudge Comprehensive", "#ef4444"),
+    ]
+    left_rows = []
+    for key, label, color in left_specs:
+        a = arms.get(key) or {}
+        tr = (a.get("by_location") or {}).get("tool_result") or {}
+        nf = a.get("noise_floor") or {}
+        if not tr.get("n_valid_pairs"):
+            continue
+        flip = tr.get("decision_flip_rate") or 0.0
+        flip_lbl = (
+            f"翻转 {tr.get('fail_to_pass_count', 0)}/{tr.get('base_fail_pairs', 0)} ({_pct(flip)})"
+            if not tr.get("decision_flip_case_study")
+            else f"翻转 0/{tr.get('base_fail_pairs', 0)} (1场景饱和)"
+        )
+        inf = tr.get("score_inflation_rate") or 0.0
+        nf_inf = nf.get("score_inflation_noise_floor") or 0.0
+        md = tr.get("mean_norm_delta") or 0.0
+        left_rows.append((label, flip, flip_lbl, inf, f"涨分 {_pct(inf)} (底 {_pct(nf_inf)}, Δ={md:+.3f})", color))
+
+    bon_specs = [
+        ("final_confidence", "末轮自信度启发式 (50任务)", "#94a3b8"),
+        ("random", "随机基线 Random (50任务)", "#64748b"),
+        ("evidence_grounded|glm-5.3-flash", "Evidence-Grounded (44/50)", "#10b981"),
+        ("trajectory_comprehensive|glm-5.3-flash", "Comprehensive (32/50*)", "#f97316"),
+        ("oracle", "DB Oracle 上界 (50任务)", "#2563eb"),
+    ]
+    right_rows = []
+    for key, label, color in bon_specs:
+        s = sels.get(key)
+        if not s:
+            continue
+        ci = ((s.get("pass_rate_ci") or {}).get("ci")) or [s["pass_rate"], s["pass_rate"]]
+        right_rows.append((label, float(s["pass_rate"]), float(ci[0]), float(ci[1]), int(s["n_tasks"]), color))
+
+    paired_n = (mcn.get("trajectory_comprehensive|glm-5.3-flash_vs_evidence_grounded|glm-5.3-flash") or {}).get("n", 28)
+    paired_r = (mcn.get("trajectory_comprehensive|glm-5.3-flash_vs_evidence_grounded|glm-5.3-flash") or {}).get("rate_a", 0.5714)
+
+    w, h = 960, 460
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">',
+        f'<rect width="{w}" height="{h}" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>',
+        '<text x="28" y="34" font-size="17.5" font-weight="700" fill="#0f172a">图 7 · P1-5 Held-Out 15 模板注入防御（tool_result）与 P2-A Best-of-4 重排闭环</text>',
+        '<text x="28" y="55" font-size="12" fill="#475569">左：未见过攻击测试集决策翻转率与涨分率对照无攻击噪声底（GLM-Flash）；右：Best-of-4 通过率与 95% 场景簇置信区间</text>',
+    ]
+
+    # Panel A (Left)
+    lx, ly, lpw, lph = 185, 96, 265, 290
+    parts.append(f'<text x="{lx + lpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">A. Held-Out 15 模板注入 (tool_result)</text>')
+    for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
+        x = lx + tick * lpw
+        parts.append(f'<line x1="{x:.1f}" y1="{ly}" x2="{x:.1f}" y2="{ly + lph}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
+        parts.append(f'<text x="{x:.1f}" y="{ly + lph + 15}" text-anchor="middle" font-size="10" fill="#64748b">{int(tick * 100)}%</text>')
+
+    if left_rows:
+        rh = lph / len(left_rows)
+        for idx, (label, flip, flip_lbl, inf, inf_lbl, color) in enumerate(left_rows):
+            y0 = ly + idx * rh + 14
+            parts.append(f'<text x="{lx - 10}" y="{y0 + 25:.1f}" text-anchor="end" font-size="11.2" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
+            bw1 = max(2.0, min(1.0, flip) * lpw)
+            parts.append(f'<rect x="{lx}" y="{y0:.1f}" width="{bw1:.1f}" height="18" rx="3" fill="{color}" fill-opacity="0.95"/>')
+            parts.append(f'<text x="{lx + bw1 + 6:.1f}" y="{y0 + 13:.1f}" font-size="10" font-weight="600" fill="#1e293b">{_esc(flip_lbl)}</text>')
+            bw2 = max(2.0, min(1.0, inf) * lpw)
+            parts.append(f'<rect x="{lx}" y="{y0 + 23:.1f}" width="{bw2:.1f}" height="18" rx="3" fill="{color}" fill-opacity="0.38"/>')
+            tx2 = min(518 - 170, lx + bw2 + 6)
+            parts.append(f'<text x="{lx + 6 if bw2 > 140 else lx + bw2 + 6:.1f}" y="{y0 + 36:.1f}" font-size="9.5" fill="#1e293b">{_esc(inf_lbl)}</text>')
+            _ = tx2
+
+    # Divider
+    parts.append('<line x1="528" y1="74" x2="528" y2="405" stroke="#cbd5e1" stroke-dasharray="4,4"/>')
+
+    # Panel B (Right): Best-of-4
+    rx, ry, rpw, rph = 695, 96, 225, 290
+    parts.append(f'<text x="{rx + rpw / 2 - 20:.1f}" y="80" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">B. P2-A Best-of-4 重排通过率 (n≤50)</text>')
+    for tick in (0.0, 0.25, 0.50, 0.75, 1.0):
+        x = rx + tick * rpw
+        parts.append(f'<line x1="{x:.1f}" y1="{ry}" x2="{x:.1f}" y2="{ry + rph}" stroke="#e2e8f0" stroke-dasharray="3,3"/>')
+        parts.append(f'<text x="{x:.1f}" y="{ry + rph + 15}" text-anchor="middle" font-size="10" fill="#64748b">{int(tick * 100)}%</text>')
+
+    if right_rows:
+        rh = rph / len(right_rows)
+        for idx, (label, rate, lo, hi, nt, color) in enumerate(right_rows):
+            y0 = ry + idx * rh + 12
+            parts.append(f'<text x="{rx - 10}" y="{y0 + 18:.1f}" text-anchor="end" font-size="11" font-weight="600" fill="#1e293b">{_esc(label)}</text>')
+            bw = max(2.0, min(1.0, rate) * rpw)
+            parts.append(f'<rect x="{rx}" y="{y0 + 4:.1f}" width="{bw:.1f}" height="20" rx="3" fill="{color}" fill-opacity="0.88"/>')
+            c_lo = rx + max(0.0, lo) * rpw
+            c_hi = rx + min(1.0, hi) * rpw
+            cy = y0 + 14
+            parts.append(f'<line x1="{c_lo:.1f}" y1="{cy:.1f}" x2="{c_hi:.1f}" y2="{cy:.1f}" stroke="#0f172a" stroke-width="1.5"/>')
+            parts.append(f'<line x1="{c_lo:.1f}" y1="{cy - 4:.1f}" x2="{c_lo:.1f}" y2="{cy + 4:.1f}" stroke="#0f172a" stroke-width="1.5"/>')
+            parts.append(f'<line x1="{c_hi:.1f}" y1="{cy - 4:.1f}" x2="{c_hi:.1f}" y2="{cy + 4:.1f}" stroke="#0f172a" stroke-width="1.5"/>')
+            parts.append(f'<text x="{max(c_hi, rx + bw) + 5:.1f}" y="{y0 + 18:.1f}" font-size="10" font-weight="700" fill="#0f172a">{_pct(rate)}</text>')
+            _ = nt
+
+    parts.append('<rect x="28" y="416" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.95"/><text x="45" y="424" font-size="10" fill="#334155">主指标：fail→pass 决策翻转率</text>')
+    parts.append('<rect x="220" y="416" width="12" height="8" rx="2" fill="#334155" fill-opacity="0.38"/><text x="237" y="424" font-size="10" fill="#334155">次指标：涨分率 vs 无攻击噪声底</text>')
+    parts.append(f'<text x="28" y="444" font-size="10.2" fill="#64748b">*注：Comprehensive 仅 32/50 任务完整（遗漏 18 个难题造成偏差）；在 {paired_n} 个共同完整任务上两者完全打平 {_pct(paired_r)} vs {_pct(paired_r)} (McNemar p=1.0)。数据源：p15_heldout_injection.json &amp; p2_best_of_n.json</text>')
+    parts.append("</svg>\n")
+    return "\n".join(parts)
+
+
 def main() -> int:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     stage3_path = root / "reports/stage3_and_neutral_v2.json"
@@ -516,6 +627,10 @@ def main() -> int:
     p16_ablation = json.loads(p16_path.read_text(encoding="utf-8")) if p16_path.is_file() else {}
     p14_path = root / "reports/p14_cross_vendor_deepseek.json"
     p14_deepseek = json.loads(p14_path.read_text(encoding="utf-8")) if p14_path.is_file() else {}
+    p15_path = root / "reports/p15_heldout_injection.json"
+    p15_heldout = json.loads(p15_path.read_text(encoding="utf-8")) if p15_path.is_file() else {}
+    p2_path = root / "reports/p2_best_of_n.json"
+    p2_bon = json.loads(p2_path.read_text(encoding="utf-8")) if p2_path.is_file() else {}
 
     outputs = {
         FIG_DIR / "fig1_judge_reliability.svg": build_fig1_judge_reliability(stage3, agreement, factorial),
@@ -528,6 +643,10 @@ def main() -> int:
     if p1_eval and p16_ablation:
         outputs[FIG_DIR / "fig6_p1_taubench_and_ablation.svg"] = build_fig6_p1_taubench_and_ablation(
             p1_eval, p16_ablation, p14_deepseek
+        )
+    if p15_heldout and p2_bon:
+        outputs[FIG_DIR / "fig7_p15_injection_and_p2_bon.svg"] = build_fig7_p15_injection_and_p2_bon(
+            p15_heldout, p2_bon
         )
     for path, content in outputs.items():
         atomic_text(path, content)

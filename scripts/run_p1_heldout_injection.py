@@ -12,13 +12,16 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import statistics
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "src"))
 
+from trajjudge.analysis import _valid, cluster_interval  # noqa: E402
 from trajjudge.artifacts import atomic_text  # noqa: E402
 from trajjudge.config import load_provider_settings  # noqa: E402
 from trajjudge.grounded_judge import GRADER_NAME, grade_trajectory_grounded  # noqa: E402
@@ -30,7 +33,7 @@ from trajjudge.perturb_v3 import (  # noqa: E402
     held_out_suite_sha256,
     inject_v3,
 )
-from trajjudge.scenario_stats import injection_metrics_v3  # noqa: E402
+from trajjudge.scenario_stats import ALL_THRESHOLDS, MIN_SCENARIOS, injection_metrics_v3, normalized_delta  # noqa: E402
 from trajjudge.usage import load_pricing, utc_now  # noqa: E402
 
 import importlib.util  # noqa: E402
@@ -107,6 +110,100 @@ def plan_heldout_variants(
     return items
 
 
+def _bucket_stats(items: Sequence[Mapping[str, Any]], *, resamples: int = 2000, seed: int = 0) -> dict[str, Any]:
+    if not items:
+        return {"n_valid_pairs": 0}
+    units = [x["scenario_id"] for x in items]
+    bf = [x for x in items if x["base_fail"]]
+    bf_units = [x["scenario_id"] for x in bf]
+    bf_scens = len(set(bf_units))
+    f2p = sum(x["fail_to_pass"] for x in bf)
+    p2f = sum(x["pass_to_fail"] for x in items)
+    inf = sum(x["inflated"] for x in items)
+    return {
+        "n_valid_pairs": len(items),
+        "n_traces": len({x["trace_id"] for x in items}),
+        "n_scenarios": len(set(units)),
+        "base_fail_pairs": len(bf),
+        "base_fail_scenarios": bf_scens,
+        "fail_to_pass_count": f2p,
+        "pass_to_fail_count": p2f,
+        "decision_flip_case_study": bf_scens < MIN_SCENARIOS,
+        "decision_flip_rate": round(f2p / len(bf), 4) if bf else None,
+        "decision_flip_rate_ci": (
+            cluster_interval(bf, bf_units, lambda d: sum(x["fail_to_pass"] for x in d) / len(d), resamples=resamples, seed=seed)
+            if bf else None
+        ),
+        "mean_norm_delta": round(statistics.fmean(x["norm_delta"] for x in items), 4),
+        "mean_norm_delta_ci": cluster_interval(
+            items, units, lambda d: statistics.fmean(x["norm_delta"] for x in d), resamples=resamples, seed=seed,
+        ),
+        "score_inflation_count": inf,
+        "score_inflation_rate": round(inf / len(items), 4),
+    }
+
+
+def compute_p15_arm_summary(
+    rows: Sequence[Mapping[str, Any]],
+    clusters: Mapping[str, str],
+    noise_floors: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Aggregate P1-5 held-out results per (grader, defended) across overall, location, and category."""
+    tpl_cat = {t.template_id: t.category for t in HELD_OUT_TEST_TEMPLATES}
+    originals = {
+        (row["grader"], row.get("defended", False), row.get("judge_model"), row["trace_id"], row.get("repeat_id", 0)): row
+        for row in rows if row.get("variant", "original") == "original"
+    }
+    by_arm: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    counts_by_arm: dict[str, dict[str, int]] = defaultdict(lambda: {"ok": 0, "error": 0, "unpaired": 0})
+
+    for row in rows:
+        arm_key = f"{row['grader']}|defended={row.get('defended', False)}"
+        if row.get("variant", "original") == "original":
+            counts_by_arm[arm_key]["ok" if _valid(row) else "error"] += 1
+            continue
+        counts_by_arm[arm_key]["ok" if _valid(row) else "error"] += 1
+        key = (row["grader"], row.get("defended", False), row.get("judge_model"), row["trace_id"], row.get("repeat_id", 0))
+        base = originals.get(key)
+        if base is None or not _valid(base) or not _valid(row):
+            counts_by_arm[arm_key]["unpaired"] += 1
+            continue
+        grader = str(row["grader"])
+        thresh = ALL_THRESHOLDS.get(grader)
+        o_sc, p_sc = float(base["score"]), float(row["score"])
+        base_fail = thresh is not None and o_sc < thresh
+        now_fail = thresh is not None and p_sc < thresh
+        variant = str(row["variant"])
+        tpl_id, loc = variant.split("/", 1) if "/" in variant else (variant, "unknown")
+        tid = str(row["trace_id"])
+        by_arm[arm_key].append({
+            "trace_id": tid,
+            "scenario_id": clusters.get(tid, tid),
+            "location": loc,
+            "category": tpl_cat.get(tpl_id, "other"),
+            "template_id": tpl_id,
+            "norm_delta": normalized_delta(grader, p_sc - o_sc),
+            "inflated": p_sc > o_sc,
+            "base_fail": bool(base_fail),
+            "fail_to_pass": bool(base_fail and not now_fail),
+            "pass_to_fail": bool(thresh is not None and not base_fail and now_fail),
+        })
+
+    out: dict[str, Any] = {}
+    for arm_key in sorted(set(by_arm) | set(counts_by_arm)):
+        items = by_arm.get(arm_key, [])
+        by_loc = {loc: _bucket_stats([x for x in items if x["location"] == loc]) for loc in sorted({x["location"] for x in items})}
+        by_cat = {cat: _bucket_stats([x for x in items if x["category"] == cat]) for cat in sorted({x["category"] for x in items})}
+        out[arm_key] = {
+            "row_counts": dict(counts_by_arm[arm_key]),
+            "noise_floor": noise_floors.get(arm_key),
+            "overall": _bucket_stats(items),
+            "by_location": by_loc,
+            "by_category": by_cat,
+        }
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("estimate", "run", "report"))
@@ -135,12 +232,14 @@ def main(argv: list[str] | None = None) -> int:
         if OUT_DIR.is_dir():
             for p in sorted(OUT_DIR.glob("p15-*.jsonl")):
                 all_rows.extend(latest_rows(load_rows(p)))
+        res_v3 = injection_metrics_v3(all_rows, trace_scenarios)
         rep = {
             "generated_at": utc_now(),
             "held_out_suite_sha256": held_out_suite_sha256(),
             "n_fail_traces": len(fail_traces),
             "n_scenarios": len({t["scenario_id"] for t in fail_traces}),
-            "results": injection_metrics_v3(all_rows, trace_scenarios),
+            "arm_summary": compute_p15_arm_summary(all_rows, trace_scenarios, res_v3.get("noise_floors") or {}),
+            "results": res_v3,
         }
         out_path = root / "reports/p15_heldout_injection.json"
         atomic_text(out_path, json.dumps(rep, ensure_ascii=False, indent=1) + "\n")

@@ -26,7 +26,7 @@ from openjudge.graders.schema import GraderScore
 from .config import PROJECT_ROOT
 from .artifacts import atomic_text
 from .cache import make_key
-from .llm import LLMClient, LLMError
+from .llm import LLMClient, LLMError, parse_json_object as _parse_json_object
 from .openjudge_bridge import openjudge_model
 from .perturb import defended_template, neutral_template
 from .score_scales import SCALES
@@ -175,7 +175,7 @@ def judge_once(trace_id: str, messages: list[dict[str, Any]], config: JudgeConfi
             continue
         try:
             for completion in results:
-                check_raw(config.grader, json.loads(completion.text), expected_steps=expected_steps)
+                check_raw(config.grader, _parse_json_object(completion.text), expected_steps=expected_steps)
         except (ValueError, TypeError, KeyError, AttributeError) as exc:
             last_error = f"raw verdict invalid (upstream may have clamped it): {exc}"[:300]
             continue

@@ -104,6 +104,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--max-tokens", type=int, default=4096)
     parser.add_argument("--cap-usd", type=float)
+    parser.add_argument("--only-prompt-variants", nargs="*", choices=PROMPT_VARIANTS, default=None,
+                        help="Run only these prompt variants (ablation=full); report still summarizes all configs.")
     parser.add_argument("--offline", action="store_true")
     args = parser.parse_args(argv)
 
@@ -169,7 +171,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("run requires a positive --cap-usd")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for ab, pv in configs:
+    run_configs = [("full", pv) for pv in args.only_prompt_variants] if args.only_prompt_variants else configs
+    for ab, pv in run_configs:
         run_id = f"p16-{args.provider}-{ab}-{pv}-n{len(subset)}"
         run_dir = root / "runs" / run_id
         out_jsonl = OUT_DIR / f"{run_id}.jsonl"

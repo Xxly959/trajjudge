@@ -408,6 +408,19 @@ uses existing rows for the same cohort. The paid P4 run awaits approval.
 1. 将 `HTTP 403` 保持为 `fatal=True` 不可重试错误（避免余额耗尽空转），并将所有已完成并检验通过的实测结果（P1-1 全量 200 条、P1-3 银标与 13/92 盲区审计、P1-4 DeepSeek 161 条跨厂商离线 post-D31 复核、P1-6 四路组件消融）正式纳入 `docs/CLAIMS.md`、`reports/FINAL_REPORT_v3.md` 与 `fig6_p1_taubench_and_ablation.svg`。
 2. 保留 `runs/` 与 `.cache/llm/` 中 `P1-6 (v1/v2)`、`P2-A (Best-of-4)` 与 `P1-5 (15 模板 held-out 注入)` 的原子断点；在余额补充前严禁发布这三项的占位或推算数字。
 
+---
+
+# D33 补充余额后以 `reasoning_effort=low` 完成 P1-6 提示词敏感性、P2-A 与 P1-5（2026-11-20）
+
+**背景与工程问题诊断**：
+1. 用户充值 10 元后明确指定后续全部实验仅使用 `glm-5.3-flash` 且思考强度设 `low`（`reasoning_effort="low"`）。实测探针表明：省略 `extra_body` 会导致思考链泄漏到 `content` 并触及长度截断；而保持 `thinking: {"type": "disabled"}` + `reasoning_effort: "low"` 时，`glm-5.3-flash` 会执行轻量推理（约 `24–44` `reasoning_tokens`）且返回干净 JSON、同时完全保留既有断点 Manifest 哈希。
+2. 首次续跑 `P2-A Best-of-4`（50 任务）时，`OpenJudge Comprehensive` 出现 `33.0% (66/200)` 报错；定位根因为：`glm-5.3-flash`（`reasoning_effort=low`）在 `40` 条有效返回的外层包了 ```` ```json ... ``` ```` 代码块，上游 `OpenAIChatModel` 用 `repair_and_load_json` 正常解析并写入 `.cache/llm/`，但本地 `judging.py` 调用原始 `json.loads` 报错丢弃，外加 `--workers 8` 并发引起 `504` 超时。
+
+**决定**：
+1. 在 `config.py` / `llm.py` / `openjudge_bridge.py` 贯通 `reasoning_effort` 字段（`hubcore_glm_flash` 锁定 `reasoning_effort: low`），在 `llm.py` 新增 `parse_json_object` 仅剥离外层 Markdown 代码块（内部格式或数值越界仍由 `check_raw` / `validate_and_score_grounded` 严格拒绝），并以 `--workers 4` 零额外成本从缓存回放 `40` 条成功恢复 `P2-A` 与完成 `P1-6` 三提示词敏感性。
+2. 全量跑完 **P1-5 15 模板 Held-Out 间接提示注入三臂对照**（`Comprehensive` `220/297`, `orig0=11/12`；`Evidence-Grounded full` `273/297`, `orig0=12/12`；`Grounded no_quarantine` `155/297`, `orig0=9/12`），全部结论写入 `docs/CLAIMS.md`、`FINAL_REPORT_v3.md`、`fig7_p15_injection_and_p2_bon.svg`、讲解卡 06 与 P3 简历定稿 `docs/RESUME_BULLETS_v3.md`。
+
+
 
 
 

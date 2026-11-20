@@ -17,7 +17,7 @@ import json
 import re
 from typing import Any, Mapping, Sequence
 
-from .llm import LLMClient, LLMError
+from .llm import LLMClient, LLMError, parse_json_object as _parse_json_object
 from .usage import utc_now
 
 GRADER_NAME = "evidence_grounded"
@@ -546,7 +546,7 @@ def grade_trajectory_grounded(
             last_error = "incomplete completion (finish_reason != stop)"
             continue
         try:
-            parsed = json.loads(result.text)
+            parsed = _parse_json_object(result.text)
             evaluated = validate_and_score_grounded(parsed, ledger, apply_veto=(ablation != "no_veto"))
             if attempt > 0:
                 row["schema_retry_attempts"] = attempt

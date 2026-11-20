@@ -45,6 +45,7 @@ class Settings:
     budget_usd: float = 3.0
     provider: str = "deepseek"
     thinking_style: str = "deepseek"
+    reasoning_effort: str | None = None
 
     def model_for(self, role: str) -> str:
         """Return the configured model id for ``role`` (``judge`` or ``agent``)."""
@@ -163,6 +164,7 @@ def load_settings(
 
 
 VALID_THINKING_STYLES = frozenset({"deepseek", "dashscope", "none"})
+VALID_REASONING_EFFORTS = frozenset({"low", "medium", "high", "minimal", "none"})
 DEFAULT_PROVIDERS_FILE = PROJECT_ROOT / "configs" / "providers.yaml"
 
 
@@ -207,6 +209,11 @@ def load_provider_settings(
     if thinking_style not in VALID_THINKING_STYLES:
         raise ConfigError(f"invalid thinking_style {thinking_style!r} for provider {provider!r}")
 
+    raw_eff = spec.get("reasoning_effort")
+    reasoning_effort = (str(raw_eff).strip().lower() or None) if raw_eff is not None else None
+    if reasoning_effort is not None and reasoning_effort not in VALID_REASONING_EFFORTS:
+        raise ConfigError(f"invalid reasoning_effort {reasoning_effort!r} for provider {provider!r}")
+
     models: Mapping[str, Any] = spec.get("models") or {}
     judge_model = str(models.get("judge") or "").strip()
     agent_model = str(models.get("agent") or judge_model).strip()
@@ -226,4 +233,5 @@ def load_provider_settings(
         pricing_file=_resolve_path(paths.get("pricing_file"), PROJECT_ROOT / "configs" / "pricing_v3.yaml"),
         provider=provider,
         thinking_style=thinking_style,
+        reasoning_effort=reasoning_effort,
     )

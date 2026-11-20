@@ -140,6 +140,7 @@ async def openjudge_model(client: LLMClient, *, thinking: bool = False,
         base_url=client.settings.base_url, stream=False, max_retries=0, timeout=60,
         client_args={"http_client": http_client}, max_tokens=max_tokens,
         **({"extra_body": extra_body} if extra_body is not None else {}),
+        **({"reasoning_effort": client.settings.reasoning_effort} if client.settings.reasoning_effort else {}),
         use_json_schema=use_json_schema,
         **({"temperature": temperature} if temperature is not None else {}),
     )
