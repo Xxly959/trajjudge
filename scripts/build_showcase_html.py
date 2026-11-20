@@ -544,12 +544,14 @@ function renderOverview() {
   const valRep = p1.validation || {};
   const valPrim = ((valRep.paired_delta_auc || {}).grounded_vs_comprehensive || {}).all_complete_case || {};
   const paucMain = (p1.paired_auc || {}).main_cohort || {};
+  const paucPool = (p1.paired_auc || {}).pooled_300_fair_d33 || {};
   const paucAbl = (p1.paired_auc || {}).ablation_60 || {};
-  const grdVsComp = (paucMain.grd_glm_flash_vs_comp_glm_flash || {}).complete_case || {};
+  const grdVsCompFair = (paucMain.grd_glm_flash_vs_comp_glm_flash_d33 || {}).complete_case || {};
+  const grdVsCompFairItt = (paucMain.grd_glm_flash_vs_comp_glm_flash_d33 || {}).itt || {};
 
   const signed3 = (v) => v == null ? '待运行' : ((v >= 0 ? '+' : '') + num(v, 3));
   const kpis = [
-    { label: "主队列 & 验证集 配对 ΔAUC (vs Comprehensive)", val: `${signed3(grdVsComp.delta_auc)} / ${signed3(valPrim.delta_auc)}`, sub: `主队列 CI ${grdVsComp.ci_95 ? '['+num(grdVsComp.ci_95[0],3)+','+num(grdVsComp.ci_95[1],3)+']' : ''} · 验证集 (n=100, 96% retail) CI ${valPrim.ci_95 ? '['+num(valPrim.ci_95[0],3)+','+num(valPrim.ci_95[1],3)+']' : '待运行'}`, color: "var(--green)" },
+    { label: "D33 公平对照配对 ΔAUC (主队列 cc / ITT)", val: `${signed3(grdVsCompFair.delta_auc)} / ${signed3(grdVsCompFairItt.delta_auc)}`, sub: `主队列 D33 对齐 cc p=${grdVsCompFair.p_value} · ITT p=${grdVsCompFairItt.p_value} · 验证集 (n=100, 96% retail) ${signed3(valPrim.delta_auc)}`, color: "var(--green)" },
     { label: "跨厂商越权副作用精确率", val: `${pct(egF.unauth_prec)} / ${pct(dsView.unauth_prec)}`, sub: `GLM-Flash ${egF.unauth_true}/${egF.unauth_count} · DeepSeek-Flash ${dsView.unauth_true}/${dsView.unauth_count}（探索性自评检查未见明显偏倚）`, color: "var(--brand)" },
     { label: "P1-6 组件共同样本配对 ΔAUC (n=60 子集)", val: `账本 +${num(((paucAbl.full_vs_no_ledger || {}).complete_case || {}).delta_auc, 3)} / 隔离 +${num(((paucAbl.full_vs_no_quarantine || {}).complete_case || {}).delta_auc, 3)}`, sub: `Veto +${num(((paucAbl.full_vs_no_veto || {}).complete_case || {}).delta_auc, 3)} (CI 跨 0)；该子集主实验 AUC 亦为 0.910 (偏容易)`, color: "var(--amber)" },
     { label: "P1-3 数据库校验盲区审计 (Silver Label)", val: `${bs.n_flagged_blindspots || 13}/${bs.n_audited_passes || 92} (${pct(bs.blindspot_rate)})`, sub: hrStatus, color: "var(--slate)" },
@@ -568,7 +570,8 @@ function renderOverview() {
     ["OpenJudge Accuracy · GLM-5.3 Pro", p1r["p1-hubcore_glm_pro-accuracy"], false],
     ["OpenJudge Accuracy · GLM-Flash", p1r["p1-hubcore_glm_flash-accuracy"], false],
     ["OpenJudge Accuracy · DeepSeek-Flash (官方完整 200/200)", p1r["p1-deepseek-accuracy"], false],
-    ["OpenJudge Comprehensive · GLM-Flash", p1r["p1-hubcore_glm_flash-comprehensive"], false],
+    ["OpenJudge Comprehensive · GLM-Flash (pre-D33)", p1r["p1-hubcore_glm_flash-comprehensive"], false],
+    ["OpenJudge Comprehensive · DeepSeek-Flash (官方完整 198/200)", p1r["p1-deepseek-comprehensive"], false],
     ["Rule Baseline · Observation InfoGain", p1r["p1-rule-baselines:observation_information_gain|rule"], false],
     ["Rule Baseline · Action Loop Detection", p1r["p1-rule-baselines:action_loop_detection|rule"], false],
   ].filter(([, v]) => v && v.n_valid);
@@ -595,15 +598,17 @@ function renderOverview() {
   };
   const valP = (valRep.paired_delta_auc || {});
   const pairedRows = [
-    ["主队列 · Grounded-GLMFlash vs Comprehensive-GLMFlash", paucMain.grd_glm_flash_vs_comp_glm_flash, "complete_case", "itt", "两种口径均显著领先通用综合裁判"],
-    ["独立验证集 · Grounded-GLMFlash vs Comprehensive-GLMFlash", valP.grounded_vs_comprehensive, "all_complete_case", "all_itt", "96%-retail 验证集主假设未复现（域漂移 + D33 推理预算差异），但默认阈值 Comprehensive 仍失效 (5.1%)、同域 retail AUC 稳定 (0.677→0.638)"],
+    ["主队列 (D33 公平对照) · Grounded-GLMFlash vs Comprehensive-D33", paucMain.grd_glm_flash_vs_comp_glm_flash_d33, "complete_case", "itt", "同 D33 推理对齐后（89.5% 思考链）cc 与 ITT 仍双双显著领先，排除推理率混杂"],
+    ["主队列 (pre-D33 历史) · Grounded-GLMFlash vs Comprehensive-GLMFlash", paucMain.grd_glm_flash_vs_comp_glm_flash, "complete_case", "itt", "Comp-D33 vs pre-D33 自身无差 (cc +0.013, p=0.709; ITT -0.006, p=0.919)"],
+    ["全量合并 (n=300, D33 公平) · Grounded-GLMFlash vs Comprehensive-D33", paucPool.pooled300_grd_vs_comp_d33, "complete_case", "itt", "主 200 + 验 100 合并 163 场景：ITT 显著领先 (+0.092, p=0.049)"],
+    ["独立验证集 · Grounded-GLMFlash vs Comprehensive-GLMFlash", valP.grounded_vs_comprehensive, "all_complete_case", "all_itt", "96%-retail (80% gpt-4o) 小样本 n=69 CI 宽达 0.47，主假设未复现但默认阈值 Comprehensive 仍仅 5.1%"],
     ["主队列 · Grounded-GLMFlash vs Accuracy-GLMFlash", paucMain.grd_glm_flash_vs_acc_glm_flash, "complete_case", "itt", "cc 有迹象，ITT 跨 0；主差异为高召回判定点"],
     ["独立验证集 · Grounded-GLMFlash vs Accuracy-GLMFlash", valP.grounded_vs_accuracy, "all_complete_case", "all_itt", "次要对照，CI 跨 0；同域 retail AUC 稳定 (0.598→0.597)"],
-    ["主队列 · Grounded-GLMFlash vs Accuracy-GLMPro", paucMain.grd_glm_flash_vs_acc_glm_pro, "complete_case", "itt", "跨尺度比较排序差不显著（主差异在判定点）"],
-    ["主队列 · DeepSeek-Flash Grounded vs Accuracy", paucMain.grd_ds_flash_vs_acc_ds_flash, "complete_case", "itt", "默认召回 +31.6pp 但 ΔAUC = 0.000，印证判定点移动"],
-    ["消融 (n=60) · full vs no_ledger", paucAbl.full_vs_no_ledger, "complete_case", "itt", "账本 cc 贡献最大（ITT 因 full-v0 7 条截断衰减）"],
-    ["消融 (n=60) · full vs no_quarantine", paucAbl.full_vs_no_quarantine, "complete_case", "itt", "隔离槽 cc 贡献显著（ITT 受缺失行影响跨 0）"],
-    ["消融 (n=60) · full vs no_veto", paucAbl.full_vs_no_veto, "complete_case", "itt", "方向为正，cc CI 跨 0（低覆写率硬约束）"],
+    ["主队列 · DeepSeek-Flash Grounded vs Comprehensive (官方 0% 思考)", paucMain.grd_ds_flash_vs_comp_ds_flash, "complete_case", "itt", "无思考链时排序差不显著 (+0.039)，但默阈召回从 5.1% 推升至 48.0%"],
+    ["主队列 · DeepSeek-Flash Grounded vs Accuracy (官方 0% 思考)", paucMain.grd_ds_flash_vs_acc_ds_flash, "complete_case", "itt", "默认召回 +31.6pp 但 ΔAUC = 0.000，印证判定点移动"],
+    ["消融 (n=60, 98.8% 思考对齐) · full vs no_ledger", paucAbl.full_vs_no_ledger, "complete_case", "itt", "账本 cc 贡献最大（ITT 因 full-v0 7 条截断衰减）"],
+    ["消融 (n=60, 98.8% 思考对齐) · full vs no_quarantine", paucAbl.full_vs_no_quarantine, "complete_case", "itt", "隔离槽 cc 贡献显著（ITT 受缺失行影响跨 0）"],
+    ["消融 (n=60, 98.8% 思考对齐) · full vs no_veto", paucAbl.full_vs_no_veto, "complete_case", "itt", "方向为正，cc CI 跨 0（低覆写率硬约束）"],
   ];
   document.querySelector('#paired-auc-table tbody').innerHTML = pairedRows.map(([lbl, obj, k1, k2, note]) => {
     const o = obj || {};

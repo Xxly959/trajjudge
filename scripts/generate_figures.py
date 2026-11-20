@@ -723,14 +723,16 @@ def build_fig8_operating_points_v3(
     parts.append(f'<text x="{fx + fw / 2:.1f}" y="{fy + fh + 30}" text-anchor="middle" font-size="10.5" fill="#334155">配对 ΔAUC（右偏大于 0 表示前者排序更优）</text>')
 
     main_p = paired_auc.get("main_cohort") or {}
+    pool_p = paired_auc.get("pooled_300_fair_d33") or {}
     abl_p = paired_auc.get("ablation_60") or {}
     val_p = val_rep.get("paired_delta_auc") or {}
     forest_specs = [
-        ("主队列 Grd vs Comp (n=200)", main_p.get("grd_glm_flash_vs_comp_glm_flash") or {}, "complete_case", "itt", "#10b981"),
+        ("主队列 Grd vs Comp-D33 (公平)", main_p.get("grd_glm_flash_vs_comp_glm_flash_d33") or {}, "complete_case", "itt", "#059669"),
+        ("全量 300 条 Grd vs Comp-D33", pool_p.get("pooled300_grd_vs_comp_d33") or {}, "complete_case", "itt", "#10b981"),
         ("验证集 Grd vs Comp (n=100)", val_p.get("grounded_vs_comprehensive") or {}, "all_complete_case", "all_itt", "#047857"),
         ("主队列 Grd vs Acc-Flash", main_p.get("grd_glm_flash_vs_acc_glm_flash") or {}, "complete_case", "itt", "#3b82f6"),
         ("验证集 Grd vs Acc-Flash", val_p.get("grounded_vs_accuracy") or {}, "all_complete_case", "all_itt", "#1d4ed8"),
-        ("主队列 Grd vs Acc-Pro", main_p.get("grd_glm_flash_vs_acc_glm_pro") or {}, "complete_case", "itt", "#6366f1"),
+        ("主队列 DS Grd vs DS Comp", main_p.get("grd_ds_flash_vs_comp_ds_flash") or {}, "complete_case", "itt", "#7c3aed"),
         ("主队列 DS Grd vs DS Acc", main_p.get("grd_ds_flash_vs_acc_ds_flash") or {}, "complete_case", "itt", "#8b5cf6"),
         ("消融 full vs no_ledger (n=60)", abl_p.get("full_vs_no_ledger") or {}, "complete_case", "itt", "#f59e0b"),
         ("消融 full vs no_quarantine", abl_p.get("full_vs_no_quarantine") or {}, "complete_case", "itt", "#d97706"),

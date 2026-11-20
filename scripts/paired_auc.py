@@ -258,18 +258,62 @@ def build_all_v3_report(*, resamples: int = 2000, seed: int = 0) -> dict[str, An
 
     main_specs = [
         ("grd_glm_flash_vs_comp_glm_flash", "Grounded-GLMFlash", "p1-hubcore_glm_flash-evidence_grounded", "Comprehensive-GLMFlash", "p1-hubcore_glm_flash-comprehensive"),
+        ("grd_glm_flash_vs_comp_glm_flash_d33", "Grounded-GLMFlash", "p1-hubcore_glm_flash-evidence_grounded", "Comprehensive-GLMFlash (D33)", "p1d33-hubcore_glm_flash-comprehensive"),
+        ("comp_glm_d33_vs_pred33", "Comprehensive-GLMFlash (D33)", "p1d33-hubcore_glm_flash-comprehensive", "Comprehensive-GLMFlash (pre-D33)", "p1-hubcore_glm_flash-comprehensive"),
         ("grd_glm_flash_vs_acc_glm_flash", "Grounded-GLMFlash", "p1-hubcore_glm_flash-evidence_grounded", "Accuracy-GLMFlash", "p1-hubcore_glm_flash-accuracy"),
         ("grd_glm_flash_vs_acc_glm_pro", "Grounded-GLMFlash", "p1-hubcore_glm_flash-evidence_grounded", "Accuracy-GLMPro", "p1-hubcore_glm_pro-accuracy"),
         ("grd_ds_flash_vs_acc_ds_flash", "Grounded-DSFlash", "p1-deepseek-evidence_grounded", "Accuracy-DSFlash", "p1-deepseek-accuracy"),
+        ("grd_ds_flash_vs_comp_ds_flash", "Grounded-DSFlash", "p1-deepseek-evidence_grounded", "Comprehensive-DSFlash", "p1-deepseek-comprehensive"),
+        ("acc_ds_flash_vs_comp_ds_flash", "Accuracy-DSFlash", "p1-deepseek-accuracy", "Comprehensive-DSFlash", "p1-deepseek-comprehensive"),
         ("grd_glm_pro_vs_acc_glm_pro", "Grounded-GLMPro", "p1-hubcore_glm_pro-evidence_grounded", "Accuracy-GLMPro", "p1-hubcore_glm_pro-accuracy"),
         ("acc_glm_pro_vs_acc_glm_flash", "Accuracy-GLMPro", "p1-hubcore_glm_pro-accuracy", "Accuracy-GLMFlash", "p1-hubcore_glm_flash-accuracy"),
         ("grd_glm_flash_vs_grd_ds_flash", "Grounded-GLMFlash", "p1-hubcore_glm_flash-evidence_grounded", "Grounded-DSFlash", "p1-deepseek-evidence_grounded"),
     ]
     main_pairs: dict[str, Any] = {}
     for key, la, ra, lb, rb in main_specs:
+        if not (runs_root / ra).is_dir() or not (runs_root / rb).is_dir():
+            continue
         main_pairs[key] = _pair_both_modes(
             cohort, runs_root / ra, runs_root / rb, label_a=la, label_b=lb, resamples=resamples, seed=seed,
         )
+
+    pooled_300: dict[str, Any] = {}
+    val_cohort_path = root / "outputs/p1_val/taubench_val_v3.json"
+    if (
+        val_cohort_path.is_file()
+        and (runs_root / "p1d33-hubcore_glm_flash-comprehensive").is_dir()
+        and (runs_root / "p1val-hubcore_glm_flash-comprehensive").is_dir()
+    ):
+        val_cohort = json.loads(val_cohort_path.read_text(encoding="utf-8"))["traces"]
+        pooled_traces = list(cohort) + list(val_cohort)
+        g_pool = {
+            **load_run_rows_by_trace(runs_root / "p1-hubcore_glm_flash-evidence_grounded"),
+            **load_run_rows_by_trace(runs_root / "p1val-hubcore_glm_flash-evidence_grounded"),
+        }
+        c_pool = {
+            **load_run_rows_by_trace(runs_root / "p1d33-hubcore_glm_flash-comprehensive"),
+            **load_run_rows_by_trace(runs_root / "p1val-hubcore_glm_flash-comprehensive"),
+        }
+        a_pool = {
+            **load_run_rows_by_trace(runs_root / "p1-hubcore_glm_flash-accuracy"),
+            **load_run_rows_by_trace(runs_root / "p1val-hubcore_glm_flash-accuracy"),
+        }
+        for key, la, rows_a, ga, lb, rows_b, gb in (
+            ("pooled300_grd_vs_comp_d33", "Grounded-GLMFlash (300)", g_pool, "evidence_grounded", "Comprehensive-GLMFlash D33 (300)", c_pool, "trajectory_comprehensive"),
+            ("pooled300_grd_vs_acc", "Grounded-GLMFlash (300)", g_pool, "evidence_grounded", "Accuracy-GLMFlash (300)", a_pool, "trajectory_accuracy"),
+        ):
+            pooled_300[key] = {
+                "label_a": la,
+                "label_b": lb,
+                "complete_case": compute_paired_delta_auc(
+                    pooled_traces, rows_a, rows_b, grader_a=ga, grader_b=gb, mode="complete_case",
+                    resamples=resamples, seed=seed,
+                ),
+                "itt": compute_paired_delta_auc(
+                    pooled_traces, rows_a, rows_b, grader_a=ga, grader_b=gb, mode="itt",
+                    resamples=resamples, seed=seed,
+                ),
+            }
 
     abl_full_rows = load_run_rows_by_trace(runs_root / "p16-hubcore_glm_flash-full-v0-n60")
     abl_tids = set(abl_full_rows.keys())
@@ -301,6 +345,7 @@ def build_all_v3_report(*, resamples: int = 2000, seed: int = 0) -> dict[str, An
         "bootstrap": {"unit": "scenario_id", "resamples": resamples, "seed": seed},
         "itt_rule": "missing/error rows assigned predicted failure with raw_score=0.0",
         "main_cohort": main_pairs,
+        "pooled_300_fair_d33": pooled_300,
         "ablation_60": ablation_pairs,
         "ablation_subset_easiness_check": {
             "n_subset": len(abl_tids),

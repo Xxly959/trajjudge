@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-20T11:28:35+00:00",
+  "generated_at": "2026-11-20T15:23:17+00:00",
   "bootstrap": {
     "unit": "scenario_id",
     "resamples": 2000,
@@ -47,6 +47,98 @@
           0.2139
         ],
         "p_value": 0.012,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "grd_glm_flash_vs_comp_glm_flash_d33": {
+      "label_a": "Grounded-GLMFlash",
+      "label_b": "Comprehensive-GLMFlash (D33)",
+      "run_a": "p1-hubcore_glm_flash-evidence_grounded",
+      "run_b": "p1d33-hubcore_glm_flash-comprehensive",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 132,
+        "n_scenarios": 93,
+        "n_fail": 62,
+        "n_pass": 70,
+        "auc_a": 0.7486,
+        "auc_b": 0.6161,
+        "delta_auc": 0.1325,
+        "ci_95": [
+          0.0058,
+          0.2529
+        ],
+        "p_value": 0.038,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.7332,
+        "auc_b": 0.6058,
+        "delta_auc": 0.1274,
+        "ci_95": [
+          0.021,
+          0.2286
+        ],
+        "p_value": 0.024,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "comp_glm_d33_vs_pred33": {
+      "label_a": "Comprehensive-GLMFlash (D33)",
+      "label_b": "Comprehensive-GLMFlash (pre-D33)",
+      "run_a": "p1d33-hubcore_glm_flash-comprehensive",
+      "run_b": "p1-hubcore_glm_flash-comprehensive",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 137,
+        "n_scenarios": 98,
+        "n_fail": 66,
+        "n_pass": 71,
+        "auc_a": 0.639,
+        "auc_b": 0.6258,
+        "delta_auc": 0.0132,
+        "ci_95": [
+          -0.0467,
+          0.0749
+        ],
+        "p_value": 0.709,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.6058,
+        "auc_b": 0.6119,
+        "delta_auc": -0.0061,
+        "ci_95": [
+          -0.0855,
+          0.0713
+        ],
+        "p_value": 0.919,
         "resamples": 2000,
         "seed": 0,
         "undefined_draws": 0,
@@ -191,6 +283,98 @@
         "status": "ok"
       }
     },
+    "grd_ds_flash_vs_comp_ds_flash": {
+      "label_a": "Grounded-DSFlash",
+      "label_b": "Comprehensive-DSFlash",
+      "run_a": "p1-deepseek-evidence_grounded",
+      "run_b": "p1-deepseek-comprehensive",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 195,
+        "n_scenarios": 130,
+        "n_fail": 96,
+        "n_pass": 99,
+        "auc_a": 0.6261,
+        "auc_b": 0.5874,
+        "delta_auc": 0.0387,
+        "ci_95": [
+          -0.0544,
+          0.1381
+        ],
+        "p_value": 0.427,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.6303,
+        "auc_b": 0.5963,
+        "delta_auc": 0.034,
+        "ci_95": [
+          -0.0592,
+          0.1203
+        ],
+        "p_value": 0.436,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "acc_ds_flash_vs_comp_ds_flash": {
+      "label_a": "Accuracy-DSFlash",
+      "label_b": "Comprehensive-DSFlash",
+      "run_a": "p1-deepseek-accuracy",
+      "run_b": "p1-deepseek-comprehensive",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 200,
+        "n_paired": 198,
+        "n_scenarios": 131,
+        "n_fail": 98,
+        "n_pass": 100,
+        "auc_a": 0.6181,
+        "auc_b": 0.5881,
+        "delta_auc": 0.0301,
+        "ci_95": [
+          -0.0574,
+          0.1125
+        ],
+        "p_value": 0.462,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 200,
+        "n_paired": 200,
+        "n_scenarios": 131,
+        "n_fail": 100,
+        "n_pass": 100,
+        "auc_a": 0.6203,
+        "auc_b": 0.5963,
+        "delta_auc": 0.024,
+        "ci_95": [
+          -0.0609,
+          0.103
+        ],
+        "p_value": 0.549,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
     "grd_glm_pro_vs_acc_glm_pro": {
       "label_a": "Grounded-GLMPro",
       "label_b": "Accuracy-GLMPro",
@@ -323,6 +507,96 @@
           0.1777
         ],
         "p_value": 0.013,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    }
+  },
+  "pooled_300_fair_d33": {
+    "pooled300_grd_vs_comp_d33": {
+      "label_a": "Grounded-GLMFlash (300)",
+      "label_b": "Comprehensive-GLMFlash D33 (300)",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 300,
+        "n_paired": 201,
+        "n_scenarios": 121,
+        "n_fail": 95,
+        "n_pass": 106,
+        "auc_a": 0.6999,
+        "auc_b": 0.6231,
+        "delta_auc": 0.0768,
+        "ci_95": [
+          -0.0409,
+          0.1933
+        ],
+        "p_value": 0.198,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 300,
+        "n_paired": 300,
+        "n_scenarios": 163,
+        "n_fail": 150,
+        "n_pass": 150,
+        "auc_a": 0.6928,
+        "auc_b": 0.6007,
+        "delta_auc": 0.0921,
+        "ci_95": [
+          0.0012,
+          0.178
+        ],
+        "p_value": 0.049,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      }
+    },
+    "pooled300_grd_vs_acc": {
+      "label_a": "Grounded-GLMFlash (300)",
+      "label_b": "Accuracy-GLMFlash (300)",
+      "complete_case": {
+        "mode": "complete_case",
+        "n_candidates": 300,
+        "n_paired": 271,
+        "n_scenarios": 155,
+        "n_fail": 134,
+        "n_pass": 137,
+        "auc_a": 0.72,
+        "auc_b": 0.6642,
+        "delta_auc": 0.0558,
+        "ci_95": [
+          0.0001,
+          0.1087
+        ],
+        "p_value": 0.049,
+        "resamples": 2000,
+        "seed": 0,
+        "undefined_draws": 0,
+        "status": "ok"
+      },
+      "itt": {
+        "mode": "itt",
+        "n_candidates": 300,
+        "n_paired": 300,
+        "n_scenarios": 163,
+        "n_fail": 150,
+        "n_pass": 150,
+        "auc_a": 0.6928,
+        "auc_b": 0.6592,
+        "delta_auc": 0.0335,
+        "ci_95": [
+          -0.0246,
+          0.0873
+        ],
+        "p_value": 0.249,
         "resamples": 2000,
         "seed": 0,
         "undefined_draws": 0,
