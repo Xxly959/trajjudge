@@ -72,7 +72,8 @@ For live API runs, copy `.env.example` to `.env`. Experiment drivers default to 
 | OpenJudge Accuracy · GLM-5.3 Pro | `200/200` (`131`) | `21/100` (`21.0%`) | `4/100` (`4.0%`) | `0.170` `[0.086, 0.261]` | `0.703` | `0.665` | `36.4%` / `58.1%` |
 | OpenJudge Accuracy · GLM-Flash | `199/200` (`131`) | `27/99` (`27.3%`) | `8/100` (`8.0%`) | `0.193` `[0.091, 0.308]` | `0.686` | `0.641` | `32.7%` / `55.7%` |
 | OpenJudge Accuracy · DeepSeek-Flash | `200/200` (`131`) | `16/100` (`16.0%`) | `3/100` (`3.0%`) | `0.130` `[0.045, 0.217]` | `0.620` | `0.601` | `33.0%` / `40.4%` |
-| OpenJudge Comprehensive · GLM-Flash | `183/200` (`125`) | `4/91` (`4.4%`) | `1/92` (`1.1%`) | `0.033` `[0.000, 0.074]` | `0.628` | `0.630` | `21.2%` / `31.9%` |
+| OpenJudge Comprehensive · GLM-Flash (pre-D33 / D33) | `183` / `147` | `4/91 (4.4%)` / `2/70 (2.9%)` | `1/92` / `0/77` | `0.033` `[0.000, 0.074]` | `0.628` / `0.631` | `0.630` | `21.2%` / `31.9%` |
+| OpenJudge Comprehensive · DeepSeek-Flash (Direct `0%` Thinking) | `198/200` (`131`) | `5/98` (`5.1%`) | `2/100` (`2.0%`) | `0.031` `[-0.010, 0.078]` | `0.588` | `0.607` | `21.4%` / `32.0%` |
 | Rule · `observation_information_gain` | `200/200` (`131`) | `8/100` (`8.0%`) | `4/100` (`4.0%`) | `0.040` `[-0.031, 0.109]` | `0.612` | `0.600` | `14.0%` / `29.0%` |
 
 - **Exploratory & Pending Items**: `P1-5` held-out indirect injection (`exploratory`, `10/134 = 7.5%` vs `7/55 = 12.7%`, overlapping CIs); `P2-A` Best-of-4 (`exploratory`, only `25/50` mixed-outcome tasks, `45.5%` vs random `42.0%`, null effect); `P1-3` Silver-Label blindspot screening (`13/92` DB-pass candidates + `12` Claw-48 disagreements) currently in **`pending_human_review`** (`reports/p13_human_review.json`); early Claw-Eval 48-trace manual labels (`κ = 0.250`) archived in [FINAL_REPORT_v3.md Appendix A](reports/FINAL_REPORT_v3.md).
@@ -96,8 +97,8 @@ tests/                    Offline socket-blocked unit tests (leakage, claims/wor
 
 ## Known Limitations & Disclosures
 
-1. **Third-Party Relay & Vendor Scope ([`D32 / D34 / D35`](docs/DECISIONS.md))**: GLM runs executed via `api.hubcore.cn`, audited against `.cache/llm/` `raw_response.model` ([`relay_audit.json`](reports/relay_audit.json)); official `deepseek-flash` serves as the direct vendor baseline. Both show sensitivity to lightweight reasoning budget on 7KB policies (`DeepSeek-Flash` `thinking=off` `AUC 0.629`).
-2. **Independent Validation & Offline Reranking Limits**: Pre-registered `n = 100` validation (`96% retail`) did not replicate `Grounded vs Comprehensive` `ΔAUC` due to `airline -> retail` domain shift and the D33 reasoning confounder; cross-domain threshold calibration is required. Pure offline Best-of-4 reranking yields a null effect over random on mixed tasks.
+1. **Third-Party Relay & Vendor Scope ([`D32 / D34 / D35 / D36`](docs/DECISIONS.md))**: GLM runs executed via `api.hubcore.cn`, audited against `.cache/llm/` `raw_response.model` ([`relay_audit.json`](reports/relay_audit.json), `7,010` cache entries audited: `100%` GLM-family across main/`p1d33`/ablation/silver/BoN/`p1val`, with `5/675` exploratory `p15` routed to `nemotron`); official `deepseek-flash` (all 3 arms `thinking=off`) serves as the direct vendor baseline.
+2. **Independent Validation & Offline Reranking Limits**: Pre-registered `n = 100` validation (`96% retail`) did not replicate `Grounded vs Comprehensive` `ΔAUC`, driven by `airline -> retail` domain shift and small-sample `gpt-4o-retail` variance (`p1d33` fair control disproved that D33 reasoning alone rescues `Comprehensive`, and pooled `300`-trace fair-D33 ITT remains `+0.092, p = 0.049`); cross-domain threshold calibration is required. Pure offline Best-of-4 reranking yields a null effect over random on mixed tasks.
 3. **Human Review & Neutral Control Status**: Phase 5 neutral-control paired comparison (`10/16`) remains `provisional`; `P1-3` Silver-Label `13/92` blindspot candidates await blinded human adjudication (`scripts/prepare_p13_review.py` -> `scripts/summarize_p13_review.py`).
 4. **Privacy**: Raw trajectories, private human labels, review packets, and API caches are gitignored and checked in CI.
 
